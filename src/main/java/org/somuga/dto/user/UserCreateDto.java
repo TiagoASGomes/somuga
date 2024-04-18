@@ -11,7 +11,7 @@ public record UserCreateDto(
         @Pattern(regexp = "[\\w ]{4,20}", message = INVALID_USERNAME)
         String userName,
         @NotBlank(message = NON_EMPTY_EMAIL)
-        @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,}$", message = INVALID_EMAIL)
+        @Pattern(regexp = "^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})$", message = INVALID_EMAIL)
         String email
 ) {
 }

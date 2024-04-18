@@ -14,7 +14,8 @@ public class UserConverter {
     public static UserPublicDto fromEntityToPublicDto(User user) {
         return new UserPublicDto(user.getId(),
                 user.getUserName(),
-                user.getEmail());
+                user.getEmail(),
+                user.getJoinDate());
     }
 
     public static List<UserPublicDto> fromEntityListToPublicDtoList(List<User> users) {
