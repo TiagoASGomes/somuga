@@ -1,4 +1,11 @@
 package org.somuga.dto.user;
 
-public record UserPublicDto() {
+import java.util.Date;
+
+public record UserPublicDto(
+        Long id,
+        String userName,
+        String email,
+        Date joinedDate
+) {
 }
