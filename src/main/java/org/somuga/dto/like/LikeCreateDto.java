@@ -1,4 +1,4 @@
 package org.somuga.dto.like;
 
-public record LikePublicDto() {
+public record LikeCreateDto() {
 }
