@@ -3,7 +3,7 @@ package org.somuga.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "review")
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -3,7 +3,6 @@ package org.somuga.aspect;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.user.UserDuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -34,8 +33,7 @@ public class SomugaExceptionHandler {
         ), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({UserDuplicateFieldException.class,
-            AlreadyLikedException.class})
+    @ExceptionHandler({UserDuplicateFieldException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(

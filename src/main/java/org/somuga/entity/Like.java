@@ -17,11 +17,6 @@ public class Like {
     public Like() {
     }
 
-    public Like(User user, Media media) {
-        this.user = user;
-        this.media = media;
-    }
-
     public Long getId() {
         return id;
     }

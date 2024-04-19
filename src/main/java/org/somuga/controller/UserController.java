@@ -27,7 +27,7 @@ public class UserController {
         this.userService = service;
     }
 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<List<UserPublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
     }
@@ -42,7 +42,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws UserDuplicateFieldException {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }

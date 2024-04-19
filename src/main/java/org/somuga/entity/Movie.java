@@ -1,12 +1,10 @@
 package org.somuga.entity;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 
 import java.util.Set;
 
 @Entity
-@Table(name = "movies")
 public class Movie extends Media {
 
     private Set<String> actors;
