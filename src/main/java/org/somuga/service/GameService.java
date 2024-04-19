@@ -1,15 +1,15 @@
 package org.somuga.service;
 
 import org.somuga.dto.game.GameCreateDto;
-import org.somuga.entity.Game;
+import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Media;
-import org.somuga.enums.MediaType;
 import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class GameService implements IGameService {
@@ -23,21 +23,28 @@ public class GameService implements IGameService {
 
 
     @Override
-    public Game create(GameCreateDto gameDto) {
-        Game game = new Game();
-        game.setReleaseDate(gameDto.releaseDate());
-        game.setTitle(gameDto.title());
-        game.setCompany(gameDto.company());
-        game.setGenre(gameDto.genre());
-        game.setPlatforms(new HashSet<>(gameDto.platforms()));
-        game.setReleaseDate(gameDto.releaseDate());
-        game.setMediaType(MediaType.GAME);
-        return gameRepo.save(game);
+    public List<GamePublicDto> getAll(Pageable page) {
+        return List.of();
     }
 
     @Override
-    public Game getById(Long id) {
-        return gameRepo.findById(id).orElse(null);
+    public GamePublicDto getById(Long id) {
+        return null;
+    }
+
+    @Override
+    public GamePublicDto create(GameCreateDto game) {
+        return null;
+    }
+
+    @Override
+    public GamePublicDto update(Long id, GameCreateDto game) {
+        return null;
+    }
+
+    @Override
+    public void delete(Long id) {
+
     }
 
     @Override
