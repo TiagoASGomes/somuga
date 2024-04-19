@@ -4,13 +4,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.message.Messages.INVALID_SCORE;
+import static org.somuga.message.Messages.MAX_REVIEW_CHARACTERS;
 
-public record ReviewCreateDto(
-        @Min(value = 0, message = ID_GREATER_THAN_0)
-        Long userId,
-        @Min(value = 0, message = ID_GREATER_THAN_0)
-        Long mediaId,
+public record ReviewUpdateDto(
         @Min(value = 1, message = INVALID_SCORE)
         @Max(value = 10, message = INVALID_SCORE)
         Integer reviewScore,

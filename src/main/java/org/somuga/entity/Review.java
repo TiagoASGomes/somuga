@@ -9,14 +9,21 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Integer reviewScore;
-    @Column(length = 512)
-    private String writenReview;
+    @Column(length = 1024)
+    private String writtenReview;
     @ManyToOne
     private User user;
     @ManyToOne
     private Media media;
 
     public Review() {
+    }
+
+    public Review(Integer reviewScore, String writtenReview, User user, Media media) {
+        this.reviewScore = reviewScore;
+        this.writtenReview = writtenReview;
+        this.user = user;
+        this.media = media;
     }
 
     public Long getId() {
@@ -49,5 +56,13 @@ public class Review {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getWrittenReview() {
+        return writtenReview;
+    }
+
+    public void setWrittenReview(String writtenReview) {
+        this.writtenReview = writtenReview;
     }
 }
