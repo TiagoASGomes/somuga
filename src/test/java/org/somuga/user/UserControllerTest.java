@@ -10,7 +10,7 @@ import org.somuga.aspect.Error;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.dto.user.UserUpdateNameDto;
-import org.somuga.repo.UserTestRepo;
+import org.somuga.repo.UserTestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +39,7 @@ public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private UserTestRepo userTestRepo;
+    private UserTestRepository userTestRepository;
 
 
     @BeforeAll
@@ -49,8 +49,8 @@ public class UserControllerTest {
 
     @AfterEach
     public void cleanUp() {
-        userTestRepo.resetAutoIncrement();
-        userTestRepo.deleteAll();
+        userTestRepository.resetAutoIncrement();
+        userTestRepository.deleteAll();
     }
 
     public long createUser(String name, String email) throws Exception {
