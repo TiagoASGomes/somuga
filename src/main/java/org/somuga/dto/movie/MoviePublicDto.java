@@ -1,4 +1,6 @@
 package org.somuga.dto.movie;
 
-public record MoviePublicDto() {
+import org.somuga.dto.media.MediaPublicDto;
+
+public record MoviePublicDto() implements MediaPublicDto {
 }
