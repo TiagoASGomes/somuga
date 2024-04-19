@@ -32,8 +32,7 @@ public class UserService implements IUserService {
 
     @Override
     public List<UserPublicDto> getAll(Pageable page) {
-        List<User> users = userRepo.findByActiveTrue(page).toList();
-        return UserConverter.fromEntityListToPublicDtoList(users);
+        return UserConverter.fromEntityListToPublicDtoList(userRepo.findByActiveTrue(page).toList());
     }
 
     @Override
