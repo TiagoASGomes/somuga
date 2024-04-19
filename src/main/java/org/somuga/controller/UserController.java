@@ -6,7 +6,7 @@ import org.somuga.dto.user.UserPublicDto;
 import org.somuga.dto.user.UserUpdateNameDto;
 import org.somuga.exception.user.UserDuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
-import org.somuga.service.interfaces.UserService;
+import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,16 +20,21 @@ import java.util.List;
 @RequestMapping("/api/v1/user")
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     @Autowired
-    public UserController(UserService service) {
+    public UserController(IUserService service) {
         this.userService = service;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page, @RequestParam(defaultValue = "", name = "userName") String name) {
-        return new ResponseEntity<>(userService.getAll(page, name), HttpStatus.OK);
+    @GetMapping("")
+    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page) {
+        return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<UserPublicDto>> getAllByName(Pageable page, @PathVariable String name) {
+        return new ResponseEntity<>(userService.getAllByName(page, name), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -37,7 +42,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws UserDuplicateFieldException {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }

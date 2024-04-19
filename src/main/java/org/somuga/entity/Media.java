@@ -1,25 +1,72 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import org.somuga.enums.MediaType;
 
+import java.util.Date;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@Builder
-@Table(name = "medias")
-public class Media {
+@Table(name = "media")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Media {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
     private MediaType mediaType;
+    private String title;
+    private Date releaseDate;
     @OneToMany(mappedBy = "media")
     private Set<Like> likes;
     @OneToMany(mappedBy = "media")
-    private Set<Rating> ratings;
+    private Set<Review> reviews;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Set<Review> getRatings() {
+        return reviews;
+    }
+
+    public void setRatings(Set<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public Set<Like> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Set<Like> likes) {
+        this.likes = likes;
+    }
+
+    public Date getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public MediaType getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
+    }
 }

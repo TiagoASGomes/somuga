@@ -8,7 +8,7 @@ import static org.somuga.message.Messages.NON_EMPTY_USERNAME;
 
 public record UserUpdateNameDto(
         @NotBlank(message = NON_EMPTY_USERNAME)
-        @Pattern(regexp = "[\\w ]{4,20}", message = INVALID_USERNAME)
+        @Pattern(regexp = "[\\w]{4,20}", message = INVALID_USERNAME)
         String userName
 ) {
 }

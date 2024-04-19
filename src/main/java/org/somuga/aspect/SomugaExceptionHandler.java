@@ -8,10 +8,12 @@ import org.somuga.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Date;
+import java.util.List;
 
 @Component
 @ControllerAdvice
@@ -22,26 +24,43 @@ public class SomugaExceptionHandler {
     @ExceptionHandler({UserNotFoundException.class})
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
-        return new ResponseEntity<>(
-                Error.builder()
-                        .message(e.getMessage())
-                        .path(request.getRequestURI())
-                        .status(HttpStatus.NOT_FOUND.value())
-                        .method(request.getMethod())
-                        .timestamp(new Date())
-                        .build(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new Error(
+                e.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.NOT_FOUND.value(),
+                request.getMethod(),
+                new Date()
+        ), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({UserDuplicateFieldException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
-        return new ResponseEntity<>(
-                Error.builder()
-                        .message(e.getMessage())
-                        .path(request.getRequestURI())
-                        .status(HttpStatus.BAD_REQUEST.value())
-                        .method(request.getMethod())
-                        .timestamp(new Date())
-                        .build(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new Error(
+                e.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.BAD_REQUEST.value(),
+                request.getMethod(),
+                new Date()
+        ), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Error> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+        StringBuilder errorMessageBuilder = new StringBuilder();
+        errors.forEach(error -> errorMessageBuilder.append(error).append(", "));
+        errorMessageBuilder.delete(errorMessageBuilder.length() - 2, errorMessageBuilder.length()).append(".");
+        String errorMessage = errorMessageBuilder.toString();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new Error(
+                errorMessage,
+                request.getRequestURI(),
+                HttpStatus.BAD_REQUEST.value(),
+                request.getMethod(),
+                new Date()
+        ), HttpStatus.BAD_REQUEST);
     }
 }

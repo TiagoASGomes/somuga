@@ -3,18 +3,20 @@ package org.somuga.entity;
 import jakarta.persistence.*;
 
 @Entity
-
-@Table(name = "likes")
-public class Like {
+@Table(name = "review")
+public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer reviewScore;
+    @Column(length = 512)
+    private String writenReview;
     @ManyToOne
     private User user;
     @ManyToOne
     private Media media;
 
-    public Like() {
+    public Review() {
     }
 
     public Long getId() {
@@ -25,19 +27,27 @@ public class Like {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public Media getMedia() {
         return media;
     }
 
     public void setMedia(Media media) {
         this.media = media;
+    }
+
+    public Integer getReviewScore() {
+        return reviewScore;
+    }
+
+    public void setReviewScore(Integer reviewScore) {
+        this.reviewScore = reviewScore;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

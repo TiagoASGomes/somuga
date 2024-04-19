@@ -10,8 +10,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface UserService {
-    List<UserPublicDto> getAll(Pageable page, String name);
+public interface IUserService {
+    List<UserPublicDto> getAll(Pageable page);
+
+    List<UserPublicDto> getAllByName(Pageable page, String name);
 
     UserPublicDto getById(Long id) throws UserNotFoundException;
 
@@ -22,4 +24,5 @@ public interface UserService {
     void delete(Long id) throws UserNotFoundException;
 
     User findById(Long id) throws UserNotFoundException;
+
 }
