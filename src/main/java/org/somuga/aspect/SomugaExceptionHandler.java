@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.somuga.exception.like.AlreadyLikedException;
+import org.somuga.exception.review.AlreadyReviewedException;
+import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserDuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,8 @@ public class SomugaExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SomugaExceptionHandler.class);
 
-    @ExceptionHandler({UserNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class,
+            ReviewNotFoundException.class})
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(
@@ -35,7 +38,8 @@ public class SomugaExceptionHandler {
     }
 
     @ExceptionHandler({UserDuplicateFieldException.class,
-            AlreadyLikedException.class})
+            AlreadyLikedException.class,
+            AlreadyReviewedException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(
