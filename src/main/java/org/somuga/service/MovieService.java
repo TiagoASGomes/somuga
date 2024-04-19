@@ -3,7 +3,9 @@ package org.somuga.service;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Media;
+import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,14 @@ import java.util.List;
 
 @Service
 public class MovieService implements IMovieService {
+
+    private final MovieRepository movieRepo;
+
+    @Autowired
+    public MovieService(MovieRepository movieRepo) {
+        this.movieRepo = movieRepo;
+    }
+
     @Override
     public List<MoviePublicDto> getAll(Pageable page) {
         return List.of();
