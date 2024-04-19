@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.entity.Game;
+import org.somuga.entity.Media;
 import org.somuga.enums.MediaType;
 import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
@@ -37,5 +38,10 @@ public class GameService implements IGameService {
     @Override
     public Game getById(Long id) {
         return gameRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public Media findById(Long id) {
+        return null;
     }
 }
