@@ -16,12 +16,14 @@ import org.somuga.service.interfaces.IReviewService;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static org.somuga.message.Messages.ALREADY_REVIED;
 import static org.somuga.message.Messages.REVIEW_NOT_FOUND;
 
+@Service
 public class ReviewService implements IReviewService {
 
     private final ReviewRepository reviewRepo;
