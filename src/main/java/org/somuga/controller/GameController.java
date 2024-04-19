@@ -20,13 +20,14 @@ public class GameController {
         this.gameService = gameService;
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Game> getById(@PathVariable Long id) {
+        return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
+    }
+
     @PostMapping("")
     public ResponseEntity<Game> create(@Valid @RequestBody GameCreateDto game) {
         return new ResponseEntity<>(gameService.create(game), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Game> getById(@PathVariable Long id) {
-        return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
-    }
 }
