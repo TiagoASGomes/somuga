@@ -2,42 +2,59 @@ package org.somuga.controller;
 
 import jakarta.validation.Valid;
 import org.somuga.dto.user.UserCreateDto;
-import org.somuga.service.interfaces.UserService;
+import org.somuga.dto.user.UserPublicDto;
+import org.somuga.dto.user.UserUpdateNameDto;
+import org.somuga.exception.user.UserDuplicateFieldException;
+import org.somuga.exception.user.UserNotFoundException;
+import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     @Autowired
-    public UserController(UserService service){
+    public UserController(IUserService service) {
         this.userService = service;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<String> getAll(Pageable page){
-        return new ResponseEntity<>("GET", HttpStatus.OK);
+    @GetMapping("")
+    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page) {
+        return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
     }
 
-    @PostMapping("/")
-    public ResponseEntity<String> create(@Valid @RequestBody UserCreateDto user){
-        return new ResponseEntity<>("POST", HttpStatus.CREATED);
+    @GetMapping("/name/{name}")
+    public ResponseEntity<List<UserPublicDto>> getAllByName(Pageable page, @PathVariable String name) {
+        return new ResponseEntity<>(userService.getAllByName(page, name), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> update(@PathVariable Long id ,@Valid @RequestBody UserCreateDto user){
-        return new ResponseEntity<>("PUT", HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserPublicDto> getById(@PathVariable Long id) throws UserNotFoundException {
+        return new ResponseEntity<>(userService.getById(id), HttpStatus.OK);
+    }
+
+    @PostMapping("")
+    public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws UserDuplicateFieldException {
+        return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserPublicDto> updateUserName(@PathVariable Long id, @Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, UserDuplicateFieldException {
+        return new ResponseEntity<>(userService.updateUserName(id, user), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id){
-        return new ResponseEntity<>("DELETE", HttpStatus.OK);
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws UserNotFoundException {
+        userService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
