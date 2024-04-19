@@ -1,4 +1,6 @@
 package org.somuga.dto.game;
 
-public record GamePublicDto() {
+import org.somuga.dto.media.MediaPublicDto;
+
+public record GamePublicDto() implements MediaPublicDto {
 }
