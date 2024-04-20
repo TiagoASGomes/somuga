@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,7 @@ public class GameController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GamePublicDto> getById(@PathVariable Long id) {
+    public ResponseEntity<GamePublicDto> getById(@PathVariable Long id) throws GameNotFoundException {
         return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
     }
 
@@ -39,12 +40,12 @@ public class GameController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) {
+    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) throws GameNotFoundException {
         return new ResponseEntity<>(gameService.update(id, game), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws GameNotFoundException {
         gameService.delete(id);
         return ResponseEntity.ok().build();
     }
