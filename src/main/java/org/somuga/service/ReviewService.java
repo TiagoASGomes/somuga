@@ -7,6 +7,7 @@ import org.somuga.dto.review.ReviewUpdateDto;
 import org.somuga.entity.Media;
 import org.somuga.entity.Review;
 import org.somuga.entity.User;
+import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
@@ -19,8 +20,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.somuga.message.Messages.ALREADY_REVIED;
+import static org.somuga.message.Messages.ALREADY_REVIEWED;
 import static org.somuga.message.Messages.REVIEW_NOT_FOUND;
 
 @Service
@@ -54,8 +56,11 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public ReviewPublicDto create(ReviewCreateDto reviewDto) throws UserNotFoundException, AlreadyReviewedException {
-        reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), reviewDto.userId()).orElseThrow(() -> new AlreadyReviewedException(ALREADY_REVIED));
+    public ReviewPublicDto create(ReviewCreateDto reviewDto) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException {
+        Optional<Review> duplicateReview = reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), reviewDto.userId());
+        if (duplicateReview.isPresent()) {
+            throw new AlreadyReviewedException(ALREADY_REVIEWED);
+        }
         User user = userService.findById(reviewDto.userId());
         Media media = mediaService.findById(reviewDto.mediaId());
         Review review = new Review(reviewDto.reviewScore(), reviewDto.writtenReview(), user, media);
@@ -71,12 +76,13 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws ReviewNotFoundException {
+        findById(id);
         //TODO verificar se é o user que criou
         reviewRepo.deleteById(id);
     }
 
     private Review findById(Long id) throws ReviewNotFoundException {
-        return reviewRepo.findById(id).orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND));
+        return reviewRepo.findById(id).orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND + id));
     }
 }

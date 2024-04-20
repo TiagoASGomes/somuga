@@ -3,6 +3,7 @@ package org.somuga.service.interfaces;
 import org.somuga.dto.review.ReviewCreateDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
+import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
@@ -17,9 +18,9 @@ public interface IReviewService {
 
     List<ReviewPublicDto> getAllByMediaId(Long mediaId, Pageable page);
 
-    ReviewPublicDto create(ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException;
+    ReviewPublicDto create(ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException;
 
     ReviewPublicDto updateReview(Long id, ReviewUpdateDto review) throws ReviewNotFoundException;
 
-    void delete(Long id);
+    void delete(Long id) throws ReviewNotFoundException;
 }

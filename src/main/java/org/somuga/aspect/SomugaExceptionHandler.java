@@ -3,7 +3,11 @@ package org.somuga.aspect;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.like.AlreadyLikedException;
+import org.somuga.exception.like.LikeNotFoundException;
+import org.somuga.exception.media.MediaNotFoundException;
+import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserDuplicateFieldException;
@@ -25,7 +29,11 @@ public class SomugaExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(SomugaExceptionHandler.class);
 
     @ExceptionHandler({UserNotFoundException.class,
-            ReviewNotFoundException.class})
+            ReviewNotFoundException.class,
+            GameNotFoundException.class,
+            MovieNotFoundException.class,
+            MediaNotFoundException.class,
+            LikeNotFoundException.class})
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(
