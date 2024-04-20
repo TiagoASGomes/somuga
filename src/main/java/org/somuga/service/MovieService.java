@@ -4,6 +4,7 @@ import org.somuga.converter.MovieConverter;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
+import org.somuga.enums.MediaType;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
@@ -39,6 +40,7 @@ public class MovieService implements IMovieService {
     @Override
     public MoviePublicDto create(MovieCreateDto movieDto) {
         Movie movie = MovieConverter.fromCreateDtoToEntity(movieDto);
+        movie.setMediaType(MediaType.MOVIE);
         return MovieConverter.fromEntityToPublicDto(movieRepo.save(movie));
     }
 
