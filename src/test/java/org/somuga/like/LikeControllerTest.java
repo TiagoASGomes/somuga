@@ -124,6 +124,11 @@ public class LikeControllerTest {
     void testCreateGameLike() throws Exception {
         LikeCreateDto likeDto = new LikeCreateDto(user.id(), game.id());
 
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        System.out.println();
+        System.out.println("USER" + user.id());
+        System.out.println("GAME" + game.id());
+
 
         String response = mockMvc.perform(post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
