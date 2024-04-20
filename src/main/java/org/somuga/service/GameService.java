@@ -4,6 +4,7 @@ import org.somuga.converter.GameConverter;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Game;
+import org.somuga.enums.MediaType;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
@@ -40,6 +41,7 @@ public class GameService implements IGameService {
     @Override
     public GamePublicDto create(GameCreateDto gameDto) {
         Game game = GameConverter.fromCreateDtoToEntity(gameDto);
+        game.setMediaType(MediaType.GAME);
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 
