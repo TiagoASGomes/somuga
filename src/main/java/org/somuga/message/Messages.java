@@ -6,6 +6,8 @@ public class Messages {
     public static final String REVIEW_NOT_FOUND = "No review found with id: ";
     public static final String MOVIE_NOT_FOUND = "No movie found with id: ";
     public static final String GAME_NOT_FOUND = "No game found with id: ";
+    public static final String MEDIA_NOT_FOUND = "No media found with id: ";
+    public static final String LIKE_NOT_FOUND = "No media found with id: ";
     public static final String NON_EMPTY_USERNAME = "Username cannot be empty";
     public static final String INVALID_USERNAME = "Username must be between 4 and 20 characters, and can only contain letters, numbers, - and spaces";
     public static final String NON_EMPTY_EMAIL = "Email cannot be empty";
@@ -14,7 +16,7 @@ public class Messages {
     public static final String DUPLICATE_USERNAME = "Username already exists";
     public static final String ID_GREATER_THAN_0 = "Id must be greater than 0";
     public static final String ALREADY_LIKED = "User already liked this media";
-    public static final String ALREADY_REVIED = "User already reviewed this media";
+    public static final String ALREADY_REVIEWED = "User already reviewed this media";
     public static final String INVALID_SCORE = "The review score must be between 1 and 10";
     public static final String MAX_REVIEW_CHARACTERS = "Review must be lower that 1024 characters";
     public static final String INVALID_TITLE = "Title field cannot be empty";

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.somuga.dto.review.ReviewCreateDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
+import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reviews")
+@RequestMapping("/api/v1/review")
 public class ReviewController {
 
     private final IReviewService reviewService;
@@ -43,7 +44,7 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ReviewPublicDto> create(@Valid @RequestBody ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException {
+    public ResponseEntity<ReviewPublicDto> create(@Valid @RequestBody ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException {
         return new ResponseEntity<>(reviewService.create(review), HttpStatus.CREATED);
     }
 
@@ -51,9 +52,9 @@ public class ReviewController {
     public ResponseEntity<ReviewPublicDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewUpdateDto review) throws ReviewNotFoundException {
         return new ResponseEntity<>(reviewService.updateReview(id, review), HttpStatus.OK);
     }
-    
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException {
         reviewService.delete(id);
         return ResponseEntity.ok().build();
     }

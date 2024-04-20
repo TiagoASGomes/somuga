@@ -7,6 +7,8 @@ import org.somuga.entity.Like;
 import org.somuga.entity.Media;
 import org.somuga.entity.User;
 import org.somuga.exception.like.AlreadyLikedException;
+import org.somuga.exception.like.LikeNotFoundException;
+import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.somuga.repository.LikeRepository;
 import org.somuga.service.interfaces.ILikeService;
@@ -17,8 +19,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.somuga.message.Messages.ALREADY_LIKED;
+import static org.somuga.message.Messages.LIKE_NOT_FOUND;
 
 @Service
 public class LikeService implements ILikeService {
@@ -45,8 +49,11 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public LikePublicDto create(LikeCreateDto likeDto) throws UserNotFoundException, AlreadyLikedException {
-        likeRepo.findByMediaIdAndUserId(likeDto.mediaId(), likeDto.userId()).orElseThrow(() -> new AlreadyLikedException(ALREADY_LIKED));
+    public LikePublicDto create(LikeCreateDto likeDto) throws UserNotFoundException, AlreadyLikedException, MediaNotFoundException {
+        Optional<Like> duplicateLike = likeRepo.findByMediaIdAndUserId(likeDto.mediaId(), likeDto.userId());
+        if (duplicateLike.isPresent()) {
+            throw new AlreadyLikedException(ALREADY_LIKED);
+        }
         User user = userService.findById(likeDto.userId());
         Media media = mediaService.findById(likeDto.mediaId());
         Like like = new Like(user, media);
@@ -54,7 +61,8 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws LikeNotFoundException {
+        likeRepo.findById(id).orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + id));
         //TODO verificar se é o user que criou
         likeRepo.deleteById(id);
     }

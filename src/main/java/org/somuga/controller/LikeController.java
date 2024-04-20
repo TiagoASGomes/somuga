@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import org.somuga.dto.like.LikeCreateDto;
 import org.somuga.dto.like.LikePublicDto;
 import org.somuga.exception.like.AlreadyLikedException;
+import org.somuga.exception.like.LikeNotFoundException;
+import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.somuga.service.interfaces.ILikeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/likes")
+@RequestMapping("/api/v1/like")
 public class LikeController {
 
     private final ILikeService likeService;
@@ -36,12 +38,12 @@ public class LikeController {
     }
 
     @PostMapping
-    public ResponseEntity<LikePublicDto> create(@Valid @RequestBody LikeCreateDto like) throws UserNotFoundException, AlreadyLikedException {
+    public ResponseEntity<LikePublicDto> create(@Valid @RequestBody LikeCreateDto like) throws UserNotFoundException, AlreadyLikedException, MediaNotFoundException {
         return new ResponseEntity<>(likeService.create(like), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws LikeNotFoundException {
         likeService.delete(id);
         return ResponseEntity.ok().build();
     }

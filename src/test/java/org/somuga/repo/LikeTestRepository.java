@@ -10,6 +10,6 @@ public interface LikeTestRepository extends JpaRepository<Like, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "ALTER TABLE reviews ALTER COLUMN id RESTART WITH 1", nativeQuery = true)
+    @Query(value = "ALTER TABLE likes ALTER COLUMN id RESTART WITH 1", nativeQuery = true)
     void resetAutoIncrement();
 }
