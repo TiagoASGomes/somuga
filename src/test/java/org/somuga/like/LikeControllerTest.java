@@ -14,14 +14,12 @@ import org.somuga.dto.user.UserPublicDto;
 import org.somuga.repo.LikeTestRepository;
 import org.somuga.repo.UserTestRepository;
 import org.somuga.repository.GameRepository;
-import org.somuga.repository.MediaBaseRepository;
 import org.somuga.repository.MovieRepository;
 import org.somuga.testDtos.LikeGameDto;
 import org.somuga.testDtos.LikeMovieDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -56,7 +54,6 @@ public class LikeControllerTest {
     private GameRepository gameRepository;
     @Autowired
     private MovieRepository movieRepository;
-    private List<MediaBaseRepository> mediaRepositories;
 
     @BeforeAll
     public static void setUpMapper() {
@@ -65,12 +62,12 @@ public class LikeControllerTest {
 
     @AfterEach
     public void cleanUp() {
-        mediaRepositories = List.of(gameRepository, movieRepository);
         likeTestRepository.deleteAll();
         likeTestRepository.resetAutoIncrement();
         userTestRepository.deleteAll();
         userTestRepository.resetAutoIncrement();
-        mediaRepositories.forEach(CrudRepository::deleteAll);
+        gameRepository.deleteAll();
+        movieRepository.deleteAll();
     }
 
     @BeforeEach
@@ -360,5 +357,5 @@ public class LikeControllerTest {
         assertNotNull(error.getTimestamp());
         assertEquals(API_PATH + "/" + 9999999, error.getPath());
     }
-    
+
 }

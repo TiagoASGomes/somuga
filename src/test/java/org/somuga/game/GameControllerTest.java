@@ -2,11 +2,13 @@ package org.somuga.game;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,10 +32,17 @@ class GameControllerTest {
     private final String API_PATH = "/api/v1/game";
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private GameRepository gameRepository;
 
     @BeforeAll
     public static void setUpMapper() {
         mapper.registerModule(new JavaTimeModule());
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        gameRepository.deleteAll();
     }
 
     @Test

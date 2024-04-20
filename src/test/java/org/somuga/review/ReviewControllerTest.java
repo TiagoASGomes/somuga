@@ -15,14 +15,12 @@ import org.somuga.dto.user.UserPublicDto;
 import org.somuga.repo.ReviewTestRepository;
 import org.somuga.repo.UserTestRepository;
 import org.somuga.repository.GameRepository;
-import org.somuga.repository.MediaBaseRepository;
 import org.somuga.repository.MovieRepository;
 import org.somuga.testDtos.ReviewGameDto;
 import org.somuga.testDtos.ReviewMovieDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,7 +55,6 @@ public class ReviewControllerTest {
     private GameRepository gameRepository;
     @Autowired
     private MovieRepository movieRepository;
-    private List<MediaBaseRepository> mediaRepositories;
 
     @BeforeAll
     public static void setUpMapper() {
@@ -66,12 +63,12 @@ public class ReviewControllerTest {
 
     @AfterEach
     public void cleanUp() {
-        mediaRepositories = List.of(gameRepository, movieRepository);
         reviewTestRepository.deleteAll();
         reviewTestRepository.resetAutoIncrement();
         userTestRepository.deleteAll();
         userTestRepository.resetAutoIncrement();
-        mediaRepositories.forEach(CrudRepository::deleteAll);
+        gameRepository.deleteAll();
+        movieRepository.deleteAll();
     }
 
     @BeforeEach
