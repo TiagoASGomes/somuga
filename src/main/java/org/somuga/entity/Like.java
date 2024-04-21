@@ -3,7 +3,6 @@ package org.somuga.entity;
 import jakarta.persistence.*;
 
 @Entity
-
 @Table(name = "likes")
 public class Like {
     @Id
@@ -13,9 +12,6 @@ public class Like {
     private User user;
     @ManyToOne
     private Media media;
-
-    public Like() {
-    }
 
     public Like(User user, Media media) {
         this.user = user;

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 
 import static org.somuga.message.Messages.GAME_NOT_FOUND;
@@ -50,9 +49,9 @@ public class GameService implements IGameService {
         Game game = findById(id);
         game.setTitle(gameDto.title());
         game.setReleaseDate(gameDto.releaseDate());
-        game.setCompany(gameDto.company());
-        game.setGenre(gameDto.genre());
-        game.setPlatforms(new HashSet<>(gameDto.platforms()));
+//        game.setDeveloper(gameDto.company());
+//        game.setGenre(gameDto.genre());
+//        game.setPlatforms(new HashSet<>(gameDto.platforms()));
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 

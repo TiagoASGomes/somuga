@@ -30,28 +30,12 @@ public abstract class Media {
         this.id = id;
     }
 
-    public Set<Review> getRatings() {
-        return reviews;
+    public MediaType getMediaType() {
+        return mediaType;
     }
 
-    public void setRatings(Set<Review> reviews) {
-        this.reviews = reviews;
-    }
-
-    public Set<Like> getLikes() {
-        return likes;
-    }
-
-    public void setLikes(Set<Like> likes) {
-        this.likes = likes;
-    }
-
-    public Date getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(Date releaseDate) {
-        this.releaseDate = releaseDate;
+    public void setMediaType(MediaType mediaType) {
+        this.mediaType = mediaType;
     }
 
     public String getTitle() {
@@ -62,11 +46,27 @@ public abstract class Media {
         this.title = title;
     }
 
-    public MediaType getMediaType() {
-        return mediaType;
+    public Date getReleaseDate() {
+        return releaseDate;
     }
 
-    public void setMediaType(MediaType mediaType) {
-        this.mediaType = mediaType;
+    public void setReleaseDate(Date releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public Set<Like> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Set<Like> likes) {
+        this.likes = likes;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 }
