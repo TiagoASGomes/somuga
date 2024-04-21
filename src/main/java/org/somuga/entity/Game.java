@@ -1,6 +1,8 @@
 package org.somuga.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.util.Set;
@@ -9,34 +11,52 @@ import java.util.Set;
 @Table(name = "games")
 public class Game extends Media {
 
-    private String company;
-    private String genre;
-    private Set<String> platforms;
+    private String description;
+    private Double price;
+    @OneToMany(mappedBy = "games")
+    private Developer developer;
+    @ManyToMany(mappedBy = "games")
+    private Set<GameGenre> genres;
+    @ManyToMany(mappedBy = "games")
+    private Set<Platform> platforms;
 
-    public Game() {
+    public String getDescription() {
+        return description;
     }
 
-    public String getCompany() {
-        return company;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public Set<String> getPlatforms() {
+    public Set<Platform> getPlatforms() {
         return platforms;
     }
 
-    public void setPlatforms(Set<String> platforms) {
+    public void setPlatforms(Set<Platform> platforms) {
         this.platforms = platforms;
+    }
+
+    public Set<GameGenre> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(Set<GameGenre> genres) {
+        this.genres = genres;
+    }
+
+    public Developer getDeveloper() {
+        return developer;
+    }
+
+    public void setDeveloper(Developer developer) {
+        this.developer = developer;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }

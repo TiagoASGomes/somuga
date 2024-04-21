@@ -12,9 +12,6 @@ public class Movie extends Media {
     private Set<String> actors;
     private String producer;
 
-    public Movie() {
-    }
-
     public Set<String> getActors() {
         return actors;
     }

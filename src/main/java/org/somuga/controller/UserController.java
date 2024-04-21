@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.dto.user.UserUpdateNameDto;
-import org.somuga.exception.user.UserDuplicateFieldException;
+import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +43,12 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws UserDuplicateFieldException {
+    public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws DuplicateFieldException {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserPublicDto> updateUserName(@PathVariable Long id, @Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, UserDuplicateFieldException {
+    public ResponseEntity<UserPublicDto> updateUserName(@PathVariable Long id, @Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException {
         return new ResponseEntity<>(userService.updateUserName(id, user), HttpStatus.OK);
     }
 

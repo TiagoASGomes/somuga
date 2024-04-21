@@ -5,7 +5,7 @@ import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.dto.user.UserUpdateNameDto;
 import org.somuga.entity.User;
-import org.somuga.exception.user.UserDuplicateFieldException;
+import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.somuga.repository.UserRepository;
 import org.somuga.service.interfaces.IUserService;
@@ -46,7 +46,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserPublicDto create(UserCreateDto userDto) throws UserDuplicateFieldException {
+    public UserPublicDto create(UserCreateDto userDto) throws DuplicateFieldException {
         User user = UserConverter.fromCreateDtoToEntity(userDto);
         checkDuplicateFields(user.getEmail(), user.getUserName());
         user.setActive(true);
@@ -56,7 +56,7 @@ public class UserService implements IUserService {
 
 
     @Override
-    public UserPublicDto updateUserName(Long id, UserUpdateNameDto userDto) throws UserNotFoundException, UserDuplicateFieldException {
+    public UserPublicDto updateUserName(Long id, UserUpdateNameDto userDto) throws UserNotFoundException, DuplicateFieldException {
         User user = findById(id);
         checkDuplicateFields("XXXXXX", userDto.userName());
         user.setUserName(userDto.userName());
@@ -77,14 +77,14 @@ public class UserService implements IUserService {
         return userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND + id));
     }
 
-    private void checkDuplicateFields(String email, String userName) throws UserDuplicateFieldException {
+    private void checkDuplicateFields(String email, String userName) throws DuplicateFieldException {
         Optional<User> opt1 = userRepo.findByEmail(email);
         Optional<User> opt2 = userRepo.findByUserName(userName);
         if (opt1.isPresent()) {
-            throw new UserDuplicateFieldException(DUPLICATE_EMAIL);
+            throw new DuplicateFieldException(DUPLICATE_EMAIL + email);
         }
         if (opt2.isPresent()) {
-            throw new UserDuplicateFieldException(DUPLICATE_USERNAME);
+            throw new DuplicateFieldException(DUPLICATE_USERNAME + userName);
         }
     }
 }

@@ -10,7 +10,7 @@ import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
-import org.somuga.exception.user.UserDuplicateFieldException;
+import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,7 @@ public class SomugaExceptionHandler {
         ), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({UserDuplicateFieldException.class,
+    @ExceptionHandler({DuplicateFieldException.class,
             AlreadyLikedException.class,
             AlreadyReviewedException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {

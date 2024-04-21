@@ -21,9 +21,6 @@ public class User {
     private Date joinDate;
     private boolean active;
 
-    public User() {
-    }
-
     public User(String userName, String email) {
         this.userName = userName;
         this.email = email;
