@@ -66,5 +66,3 @@ public class GameGenreService implements IGameGenreService {
         return gameGenreRepo.findById(id).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND + id));
     }
 }
-
-// Compare this snippet from src/main/java/org/somuga/service/interfaces/IGameGenreService.java:

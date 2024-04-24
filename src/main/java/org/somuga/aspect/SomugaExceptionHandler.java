@@ -3,11 +3,16 @@ package org.somuga.aspect;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
+import org.somuga.exception.game_genre.GenreAlreadyExistsException;
+import org.somuga.exception.game_genre.GenreNotFoundException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.movie.MovieNotFoundException;
+import org.somuga.exception.platform.PlatformAlreadyExistsException;
+import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
@@ -33,7 +38,10 @@ public class SomugaExceptionHandler {
             GameNotFoundException.class,
             MovieNotFoundException.class,
             MediaNotFoundException.class,
-            LikeNotFoundException.class})
+            LikeNotFoundException.class,
+            DeveloperNotFoundException.class,
+            GenreNotFoundException.class,
+            PlatformNotFoundException.class})
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(
@@ -47,7 +55,9 @@ public class SomugaExceptionHandler {
 
     @ExceptionHandler({DuplicateFieldException.class,
             AlreadyLikedException.class,
-            AlreadyReviewedException.class})
+            AlreadyReviewedException.class,
+            GenreAlreadyExistsException.class,
+            PlatformAlreadyExistsException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(

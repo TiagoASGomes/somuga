@@ -12,7 +12,7 @@ public class Developer {
     private Long id;
     @Column(unique = true)
     private String developerName;
-    @ManyToOne
+    @OneToMany(mappedBy = "developer")
     private List<Game> games;
 
     public Long getId() {

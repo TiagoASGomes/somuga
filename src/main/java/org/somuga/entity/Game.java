@@ -2,7 +2,7 @@ package org.somuga.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.util.Set;
@@ -13,7 +13,7 @@ public class Game extends Media {
 
     private String description;
     private Double price;
-    @OneToMany(mappedBy = "games")
+    @ManyToOne
     private Developer developer;
     @ManyToMany(mappedBy = "games")
     private Set<GameGenre> genres;
