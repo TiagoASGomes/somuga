@@ -3,7 +3,9 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
+import org.somuga.exception.game_genre.GenreNotFoundException;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -34,8 +36,28 @@ public class GameController {
         return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/platform/{platformName}")
+    public ResponseEntity<List<GamePublicDto>> getByPlatform(@PathVariable String platformName, Pageable page) {
+        return new ResponseEntity<>(gameService.getByPlatform(platformName, page), HttpStatus.OK);
+    }
+
+    @GetMapping("/genre/{genreName}")
+    public ResponseEntity<List<GamePublicDto>> getByGenre(@PathVariable String genreName, Pageable page) {
+        return new ResponseEntity<>(gameService.getByGenre(genreName, page), HttpStatus.OK);
+    }
+
+    @GetMapping("/developer/{developerName}")
+    public ResponseEntity<List<GamePublicDto>> getByDeveloper(@PathVariable String developerName, Pageable page) {
+        return new ResponseEntity<>(gameService.getByDeveloper(developerName, page), HttpStatus.OK);
+    }
+
+    @GetMapping("/search/{name}")
+    public ResponseEntity<List<GamePublicDto>> searchByName(@PathVariable String name, Pageable page) {
+        return new ResponseEntity<>(gameService.searchByName(name, page), HttpStatus.OK);
+    }
+
     @PostMapping
-    public ResponseEntity<GamePublicDto> create(@Valid @RequestBody GameCreateDto game) {
+    public ResponseEntity<GamePublicDto> create(@Valid @RequestBody GameCreateDto game) throws DeveloperNotFoundException, GenreNotFoundException {
         return new ResponseEntity<>(gameService.create(game), HttpStatus.CREATED);
     }
 

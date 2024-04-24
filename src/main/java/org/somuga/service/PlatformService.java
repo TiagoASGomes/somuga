@@ -28,6 +28,7 @@ public class PlatformService implements IPlatformService {
 
     @Override
     public List<PlatformPublicDto> getAll(Pageable page) {
+        List<Platform> platforms = platformRepo.findAll(page).toList();
         return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findAll(page).toList());
     }
 

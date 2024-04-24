@@ -34,6 +34,7 @@ public class Game extends Media {
 
     public void setPlatforms(Set<Platform> platforms) {
         this.platforms = platforms;
+        platforms.forEach(platform -> platform.addGame(this));
     }
 
     public Set<GameGenre> getGenres() {
@@ -42,6 +43,7 @@ public class Game extends Media {
 
     public void setGenres(Set<GameGenre> genres) {
         this.genres = genres;
+        genres.forEach(genre -> genre.addGame(this));
     }
 
     public Developer getDeveloper() {
@@ -50,6 +52,7 @@ public class Game extends Media {
 
     public void setDeveloper(Developer developer) {
         this.developer = developer;
+        developer.addGame(this);
     }
 
     public Double getPrice() {
