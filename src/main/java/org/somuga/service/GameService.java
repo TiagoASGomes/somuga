@@ -10,6 +10,7 @@ import org.somuga.entity.Platform;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
+import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,17 +57,27 @@ public class GameService implements IGameService {
 
     @Override
     public List<GamePublicDto> getByGenre(String genreName, Pageable page) {
-        return List.of();
+        try {
+            genreService.findByGenre(genreName);
+        } catch (Exception e) {
+            return List.of();
+        }
+        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByGenre(genreName.toLowerCase(), page).toList());
     }
 
     @Override
     public List<GamePublicDto> getByDeveloper(String developerName, Pageable page) {
-        return List.of();
+        try {
+            developerService.findByDeveloperName(developerName);
+        } catch (Exception e) {
+            return List.of();
+        }
+        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByDeveloper(developerName.toLowerCase(), page).toList());
     }
 
     @Override
     public List<GamePublicDto> searchByName(String name, Pageable page) {
-        return List.of();
+        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByTitleContainingIgnoreCase(name, page).toList());
     }
 
     @Override
@@ -75,22 +86,16 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public GamePublicDto create(GameCreateDto gameDto) throws GenreNotFoundException, DeveloperNotFoundException {
+    public GamePublicDto create(GameCreateDto gameDto) throws GenreNotFoundException, DeveloperNotFoundException, PlatformNotFoundException {
         Game game = GameConverter.fromCreateDtoToEntity(gameDto);
         Developer developer = developerService.findByDeveloperName(gameDto.developerName());
         Set<GameGenre> genres = new HashSet<>();
         Set<Platform> platforms = new HashSet<>();
         for (String platformName : gameDto.platformsNames()) {
-            try {
-                platforms.add(platformService.findByPlatformName(platformName));
-            } catch (Exception ignored) {
-            }
+            platforms.add(platformService.findByPlatformName(platformName));
         }
         for (String genreName : gameDto.genres()) {
-            try {
-                genres.add(genreService.findByGenre(genreName));
-            } catch (Exception ignored) {
-            }
+            genres.add(genreService.findByGenre(genreName));
         }
         game.setDeveloper(developer);
         game.setGenres(genres);
@@ -100,7 +105,7 @@ public class GameService implements IGameService {
 
     @Override
     public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException {
-
+        //TODO ver adicionar e remover plataformas e generos
         return null;
     }
 
