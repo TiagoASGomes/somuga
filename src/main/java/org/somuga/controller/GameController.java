@@ -6,6 +6,7 @@ import org.somuga.dto.game.GamePublicDto;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
+import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -57,12 +58,12 @@ public class GameController {
     }
 
     @PostMapping
-    public ResponseEntity<GamePublicDto> create(@Valid @RequestBody GameCreateDto game) throws DeveloperNotFoundException, GenreNotFoundException {
+    public ResponseEntity<GamePublicDto> create(@Valid @RequestBody GameCreateDto game) throws DeveloperNotFoundException, GenreNotFoundException, PlatformNotFoundException {
         return new ResponseEntity<>(gameService.create(game), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) throws GameNotFoundException {
+    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException {
         return new ResponseEntity<>(gameService.update(id, game), HttpStatus.OK);
     }
 

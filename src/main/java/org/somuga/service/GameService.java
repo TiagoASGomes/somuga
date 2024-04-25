@@ -104,14 +104,31 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException {
-        //TODO ver adicionar e remover plataformas e generos
-        return null;
+    public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException {
+        Game game = findById(id);
+        Developer developer = developerService.findByDeveloperName(gameDto.developerName());
+        Set<GameGenre> genres = new HashSet<>();
+        Set<Platform> platforms = new HashSet<>();
+        for (String platformName : gameDto.platformsNames()) {
+            platforms.add(platformService.findByPlatformName(platformName));
+        }
+        for (String genreName : gameDto.genres()) {
+            genres.add(genreService.findByGenre(genreName));
+        }
+        game.setDeveloper(developer);
+        game.setGenres(genres);
+        game.setPlatforms(platforms);
+        game.setTitle(gameDto.title());
+        game.setDescription(gameDto.description());
+        game.setReleaseDate(gameDto.releaseDate());
+        game.setPrice(gameDto.price());
+        return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 
     @Override
     public void delete(Long id) throws GameNotFoundException {
-
+        findById(id);
+        gameRepo.deleteById(id);
     }
 
     @Override

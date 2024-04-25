@@ -17,9 +17,13 @@ public abstract class Media {
     private MediaType mediaType;
     private String title;
     private Date releaseDate;
-    @OneToMany(mappedBy = "media")
+    @OneToMany(mappedBy = "media",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Set<Like> likes;
-    @OneToMany(mappedBy = "media")
+    @OneToMany(mappedBy = "media",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private Set<Review> reviews;
 
     public Long getId() {

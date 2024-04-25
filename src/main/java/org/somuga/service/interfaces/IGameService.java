@@ -27,7 +27,7 @@ public interface IGameService {
 
     GamePublicDto create(GameCreateDto game) throws GenreNotFoundException, DeveloperNotFoundException, PlatformNotFoundException;
 
-    GamePublicDto update(Long id, GameCreateDto game) throws GameNotFoundException;
+    GamePublicDto update(Long id, GameCreateDto game) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException;
 
     void delete(Long id) throws GameNotFoundException;
 
