@@ -44,8 +44,7 @@ public class DeveloperService implements IDeveloperService {
     @Override
     public DeveloperPublicDto create(DeveloperCreateDto developerDto) throws DuplicateFieldException {
         checkDuplicateDeveloperName(developerDto.developerName().toLowerCase());
-        Developer developer = new Developer();
-        developer.setDeveloperName(developerDto.developerName().toLowerCase());
+        Developer developer = new Developer(developerDto.developerName().toLowerCase());
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 

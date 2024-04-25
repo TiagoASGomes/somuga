@@ -15,6 +15,13 @@ public class Developer {
     @OneToMany(mappedBy = "developer")
     private List<Game> games;
 
+    public Developer() {
+    }
+
+    public Developer(String developerName) {
+        this.developerName = developerName;
+    }
+
     public Long getId() {
         return id;
     }

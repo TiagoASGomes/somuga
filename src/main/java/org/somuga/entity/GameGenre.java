@@ -15,6 +15,13 @@ public class GameGenre {
     @ManyToMany
     private List<Game> games;
 
+    public GameGenre() {
+    }
+
+    public GameGenre(String genre) {
+        this.genre = genre;
+    }
+
     public Long getId() {
         return id;
     }
