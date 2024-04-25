@@ -7,6 +7,7 @@ import org.somuga.entity.Developer;
 import org.somuga.entity.Game;
 import org.somuga.entity.GameGenre;
 import org.somuga.entity.Platform;
+import org.somuga.enums.MediaType;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
@@ -100,6 +101,7 @@ public class GameService implements IGameService {
         game.setDeveloper(developer);
         game.setGenres(genres);
         game.setPlatforms(platforms);
+        game.setMediaType(MediaType.GAME);
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 

@@ -10,7 +10,7 @@ import org.somuga.aspect.Error;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.dto.user.UserUpdateNameDto;
-import org.somuga.repo.UserTestRepository;
+import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,7 +39,7 @@ public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private UserTestRepository userTestRepository;
+    private UserRepository userTestRepository;
 
 
     @BeforeAll
@@ -49,7 +49,6 @@ public class UserControllerTest {
 
     @AfterEach
     public void cleanUp() {
-        userTestRepository.resetAutoIncrement();
         userTestRepository.deleteAll();
     }
 
@@ -62,8 +61,7 @@ public class UserControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
-        UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
-        return user.id();
+        return mapper.readValue(response, UserPublicDto.class).id();
     }
 
     @Test
@@ -229,7 +227,7 @@ public class UserControllerTest {
     void testGetAllWithDeletedUsers() throws Exception {
         long id = 1L;
         for (int i = 0; i < 3; i++) {
-            createUser(USERNAME + i, "email" + i + "@example.com");
+            id = createUser(USERNAME + i, "email" + i + "@example.com");
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
                 .andExpect(status().isNoContent());
@@ -244,7 +242,7 @@ public class UserControllerTest {
     void testGetAllWithDeletedUsersPaged() throws Exception {
         long id = 1L;
         for (int i = 0; i < 5; i++) {
-            createUser(USERNAME + i, "email" + i + "@example.com");
+            id = createUser(USERNAME + i, "email" + i + "@example.com");
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
                 .andExpect(status().isNoContent());
@@ -286,10 +284,11 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test get users all by name with 1 deleted user and expect list 2 users")
     void testGetAllByNameWithDeleted() throws Exception {
+        long id = 1L;
         for (int i = 0; i < 3; i++) {
-            createUser(USERNAME + i, "email" + i + "@example.com");
+            id = createUser(USERNAME + i, "email" + i + "@example.com");
         }
-        mockMvc.perform(delete(API_PATH + "/" + 1))
+        mockMvc.perform(delete(API_PATH + "/" + id))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
                 .andExpect(status().isOk())

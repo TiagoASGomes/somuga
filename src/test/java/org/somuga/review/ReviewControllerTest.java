@@ -6,10 +6,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.dto.user.UserPublicDto;
-import org.somuga.repo.ReviewTestRepository;
-import org.somuga.repo.UserTestRepository;
 import org.somuga.repository.GameRepository;
 import org.somuga.repository.MovieRepository;
+import org.somuga.repository.ReviewRepository;
+import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,9 +29,9 @@ public class ReviewControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private UserTestRepository userTestRepository;
+    private UserRepository userTestRepository;
     @Autowired
-    private ReviewTestRepository reviewTestRepository;
+    private ReviewRepository reviewTestRepository;
     @Autowired
     private GameRepository gameRepository;
     @Autowired

@@ -15,6 +15,13 @@ public class Platform {
     @ManyToMany
     private List<Game> games;
 
+    public Platform() {
+    }
+
+    public Platform(String platformName) {
+        this.platformName = platformName;
+    }
+
     public Long getId() {
         return id;
     }
