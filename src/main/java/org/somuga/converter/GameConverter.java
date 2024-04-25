@@ -5,9 +5,14 @@ import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Game;
 
 import java.util.List;
+import java.util.Set;
 
 public class GameConverter {
     public static GamePublicDto fromEntityToPublicDto(Game game) {
+        if (game == null) return null;
+        if (game.getReviews() == null) game.setReviews(Set.of());
+        if (game.getLikes() == null) game.setLikes(Set.of());
+
         return new GamePublicDto(
                 game.getId(),
                 game.getTitle(),

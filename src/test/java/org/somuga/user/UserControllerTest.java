@@ -393,7 +393,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Test delete user and expect status 200 and deleted user")
+    @DisplayName("Test delete user and expect status 204 and deleted user")
     void testDelete() throws Exception {
         long id = createUser(USERNAME, EMAIL);
 
@@ -401,7 +401,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
 
         String response = mockMvc.perform(get(API_PATH + "/" + id))
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andReturn().getResponse().getContentAsString();
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);

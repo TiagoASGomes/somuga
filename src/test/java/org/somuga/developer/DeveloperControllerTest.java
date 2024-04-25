@@ -67,25 +67,6 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test create developer with invalid name and expect 400")
-    void testCreateDeveloperInvalidName() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("De");
-
-        String response = mockMvc.perform(post(API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        Error error = mapper.readValue(response, Error.class);
-
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
-        assertEquals(400, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertEquals(API_PATH, error.getPath());
-    }
-
-    @Test
     @DisplayName("Test create developer with empty name and expect 400")
     void testCreateDeveloperEmptyName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("");

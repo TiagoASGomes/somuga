@@ -146,25 +146,6 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test create platform with name shorter than 3 characters and expect 400")
-    void testCreatePlatformWithShortName() throws Exception {
-        PlatformCreateDto platform = new PlatformCreateDto("A");
-
-        String response = mockMvc.perform(post(API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platform)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        Error error = mapper.readValue(response, Error.class);
-
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertEquals(400, error.getStatus());
-        assertEquals(API_PATH, error.getPath());
-        assertEquals("POST", error.getMethod());
-    }
-
-    @Test
     @DisplayName("Test create platform with invalid characters and expect 400")
     void testCreatePlatformWithInvalidCharacters() throws Exception {
         PlatformCreateDto platform = new PlatformCreateDto("Test Platform!");

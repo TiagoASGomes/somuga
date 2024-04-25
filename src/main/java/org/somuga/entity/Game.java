@@ -1,9 +1,6 @@
 package org.somuga.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Set;
 
@@ -15,9 +12,11 @@ public class Game extends Media {
     private Double price;
     @ManyToOne
     private Developer developer;
-    @ManyToMany(mappedBy = "games")
+    @ManyToMany(mappedBy = "games",
+            cascade = CascadeType.REMOVE)
     private Set<GameGenre> genres;
-    @ManyToMany(mappedBy = "games")
+    @ManyToMany(mappedBy = "games",
+            cascade = CascadeType.REMOVE)
     private Set<Platform> platforms;
 
     public String getDescription() {

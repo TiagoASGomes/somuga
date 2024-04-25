@@ -13,7 +13,7 @@ public record GamePublicDto(
         String title,
         Date releaseDate,
         DeveloperPublicDto developer,
-        List<GameGenrePublicDto> genre,
+        List<GameGenrePublicDto> genres,
         List<PlatformPublicDto> platforms,
         Double price,
         String description,
