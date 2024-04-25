@@ -16,6 +16,9 @@ public class Review {
     @ManyToOne
     private Media media;
 
+    public Review() {
+    }
+
     public Review(Integer reviewScore, String writtenReview, User user, Media media) {
         this.reviewScore = reviewScore;
         this.writtenReview = writtenReview;

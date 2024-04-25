@@ -26,8 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.message.Messages.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -503,41 +502,226 @@ class GameControllerTest {
     @Test
     @DisplayName("Test update game and expect 200")
     void testUpdateGame() throws Exception {
-//        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
-//
-//        String newTitle = "New Title";
-//        String newDescription = "New Description";
-//        Date newReleaseDate = new Date();
-//        double newPrice = 49.99;
-//        List<String> newPlatforms = List.of("PC", "PS5");
-//        List<String> newGenres = List.of("Action", "Adventure");
-//
-//        GameCreateDto gameCreateDto = new GameCreateDto(newTitle, newReleaseDate, developer, newGenres, newPlatforms, newPrice, newDescription);
-//
-//        String response = mockMvc.perform(post(API_PATH + "/" + gamePublicDto.id())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(mapper.writeValueAsString(gameCreateDto)))
-//                .andExpect(status().isOk())
-//                .andReturn().getResponse().getContentAsString();
-//
-//        GamePublicDto gamePublicDtoResponse = mapper.readValue(response, GamePublicDto.class);
-//
-//        assertEquals(gamePublicDto.id(), gamePublicDtoResponse.id());
-//        assertEquals(newTitle, gamePublicDtoResponse.title());
-//        assertEquals(developer, gamePublicDtoResponse.developer().developerName());
-//        assertEquals(newPrice, gamePublicDtoResponse.price());
-//        assertEquals(newDescription, gamePublicDtoResponse.description());
-//        newPlatforms.forEach(platform -> {
-//            boolean found = gamePublicDtoResponse.platforms().stream().anyMatch(p -> p.platformName().equalsIgnoreCase(platform));
-//            assertTrue(found);
-//        });
-//        newGenres.forEach(genre -> {
-//            boolean found = gamePublicDtoResponse.genres().stream().anyMatch(g -> g.genreName().equalsIgnoreCase(genre));
-//            assertTrue(found);
-//        });
-//        assertEquals(newReleaseDate, gamePublicDtoResponse.releaseDate());
-//        assertEquals(0, gamePublicDtoResponse.reviews());
-//        assertEquals(0, gamePublicDtoResponse.likes());
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String newTitle = "New Title";
+        String newDescription = "New Description";
+        Date newReleaseDate = new Date();
+        double newPrice = 49.99;
+        String newDeveloper = "Ubisoft";
+        createDeveloper(newDeveloper);
+        List<String> newPlatforms = List.of("PC");
+        List<String> newGenres = List.of("Action");
+
+        GameCreateDto gameCreateDto = new GameCreateDto(newTitle, newReleaseDate, newDeveloper, newGenres, newPlatforms, newPrice, newDescription);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        GamePublicDto gamePublicDtoResponse = mapper.readValue(response, GamePublicDto.class);
+
+        assertEquals(gamePublicDto.id(), gamePublicDtoResponse.id());
+        assertEquals(newTitle, gamePublicDtoResponse.title());
+        assertEquals(newDeveloper.toLowerCase(), gamePublicDtoResponse.developer().developerName());
+        assertEquals(newPrice, gamePublicDtoResponse.price());
+        assertEquals(newDescription, gamePublicDtoResponse.description());
+        assertEquals(newPlatforms.get(0).toLowerCase(), gamePublicDtoResponse.platforms().get(0).platformName());
+        assertEquals(newGenres.get(0).toLowerCase(), gamePublicDtoResponse.genres().get(0).genreName());
+        assertEquals(newReleaseDate, gamePublicDtoResponse.releaseDate());
+        assertEquals(0, gamePublicDtoResponse.reviews());
+        assertEquals(0, gamePublicDtoResponse.likes());
     }
+
+    @Test
+    @DisplayName("Test update game with invalid developer name and expect 404")
+    void testUpdateGameWithInvalidDeveloperName() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String newDeveloper = "Invalid Developer";
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, newDeveloper, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(DEVELOPER_NOT_FOUND_NAME + newDeveloper, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid genre name and expect 404")
+    void testUpdateGameWithInvalidGenreName() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String invalidGenre = "Invalid Genre";
+        genres.add(invalidGenre);
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developer, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(GENRE_NOT_FOUND_NAME + invalidGenre, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid platform name and expect 404")
+    void testUpdateGameWithInvalidPlatformName() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String invalidPlatform = "Invalid Platform";
+        platforms.add(invalidPlatform);
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developer, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(PLATFORM_NOT_FOUND_NAME + invalidPlatform, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid title and expect 400")
+    void testUpdateGameWithInvalidTitle() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String invalidTitle = "";
+        GameCreateDto gameCreateDto = new GameCreateDto(invalidTitle, releaseDate, developer, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertTrue(error.getMessage().contains(INVALID_TITLE));
+        assertEquals(400, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid description and expect 400")
+    void testUpdateGameWithInvalidDescription() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        String invalidDescription = "";
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developer, genres, platforms, price, invalidDescription);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertTrue(error.getMessage().contains(INVALID_DESCRIPTION));
+        assertEquals(400, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid price and expect 400")
+    void testUpdateGameWithInvalidPrice() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        double invalidPrice = -1;
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developer, genres, platforms, invalidPrice, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertTrue(error.getMessage().contains(INVALID_PRICE));
+        assertEquals(400, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid release date and expect 400")
+    void testUpdateGameWithInvalidReleaseDate() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        Date invalidReleaseDate = new Date(System.currentTimeMillis() + 10000);
+        GameCreateDto gameCreateDto = new GameCreateDto(title, invalidReleaseDate, developer, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
+        assertEquals(400, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update game with invalid id and expect 404")
+    void testUpdateGameWithInvalidId() throws Exception {
+        String invalidId = "9999999";
+        GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developer, genres, platforms, price, description);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + invalidId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(gameCreateDto)))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(GAME_NOT_FOUND + invalidId, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test delete game and expect 204")
+    void testDeleteGame() throws Exception {
+        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
+
+        mockMvc.perform(delete(API_PATH + "/" + gamePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        assertEquals(0, gameRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test delete game with invalid id and expect 404")
+    void testDeleteGameWithInvalidId() throws Exception {
+        String invalidId = "9999999";
+
+        String response = mockMvc.perform(delete(API_PATH + "/" + invalidId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(GAME_NOT_FOUND + invalidId, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
 
 }

@@ -13,6 +13,9 @@ public class Like {
     @ManyToOne
     private Media media;
 
+    public Like() {
+    }
+
     public Like(User user, Media media) {
         this.user = user;
         this.media = media;
