@@ -38,4 +38,8 @@ public class Platform {
     public void setGames(List<Game> games) {
         this.games = games;
     }
+
+    public void addGame(Game game) {
+        games.add(game);
+    }
 }

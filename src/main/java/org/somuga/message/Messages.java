@@ -32,6 +32,10 @@ public class Messages {
     public static final String DEVELOPER_ALREADY_EXISTS = "Developer already exists with this name: ";
     public static final String PLATFORM_ALREADY_EXISTS = "Platform already exists with this name: ";
     public static final String GENRE_ALREADY_EXISTS = "Genre already exists with this name: ";
+    public static final String INVALID_RELEASE_DATE = "Release date cannot be in the future";
+    public static final String INVALID_PRICE = "Price must be between 0 and 1000";
+    public static final String INVALID_DESCRIPTION = "Description field cannot be empty";
+    public static final String MAX_DESCRIPTION_CHARACTERS = "Description must be lower that 1000 characters";
 
 
     private Messages() {
