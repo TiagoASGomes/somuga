@@ -16,8 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.somuga.message.Messages.DEVELOPER_NOT_FOUND;
-import static org.somuga.message.Messages.INVALID_DEVELOPER_NAME;
+import static org.somuga.message.Messages.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -118,6 +117,27 @@ class DeveloperControllerTest {
         Error error = mapper.readValue(response, Error.class);
 
         assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
+        assertEquals(400, error.getStatus());
+        assertEquals("POST", error.getMethod());
+        assertEquals(API_PATH, error.getPath());
+    }
+
+    @Test
+    @DisplayName("Test create duplicate developer and expect 400")
+    void testCreateDuplicateDeveloper() throws Exception {
+        createDeveloper("Developer");
+
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer");
+
+        String response = mockMvc.perform(post(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(developer)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertTrue(error.getMessage().contains(DEVELOPER_ALREADY_EXISTS + developer.developerName().toLowerCase()));
         assertEquals(400, error.getStatus());
         assertEquals("POST", error.getMethod());
         assertEquals(API_PATH, error.getPath());

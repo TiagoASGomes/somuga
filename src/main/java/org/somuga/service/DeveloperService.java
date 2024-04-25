@@ -61,7 +61,7 @@ public class DeveloperService implements IDeveloperService {
     private void checkDuplicateDeveloperName(String developerName) throws DuplicateFieldException {
         try {
             findByDeveloperName(developerName);
-            throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS);
+            throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerName);
         } catch (DeveloperNotFoundException ignored) {
         }
     }
