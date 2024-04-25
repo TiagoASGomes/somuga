@@ -133,6 +133,6 @@ public class GameService implements IGameService {
 
     @Override
     public Game findById(Long id) throws GameNotFoundException {
-        return gameRepo.findById(id).orElseThrow(() -> new GameNotFoundException(GAME_NOT_FOUND));
+        return gameRepo.findById(id).orElseThrow(() -> new GameNotFoundException(GAME_NOT_FOUND + id));
     }
 }
