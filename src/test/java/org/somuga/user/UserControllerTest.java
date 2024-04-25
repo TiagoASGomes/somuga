@@ -149,7 +149,7 @@ public class UserControllerTest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(DUPLICATE_USERNAME, error.getMessage());
+        assertEquals(DUPLICATE_USERNAME + USERNAME, error.getMessage());
         assertEquals(400, error.getStatus());
         assertEquals(API_PATH, error.getPath());
         assertEquals("POST", error.getMethod());
@@ -168,7 +168,7 @@ public class UserControllerTest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(DUPLICATE_EMAIL, error.getMessage());
+        assertEquals(DUPLICATE_EMAIL + EMAIL, error.getMessage());
         assertEquals(400, error.getStatus());
         assertEquals(API_PATH, error.getPath());
         assertEquals("POST", error.getMethod());
@@ -232,7 +232,7 @@ public class UserControllerTest {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         mockMvc.perform(get(API_PATH))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -247,7 +247,7 @@ public class UserControllerTest {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         mockMvc.perform(get(API_PATH + "?page=0&size=4"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -290,7 +290,7 @@ public class UserControllerTest {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
         mockMvc.perform(delete(API_PATH + "/" + 1))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -385,7 +385,7 @@ public class UserControllerTest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(DUPLICATE_USERNAME, error.getMessage());
+        assertEquals(DUPLICATE_USERNAME + "NewName", error.getMessage());
         assertEquals(400, error.getStatus());
         assertEquals(API_PATH + "/" + id, error.getPath());
         assertEquals("PATCH", error.getMethod());
@@ -398,10 +398,10 @@ public class UserControllerTest {
         long id = createUser(USERNAME, EMAIL);
 
         mockMvc.perform(delete(API_PATH + "/" + id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         String response = mockMvc.perform(get(API_PATH + "/" + id))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
