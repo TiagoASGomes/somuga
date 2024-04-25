@@ -7,7 +7,7 @@ import static org.somuga.message.Messages.INVALID_PLATFORM_NAME;
 
 public record PlatformCreateDto(
         @NotBlank(message = INVALID_PLATFORM_NAME)
-        @Pattern(regexp = "^[a-zA-Z0-9 ]{3,50}$", message = INVALID_PLATFORM_NAME)
+        @Pattern(regexp = "^[a-zA-Z0-9 ]{1,50}$", message = INVALID_PLATFORM_NAME)
         String platformName
 ) {
 }
