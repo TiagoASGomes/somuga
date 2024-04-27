@@ -41,7 +41,7 @@ public class LikeControllerTest {
     private final String developerName = "Developer";
     private final String genreName = "genre";
     private final String platformName = "platforms";
-    private GamePublicDto game1;
+    private GamePublicDto game;
     private UserPublicDto user;
     @Autowired
     private MockMvc mockMvc;
@@ -80,7 +80,7 @@ public class LikeControllerTest {
         gameGenreRepository.save(new GameGenre(genreName.toLowerCase()));
         platformRepository.save(new Platform(platformName.toLowerCase()));
         user = createUser("UserName", "email@example.com");
-        game1 = createGame();
+        game = createGame();
     }
 
     public GamePublicDto createGame() throws Exception {
@@ -118,7 +118,7 @@ public class LikeControllerTest {
     @Test
     @DisplayName("Test create game like and expect status 201 and like")
     void testCreateGameLike() throws Exception {
-        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game1.id());
+        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game.id());
 
         String response = mockMvc.perform(post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +132,7 @@ public class LikeControllerTest {
         assertEquals(likeDto.userId(), like.user().id());
         assertEquals(likeDto.mediaId(), like.media().id());
         assertEquals(user.userName(), like.user().userName());
-        assertEquals(game1.title(), like.media().title());
+        assertEquals(game.title(), like.media().title());
     }
 
 
@@ -160,7 +160,7 @@ public class LikeControllerTest {
     @Test
     @DisplayName("Test create like with incorrect validation and expect status 400 and message")
     void testCreateLikeValidation() throws Exception {
-        LikeCreateDto likeDto = new LikeCreateDto(user.id() * -1, game1.id() * -1);
+        LikeCreateDto likeDto = new LikeCreateDto(user.id() * -1, game.id() * -1);
 
 
         String response = mockMvc.perform(post(API_PATH)
@@ -181,7 +181,7 @@ public class LikeControllerTest {
     @Test
     @DisplayName("Test create duplicate like and expect status 400 and message")
     void testCreateLikeDuplicate() throws Exception {
-        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game1.id());
+        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game.id());
 
 
         mockMvc.perform(post(API_PATH)
@@ -294,7 +294,7 @@ public class LikeControllerTest {
     @Test
     @DisplayName("Test delete like and expect status 200 and deleted like")
     void testDeleteLike() throws Exception {
-        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game1.id());
+        LikeCreateDto likeDto = new LikeCreateDto(user.id(), game.id());
 
         String response = mockMvc.perform(post(API_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
