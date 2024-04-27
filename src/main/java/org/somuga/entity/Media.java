@@ -11,7 +11,14 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Media {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "media_id_generator")
+    @TableGenerator(name = "media_id_generator",
+            table = "id_gen",
+            pkColumnName = "gen_name",
+            valueColumnName = "gen_val",
+            pkColumnValue = "media_id",
+            initialValue = 1,
+            allocationSize = 1)
     private Long id;
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;
