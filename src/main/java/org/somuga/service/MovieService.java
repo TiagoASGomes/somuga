@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static org.somuga.message.Messages.MOVIE_NOT_FOUND;
+
 @Service
 public class MovieService implements IMovieService {
 
@@ -48,6 +50,6 @@ public class MovieService implements IMovieService {
 
     @Override
     public Movie findById(Long id) throws MovieNotFoundException {
-        return null;
+        return movieRepo.findById(id).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND + id));
     }
 }
