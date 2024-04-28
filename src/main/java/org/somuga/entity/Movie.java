@@ -1,6 +1,7 @@
 package org.somuga.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 import java.util.Set;
@@ -9,22 +10,14 @@ import java.util.Set;
 @Table(name = "movies")
 public class Movie extends Media {
 
-    private Set<String> actors;
-    private String producer;
+    @ManyToMany(mappedBy = "movies")
+    private Set<MovieCrew> movieCrew;
 
-    public Set<String> getActors() {
-        return actors;
+    public Set<MovieCrew> getMovieCrew() {
+        return movieCrew;
     }
 
-    public void setActors(Set<String> actors) {
-        this.actors = actors;
-    }
-
-    public String getProducer() {
-        return producer;
-    }
-
-    public void setProducer(String producer) {
-        this.producer = producer;
+    public void setMovieCrew(Set<MovieCrew> movieCrew) {
+        this.movieCrew = movieCrew;
     }
 }
