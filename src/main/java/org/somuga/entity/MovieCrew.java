@@ -1,26 +1,40 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import org.somuga.enums.MovieRole;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.NaturalIdCache;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
-@Entity
+@Entity(name = "MovieCrew")
 @Table(name = "movie_crew")
+@NaturalIdCache
+@org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
 public class MovieCrew {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private MovieRole role;
-
+    @NaturalId
     private String name;
+    private Date birthDate;
 
-    private String character;
 
-    @ManyToMany
-    private Set<Movie> movies;
+    @OneToMany(mappedBy = "movieCrew",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<MovieCrewRole> roles = new ArrayList<>();
+
+    public MovieCrew() {
+    }
+
+    public MovieCrew(String name, Date birthDate) {
+        this.name = name;
+        this.birthDate = birthDate;
+    }
 
     public Long getId() {
         return id;
@@ -28,14 +42,6 @@ public class MovieCrew {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public MovieRole getRole() {
-        return role;
-    }
-
-    public void setRole(MovieRole role) {
-        this.role = role;
     }
 
     public String getName() {
@@ -46,19 +52,32 @@ public class MovieCrew {
         this.name = name;
     }
 
-    public String getCharacter() {
-        return character;
+    public Date getBirthDate() {
+        return birthDate;
     }
 
-    public void setCharacter(String character) {
-        this.character = character;
+    public void setBirthDate(Date birthDate) {
+        this.birthDate = birthDate;
     }
 
-    public Set<Movie> getMovies() {
-        return movies;
+    public List<MovieCrewRole> getRoles() {
+        return roles;
     }
 
-    public void setMovies(Set<Movie> movies) {
-        this.movies = movies;
+    public void setRoles(List<MovieCrewRole> roles) {
+        this.roles = roles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MovieCrew movieCrew = (MovieCrew) o;
+        return Objects.equals(id, movieCrew.id) && Objects.equals(name, movieCrew.name) && Objects.equals(birthDate, movieCrew.birthDate) && Objects.equals(roles, movieCrew.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, birthDate, roles);
     }
 }

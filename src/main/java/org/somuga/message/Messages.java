@@ -14,6 +14,7 @@ public class Messages {
     public static final String DEVELOPER_NOT_FOUND_NAME = "No developer found with name: ";
     public static final String GENRE_NOT_FOUND = "No genre found with id: ";
     public static final String GENRE_NOT_FOUND_NAME = "No genre found with name: ";
+    public static final String MOVIECREW_NOT_FOUND = "No crew member found with id: ";
     public static final String NON_EMPTY_USERNAME = "Username cannot be empty";
     public static final String INVALID_USERNAME = "Username must be between 4 and 20 characters, and can only contain letters, numbers, - and spaces";
     public static final String NON_EMPTY_EMAIL = "Email cannot be empty";
