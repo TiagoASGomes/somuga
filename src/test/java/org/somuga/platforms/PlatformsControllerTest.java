@@ -68,7 +68,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test create platform with empty name and expect 400")
+    @DisplayName("Test create platform with empty fullName and expect 400")
     void testCreatePlatformWithEmptyName() throws Exception {
         PlatformCreateDto platform = new PlatformCreateDto("");
 
@@ -87,7 +87,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test create platform with duplicate name and expect 400")
+    @DisplayName("Test create platform with duplicate fullName and expect 400")
     void testCreatePlatformWithDuplicateName() throws Exception {
         createPlatform("Test Platform");
 
@@ -108,7 +108,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test create platform with null name and expect 400")
+    @DisplayName("Test create platform with null fullName and expect 400")
     void testCreatePlatformWithNullName() throws Exception {
         PlatformCreateDto platform = new PlatformCreateDto(null);
 
@@ -127,7 +127,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test create platform with name longer than 50 characters and expect 400")
+    @DisplayName("Test create platform with fullName longer than 50 characters and expect 400")
     void testCreatePlatformWithLongName() throws Exception {
         PlatformCreateDto platform = new PlatformCreateDto("A".repeat(51));
 
@@ -226,7 +226,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test search platform by name and expect 200")
+    @DisplayName("Test search platform by fullName and expect 200")
     void testSearchPlatformByName() throws Exception {
         createPlatform("asgfsag Platform 1");
         createPlatform("Tesasgasgt Platform 2");
@@ -242,7 +242,7 @@ class PlatformsControllerTest {
     }
 
     @Test
-    @DisplayName("Test search platform by name with pagination and expect 200")
+    @DisplayName("Test search platform by fullName with pagination and expect 200")
     void testSearchPlatformByNameWithPagination() throws Exception {
         createPlatform("asgfsag Platform 1");
         createPlatform("Tesasgasgt Platform 2");

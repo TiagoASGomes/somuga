@@ -52,7 +52,7 @@ public class GameController {
         return new ResponseEntity<>(gameService.getByDeveloper(developerName, page), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/search/{fullName}")
     public ResponseEntity<List<GamePublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(gameService.searchByName(name, page), HttpStatus.OK);
     }

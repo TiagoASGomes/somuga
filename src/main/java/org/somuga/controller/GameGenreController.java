@@ -35,7 +35,7 @@ public class GameGenreController {
         return new ResponseEntity<>(gameGenreService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/search/{fullName}")
     public ResponseEntity<List<GameGenrePublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(gameGenreService.searchByName(name, page), HttpStatus.OK);
     }

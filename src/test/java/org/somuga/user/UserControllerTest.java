@@ -257,32 +257,32 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Test get users all by name with 3 matched and expect list with 3 users")
+    @DisplayName("Test get users all by fullName with 3 matched and expect list with 3 users")
     void testGetAllByName() throws Exception {
         for (int i = 0; i < 3; i++) {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
         createUser("Teste", "teste@example.com");
-        mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
+        mockMvc.perform(get(API_PATH + "/fullName/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(3)));
     }
 
     @Test
-    @DisplayName("Test get users all by name with 0 matches and expect empty list")
+    @DisplayName("Test get users all by fullName with 0 matches and expect empty list")
     void testGetAllByNameNoFound() throws Exception {
         for (int i = 0; i < 3; i++) {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
-        mockMvc.perform(get(API_PATH + "/name/NotFound"))
+        mockMvc.perform(get(API_PATH + "/fullName/NotFound"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
-    @DisplayName("Test get users all by name with 1 deleted user and expect list 2 users")
+    @DisplayName("Test get users all by fullName with 1 deleted user and expect list 2 users")
     void testGetAllByNameWithDeleted() throws Exception {
         long id = 1L;
         for (int i = 0; i < 3; i++) {
@@ -290,7 +290,7 @@ public class UserControllerTest {
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
+        mockMvc.perform(get(API_PATH + "/fullName/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));
@@ -370,7 +370,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Test update username with duplicate name and expect status 400 and message")
+    @DisplayName("Test update username with duplicate fullName and expect status 400 and message")
     void testUpdateUserNameDuplicateName() throws Exception {
         long id = createUser(USERNAME, EMAIL);
         createUser("NewName", "newemail@example.com");

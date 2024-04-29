@@ -11,6 +11,7 @@ import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.movie.MovieNotFoundException;
+import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.exception.platform.PlatformAlreadyExistsException;
 import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
@@ -41,7 +42,8 @@ public class SomugaExceptionHandler {
             LikeNotFoundException.class,
             DeveloperNotFoundException.class,
             GenreNotFoundException.class,
-            PlatformNotFoundException.class})
+            PlatformNotFoundException.class,
+            MovieCrewNotFoundException.class})
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(

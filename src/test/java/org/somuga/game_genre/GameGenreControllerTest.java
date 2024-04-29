@@ -66,7 +66,7 @@ class GameGenreControllerTest {
     }
 
     @Test
-    @DisplayName("Create a game genre with an empty genre name and expect a 400 status code")
+    @DisplayName("Create a game genre with an empty genre fullName and expect a 400 status code")
     void createGameGenreWithEmptyGenreName() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("");
 
@@ -85,7 +85,7 @@ class GameGenreControllerTest {
     }
 
     @Test
-    @DisplayName("Create a game genre with an invalid genre name and expect a 400 status code")
+    @DisplayName("Create a game genre with an invalid genre fullName and expect a 400 status code")
     void createGameGenreWithInvalidGenreName() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action!");
 
@@ -104,7 +104,7 @@ class GameGenreControllerTest {
     }
 
     @Test
-    @DisplayName("Create a game genre with a genre name that already exists and expect a 400 status code")
+    @DisplayName("Create a game genre with a genre fullName that already exists and expect a 400 status code")
     void createGameGenreWithDuplicateGenreName() throws Exception {
         createGameGenre("Action");
 
@@ -185,7 +185,7 @@ class GameGenreControllerTest {
     }
 
     @Test
-    @DisplayName("Test search by name and expect a 200 status code")
+    @DisplayName("Test search by fullName and expect a 200 status code")
     void searchGameGenreByName() throws Exception {
         createGameGenre("Action");
         createGameGenre("Adventure");
@@ -200,7 +200,7 @@ class GameGenreControllerTest {
     }
 
     @Test
-    @DisplayName("Test search by name with pagination and expect a 200 status code")
+    @DisplayName("Test search by fullName with pagination and expect a 200 status code")
     void searchGameGenreByNameWithPagination() throws Exception {
         createGameGenre("Action");
         createGameGenre("Adventure");

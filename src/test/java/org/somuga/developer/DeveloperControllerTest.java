@@ -66,7 +66,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test create developer with empty name and expect 400")
+    @DisplayName("Test create developer with empty fullName and expect 400")
     void testCreateDeveloperEmptyName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("");
 
@@ -85,7 +85,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test create developer with null name and expect 400")
+    @DisplayName("Test create developer with null fullName and expect 400")
     void testCreateDeveloperNullName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto(null);
 
@@ -104,7 +104,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test create developer with name containing special characters and expect 400")
+    @DisplayName("Test create developer with fullName containing special characters and expect 400")
     void testCreateDeveloperSpecialCharacters() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer!");
 
@@ -209,7 +209,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test get developer by name and expect 200")
+    @DisplayName("Test get developer by fullName and expect 200")
     void testGetDeveloperByName() throws Exception {
         createDeveloper("Developer1");
         createDeveloper("Developer2");
@@ -226,7 +226,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test get developer by name that does not exist and expect 200")
+    @DisplayName("Test get developer by fullName that does not exist and expect 200")
     void testGetDeveloperByNameNotFound() throws Exception {
         createDeveloper("Developer1");
         createDeveloper("Developer2");
@@ -243,7 +243,7 @@ class DeveloperControllerTest {
     }
 
     @Test
-    @DisplayName("Test get developer by name with pagination and expect 200")
+    @DisplayName("Test get developer by fullName with pagination and expect 200")
     void testGetDeveloperByNameWithPagination() throws Exception {
         createDeveloper("Developer1");
         createDeveloper("Developer2");

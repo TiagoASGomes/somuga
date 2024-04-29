@@ -35,7 +35,7 @@ public class PlatformController {
         return new ResponseEntity<>(platformService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/search/{fullName}")
     public ResponseEntity<List<PlatformPublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(platformService.searchByName(name, page), HttpStatus.OK);
     }

@@ -19,7 +19,7 @@ public class MovieCrew {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NaturalId
-    private String name;
+    private String fullName;
     private Date birthDate;
 
 
@@ -31,8 +31,8 @@ public class MovieCrew {
     public MovieCrew() {
     }
 
-    public MovieCrew(String name, Date birthDate) {
-        this.name = name;
+    public MovieCrew(String fullName, Date birthDate) {
+        this.fullName = fullName;
         this.birthDate = birthDate;
     }
 
@@ -44,12 +44,12 @@ public class MovieCrew {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public Date getBirthDate() {
@@ -73,11 +73,11 @@ public class MovieCrew {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MovieCrew movieCrew = (MovieCrew) o;
-        return Objects.equals(id, movieCrew.id) && Objects.equals(name, movieCrew.name) && Objects.equals(birthDate, movieCrew.birthDate) && Objects.equals(roles, movieCrew.roles);
+        return Objects.equals(id, movieCrew.id) && Objects.equals(fullName, movieCrew.fullName) && Objects.equals(birthDate, movieCrew.birthDate) && Objects.equals(roles, movieCrew.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, birthDate, roles);
+        return Objects.hash(id, fullName, birthDate, roles);
     }
 }
