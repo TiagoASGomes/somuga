@@ -11,8 +11,9 @@ public class MovieCrewConverter {
     public static MovieCrewPublicDto fromEntityToPublicDto(MovieCrew movieCrew) {
         return new MovieCrewPublicDto(
                 movieCrew.getId(),
-                movieCrew.getName(),
-                movieCrew.getBirthDate()
+                movieCrew.getFullName(),
+                movieCrew.getBirthDate(),
+                movieCrew.getRoles()
         );
     }
 
@@ -24,7 +25,7 @@ public class MovieCrewConverter {
 
     public static MovieCrew fromCreateDtoToEntity(MovieCrewCreateDto movieCrewCreateDto) {
         return new MovieCrew(
-                movieCrewCreateDto.name(),
+                movieCrewCreateDto.fullName(),
                 movieCrewCreateDto.birthDate()
         );
     }

@@ -138,7 +138,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test create game with invalid developer name and expect 404")
+    @DisplayName("Test create game with invalid developer fullName and expect 404")
     void testCreateGameWithInvalidDeveloperName() throws Exception {
         String developerName = "Invalid Developer";
         GameCreateDto gameCreateDto = new GameCreateDto(title, releaseDate, developerName, genres, platforms, price, description);
@@ -157,7 +157,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test create game with invalid genre name and expect 404")
+    @DisplayName("Test create game with invalid genre fullName and expect 404")
     void testCreateGameWithInvalidGenreName() throws Exception {
         String invalidGenre = "Invalid Genre";
         genres.add(invalidGenre);
@@ -177,7 +177,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test create game with invalid platform name and expect 404")
+    @DisplayName("Test create game with invalid platform fullName and expect 404")
     void testCreateGameWithInvalidPlatformName() throws Exception {
         String invalidPlatform = "Invalid Platform";
         platforms.add(invalidPlatform);
@@ -419,7 +419,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test search games by name and expect 200")
+    @DisplayName("Test search games by fullName and expect 200")
     void testSearchGamesByName() throws Exception {
         createGame("DifferentTitle", description, releaseDate, price, developer, genres, platforms);
         for (int i = 0; i < 3; i++) {
@@ -437,7 +437,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test search games by name with pagination and expect 200")
+    @DisplayName("Test search games by fullName with pagination and expect 200")
     void testSearchGamesByNameWithPagination() throws Exception {
         createGame("DifferentTitle", description, releaseDate, price, developer, genres, platforms);
         for (int i = 0; i < 3; i++) {
@@ -536,7 +536,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test update game with invalid developer name and expect 404")
+    @DisplayName("Test update game with invalid developer fullName and expect 404")
     void testUpdateGameWithInvalidDeveloperName() throws Exception {
         GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
 
@@ -556,7 +556,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test update game with invalid genre name and expect 404")
+    @DisplayName("Test update game with invalid genre fullName and expect 404")
     void testUpdateGameWithInvalidGenreName() throws Exception {
         GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
 
@@ -577,7 +577,7 @@ class GameControllerTest {
     }
 
     @Test
-    @DisplayName("Test update game with invalid platform name and expect 404")
+    @DisplayName("Test update game with invalid platform fullName and expect 404")
     void testUpdateGameWithInvalidPlatformName() throws Exception {
         GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms);
 

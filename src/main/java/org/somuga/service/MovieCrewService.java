@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.somuga.message.Messages.MOVIECREW_NOT_FOUND;
+import static org.somuga.message.Messages.MOVIE_CREW_NOT_FOUND;
 
 @Service
 public class MovieCrewService implements IMovieCrewService {
@@ -37,16 +37,17 @@ public class MovieCrewService implements IMovieCrewService {
 
     @Override
     public List<MovieCrewPublicDto> getByName(String name, Pageable page) {
-        return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByNameContainingIgnoreCase(name, page).toList());
+        return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByFullNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override
     public MovieCrewPublicDto create(MovieCrewCreateDto movieCrewDto) {
+//        TODO: Verificar se o nome e data de nascimento já existe
         MovieCrew movieCrew = MovieCrewConverter.fromCreateDtoToEntity(movieCrewDto);
         return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(movieCrew));
     }
 
     private MovieCrew findById(Long id) throws MovieCrewNotFoundException {
-        return movieCrewRepository.findById(id).orElseThrow(() -> new MovieCrewNotFoundException(MOVIECREW_NOT_FOUND + id));
+        return movieCrewRepository.findById(id).orElseThrow(() -> new MovieCrewNotFoundException(MOVIE_CREW_NOT_FOUND + id));
     }
 }
