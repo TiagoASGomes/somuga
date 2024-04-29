@@ -35,7 +35,7 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{fullName}")
+    @GetMapping("/search/{name}")
     public ResponseEntity<List<DeveloperPublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(developerService.searchByName(name, page), HttpStatus.OK);
     }

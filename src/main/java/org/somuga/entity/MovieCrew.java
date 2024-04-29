@@ -1,6 +1,7 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.NaturalIdCache;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
 @Entity(name = "MovieCrew")
 @Table(name = "movie_crew")
 @NaturalIdCache
-@org.hibernate.annotations.Cache(usage = org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE)
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class MovieCrew {
 
     @Id
@@ -21,8 +22,6 @@ public class MovieCrew {
     @NaturalId
     private String fullName;
     private Date birthDate;
-
-
     @OneToMany(mappedBy = "movieCrew",
             cascade = CascadeType.ALL,
             orphanRemoval = true)

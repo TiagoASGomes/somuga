@@ -263,7 +263,7 @@ public class UserControllerTest {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
         createUser("Teste", "teste@example.com");
-        mockMvc.perform(get(API_PATH + "/fullName/" + USERNAME))
+        mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(3)));
@@ -275,7 +275,7 @@ public class UserControllerTest {
         for (int i = 0; i < 3; i++) {
             createUser(USERNAME + i, "email" + i + "@example.com");
         }
-        mockMvc.perform(get(API_PATH + "/fullName/NotFound"))
+        mockMvc.perform(get(API_PATH + "/name/NotFound"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -290,7 +290,7 @@ public class UserControllerTest {
         }
         mockMvc.perform(delete(API_PATH + "/" + id))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get(API_PATH + "/fullName/" + USERNAME))
+        mockMvc.perform(get(API_PATH + "/name/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)));

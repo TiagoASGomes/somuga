@@ -32,7 +32,7 @@ public class UserController {
         return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/fullName/{fullName}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<List<UserPublicDto>> getAllByName(Pageable page, @PathVariable String name) {
         return new ResponseEntity<>(userService.getAllByName(page, name), HttpStatus.OK);
     }
