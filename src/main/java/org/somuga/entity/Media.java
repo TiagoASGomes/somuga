@@ -24,6 +24,7 @@ public abstract class Media {
     private MediaType mediaType;
     private String title;
     private Date releaseDate;
+    private String description;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
@@ -79,5 +80,13 @@ public abstract class Media {
 
     public void setReviews(Set<Review> reviews) {
         this.reviews = reviews;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

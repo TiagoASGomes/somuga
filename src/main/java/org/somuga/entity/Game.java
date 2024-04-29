@@ -8,7 +8,6 @@ import java.util.Set;
 @Table(name = "games")
 public class Game extends Media {
 
-    private String description;
     private Double price;
     @ManyToOne
     private Developer developer;
@@ -18,14 +17,6 @@ public class Game extends Media {
     @ManyToMany(mappedBy = "games",
             cascade = CascadeType.REMOVE)
     private Set<Platform> platforms;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public Set<Platform> getPlatforms() {
         return platforms;
