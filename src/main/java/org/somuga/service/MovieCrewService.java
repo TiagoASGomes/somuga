@@ -47,7 +47,7 @@ public class MovieCrewService implements IMovieCrewService {
         return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(movieCrew));
     }
 
-    private MovieCrew findById(Long id) throws MovieCrewNotFoundException {
+    public MovieCrew findById(Long id) throws MovieCrewNotFoundException {
         return movieCrewRepository.findById(id).orElseThrow(() -> new MovieCrewNotFoundException(MOVIE_CREW_NOT_FOUND + id));
     }
 }

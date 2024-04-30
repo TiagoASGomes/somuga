@@ -1,6 +1,6 @@
 package org.somuga.dto.movie_crew;
 
-import org.somuga.entity.MovieCrewRole;
+import org.somuga.dto.crew_role.CrewRolePublicDto;
 
 import java.util.Date;
 import java.util.List;
@@ -10,7 +10,6 @@ public record MovieCrewPublicDto(
         Long id,
         String name,
         Date birthDate,
-        List<MovieCrewRole> roles
-
+        List<CrewRolePublicDto> roles
 ) {
 }

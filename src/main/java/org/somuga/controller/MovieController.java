@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.exception.movie.MovieNotFoundException;
+import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -29,18 +30,28 @@ public class MovieController {
         return new ResponseEntity<>(movieService.getAll(page), HttpStatus.OK);
     }
 
+    @GetMapping("/search/{title}")
+    public ResponseEntity<List<MoviePublicDto>> searchByTitle(@PathVariable String title, Pageable page) {
+        return new ResponseEntity<>(movieService.searchByTitle(title, page), HttpStatus.OK);
+    }
+
+    @GetMapping("/crew/{crewId}")
+    public ResponseEntity<List<MoviePublicDto>> getByCrewId(@PathVariable Long crewId, Pageable page) {
+        return new ResponseEntity<>(movieService.getByCrewId(crewId, page), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<MoviePublicDto> getById(@PathVariable Long id) throws MovieNotFoundException {
         return new ResponseEntity<>(movieService.getById(id), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<MoviePublicDto> create(@Valid @RequestBody MovieCreateDto movie) {
+    public ResponseEntity<MoviePublicDto> create(@Valid @RequestBody MovieCreateDto movie) throws MovieCrewNotFoundException {
         return new ResponseEntity<>(movieService.create(movie), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException {
+    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException {
         return new ResponseEntity<>(movieService.update(id, movie), HttpStatus.OK);
     }
 
