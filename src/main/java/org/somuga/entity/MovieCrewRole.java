@@ -33,6 +33,7 @@ public class MovieCrewRole {
     public MovieCrewRole(MovieCrew movieCrew, Movie movie) {
         this.movieCrew = movieCrew;
         this.movie = movie;
+        this.id = new MovieCrewRoleId(movie.getId(), movieCrew.getId());
     }
 
     public MovieCrewRoleId getId() {

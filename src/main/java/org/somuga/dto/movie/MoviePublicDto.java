@@ -1,5 +1,6 @@
 package org.somuga.dto.movie;
 
+import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.media.MediaPublicDto;
 
 import java.util.Date;
@@ -9,8 +10,8 @@ public record MoviePublicDto(
         Long id,
         String title,
         Date releaseDate,
-        String mediaType,
-        List<String> actors,
-        String producer
+        String description,
+        Integer duration,
+        List<CrewRolePublicDto> crew
 ) implements MediaPublicDto {
 }

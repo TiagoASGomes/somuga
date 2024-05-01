@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.somuga.enums.MovieRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ import java.util.Objects;
 @Entity(name = "Movie")
 @Table(name = "movies")
 public class Movie extends Media {
+
+    private Integer duration;
 
     @OneToMany(mappedBy = "movie",
             cascade = CascadeType.ALL,
@@ -26,8 +29,18 @@ public class Movie extends Media {
         this.movieCrew = movieCrew;
     }
 
-    public void addMovieCrew(MovieCrew movieCrew) {
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public void addMovieCrew(MovieCrew movieCrew, MovieRole movieRole, String characterName) {
         MovieCrewRole movieCrewRole = new MovieCrewRole(movieCrew, this);
+        movieCrewRole.setMovieRole(movieRole);
+        movieCrewRole.setCharacterName(characterName);
         this.movieCrew.add(movieCrewRole);
         movieCrew.getRoles().add(movieCrewRole);
     }
@@ -50,11 +63,11 @@ public class Movie extends Media {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Movie movie = (Movie) o;
-        return Objects.equals(movieCrew, movie.movieCrew);
+        return Objects.equals(duration, movie.duration) && Objects.equals(movieCrew, movie.movieCrew);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(movieCrew);
+        return Objects.hash(duration, movieCrew);
     }
 }
