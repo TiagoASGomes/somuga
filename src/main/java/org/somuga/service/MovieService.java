@@ -6,9 +6,11 @@ import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrew;
+import org.somuga.enums.MediaType;
 import org.somuga.enums.MovieRole;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
+import org.somuga.repository.MovieCrewRoleRepository;
 import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +27,13 @@ public class MovieService implements IMovieService {
 
     private final MovieRepository movieRepo;
     private final MovieCrewService crewService;
+    private final MovieCrewRoleRepository movieCrewRoleRepo;
 
     @Autowired
-    public MovieService(MovieRepository movieRepo, MovieCrewService crewService) {
+    public MovieService(MovieRepository movieRepo, MovieCrewService crewService, MovieCrewRoleRepository movieCrewRoleRepo) {
         this.movieRepo = movieRepo;
         this.crewService = crewService;
+        this.movieCrewRoleRepo = movieCrewRoleRepo;
     }
 
     @Override
@@ -52,7 +56,6 @@ public class MovieService implements IMovieService {
         return MovieConverter.fromEntityToPublicDto(findById(id));
     }
 
-    @Override
     public MoviePublicDto create(MovieCreateDto movieDto) throws MovieCrewNotFoundException {
         Movie movie = MovieConverter.fromCreateDtoToEntity(movieDto);
         List<MovieCrew> crew = new ArrayList<>();
@@ -63,6 +66,7 @@ public class MovieService implements IMovieService {
             CrewRoleCreateDto roleDto = movieDto.crew().get(i);
             movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), roleDto.characterName());
         }
+        movie.setMediaType(MediaType.MOVIE);
         return MovieConverter.fromEntityToPublicDto(movieRepo.save(movie));
     }
 
