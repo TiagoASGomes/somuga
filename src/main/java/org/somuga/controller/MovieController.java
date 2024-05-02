@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
+import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.service.interfaces.IMovieService;
@@ -46,12 +47,12 @@ public class MovieController {
     }
 
     @PostMapping
-    public ResponseEntity<MoviePublicDto> create(@Valid @RequestBody MovieCreateDto movie) throws MovieCrewNotFoundException {
-        return new ResponseEntity<>(movieService.create(movie), HttpStatus.OK);
+    public ResponseEntity<MoviePublicDto> create(@Valid @RequestBody MovieCreateDto movie) throws MovieCrewNotFoundException, InvalidCrewRoleException {
+        return new ResponseEntity<>(movieService.create(movie), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException {
+    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException {
         return new ResponseEntity<>(movieService.update(id, movie), HttpStatus.OK);
     }
 
