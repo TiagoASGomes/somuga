@@ -41,10 +41,10 @@ public class Messages {
     public static final String INVALID_NAME_SIZE = "Name must be between 1 and 50 characters";
     public static final String INVALID_BIRTH_DATE = "Birth date must be in the past";
     public static final String INVALID_MOVIE_ROLE = "Invalid movie role";
-    public static final String INVALID_CHARACTER_NAME = "Character name cannot be empty";
+    public static final String INVALID_CHARACTER_NAME = "Character name must be lower than 255 characters";
     public static final String INVALID_DURATION = "Duration must be between 1 and 1440 minutes";
-    public static final String INVALID_CREW_ROLE = "Crew cannot be null";
-
+    public static final String INVALID_CREW_ROLE = "Crew cannot be empty";
+    public static final String MAX_TITLE_CHARACTERS = "Title must be lower than 255 characters";
 
     private Messages() {
     }

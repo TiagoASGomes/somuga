@@ -10,6 +10,7 @@ import org.somuga.exception.game_genre.GenreNotFoundException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
+import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.exception.platform.PlatformAlreadyExistsException;
@@ -59,7 +60,8 @@ public class SomugaExceptionHandler {
             AlreadyLikedException.class,
             AlreadyReviewedException.class,
             GenreAlreadyExistsException.class,
-            PlatformAlreadyExistsException.class})
+            PlatformAlreadyExistsException.class,
+            InvalidCrewRoleException.class})
     public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
         logger.error(e.getMessage());
         return new ResponseEntity<>(new Error(

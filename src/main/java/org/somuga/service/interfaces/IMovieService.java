@@ -3,6 +3,7 @@ package org.somuga.service.interfaces;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
+import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +20,9 @@ public interface IMovieService {
 
     MoviePublicDto getById(Long id) throws MovieNotFoundException;
 
-    MoviePublicDto create(MovieCreateDto movie) throws MovieCrewNotFoundException;
+    MoviePublicDto create(MovieCreateDto movie) throws MovieCrewNotFoundException, InvalidCrewRoleException;
 
-    MoviePublicDto update(Long id, MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException;
+    MoviePublicDto update(Long id, MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException;
 
     void delete(Long id) throws MovieNotFoundException;
 
