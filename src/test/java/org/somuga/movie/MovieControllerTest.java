@@ -471,5 +471,42 @@ class MovieControllerTest {
         assertEquals(crew.size(), updatedMovie.crew().size());
     }
 
+    @Test
+    @DisplayName("Test update movie invalid id and expect status 404")
+    void testUpdateMovieInvalidId() throws Exception {
+        List<CrewRoleCreateDto> crew = createAllRoles();
+        String newTitle = "New Title";
+        Date newReleaseDate = new Date();
+        String newDescription = "New Description";
+        Integer newDuration = 150;
+        crew.remove(3);
+        crew.remove(2);
+
+        MovieCreateDto movieCreateDto = new MovieCreateDto(newTitle, newReleaseDate, newDescription, newDuration, crew);
+
+        String response = mockMvc.perform(put(API_PATH + "/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(movieCreateDto)))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(MOVIE_NOT_FOUND + 1, error.getMessage());
+        assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test delete movie and expect status 204")
+    void testDeleteMovie() throws Exception {
+        MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles());
+
+        mockMvc.perform(delete(API_PATH + "/" + moviePublicDto.id()))
+                .andExpect(status().isNoContent());
+
+        assertEquals(0, movieRepository.count());
+        assertEquals(0, movieCrewRoleRepository.count());
+    }
+
 
 }

@@ -95,21 +95,6 @@ public class MovieService implements IMovieService {
         return MovieConverter.fromEntityToPublicDto(movieRepo.save(movie));
     }
 
-    private List<CrewRoleCreateDto> deleteOrphanedCrew(Movie movie, List<CrewRoleCreateDto> crew) {
-        List<CrewRoleCreateDto> newCrew = crew;
-        List<MovieCrewRole> toDelete = new ArrayList<>();
-        for (MovieCrewRole role : movie.getMovieCrew()) {
-            if (crew.stream().noneMatch(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()))) {
-                movieCrewRoleRepo.delete(role);
-                toDelete.add(role);
-            } else {
-                newCrew.removeIf(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()));
-            }
-        }
-        movie.getMovieCrew().removeAll(toDelete);
-        return newCrew;
-    }
-
 
     @Override
     public void delete(Long id) throws MovieNotFoundException {
@@ -139,5 +124,20 @@ public class MovieService implements IMovieService {
                 throw new InvalidCrewRoleException(INVALID_MOVIE_ROLE);
             }
         }
+    }
+
+    private List<CrewRoleCreateDto> deleteOrphanedCrew(Movie movie, List<CrewRoleCreateDto> crew) {
+        List<CrewRoleCreateDto> newCrew = crew;
+        List<MovieCrewRole> toDelete = new ArrayList<>();
+        for (MovieCrewRole role : movie.getMovieCrew()) {
+            if (crew.stream().noneMatch(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()))) {
+                movieCrewRoleRepo.delete(role);
+                toDelete.add(role);
+            } else {
+                newCrew.removeIf(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()));
+            }
+        }
+        movie.getMovieCrew().removeAll(toDelete);
+        return newCrew;
     }
 }
