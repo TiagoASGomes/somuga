@@ -9,6 +9,7 @@ import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.MovieCrew;
 import org.somuga.repository.MovieCrewRepository;
+import org.somuga.repository.MovieCrewRoleRepository;
 import org.somuga.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,8 +25,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.somuga.message.Messages.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -47,6 +47,8 @@ class MovieControllerTest {
     private MovieRepository movieRepository;
     @Autowired
     private MovieCrewRepository movieCrewRepository;
+    @Autowired
+    private MovieCrewRoleRepository movieCrewRoleRepository;
 
     @BeforeAll
     public static void setUpMapper() {
@@ -438,6 +440,35 @@ class MovieControllerTest {
 
         assertTrue(error.getMessage().contains(MOVIE_NOT_FOUND));
         assertEquals(404, error.getStatus());
+    }
+
+    @Test
+    @DisplayName("Test update movie and expect status 200")
+    void testUpdateMovie() throws Exception {
+        List<CrewRoleCreateDto> crew = createAllRoles();
+        MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crew);
+        String newTitle = "New Title";
+        Date newReleaseDate = new Date();
+        String newDescription = "New Description";
+        Integer newDuration = 150;
+        crew.remove(3);
+        crew.remove(2);
+
+        MovieCreateDto movieCreateDto = new MovieCreateDto(newTitle, newReleaseDate, newDescription, newDuration, crew);
+
+        String response = mockMvc.perform(put(API_PATH + "/" + moviePublicDto.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(movieCreateDto)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MoviePublicDto updatedMovie = mapper.readValue(response, MoviePublicDto.class);
+
+        assertEquals(newTitle, updatedMovie.title());
+        assertEquals(newReleaseDate, updatedMovie.releaseDate());
+        assertEquals(newDescription, updatedMovie.description());
+        assertEquals(newDuration, updatedMovie.duration());
+        assertEquals(crew.size(), updatedMovie.crew().size());
     }
 
 

@@ -45,17 +45,8 @@ public class Movie extends Media {
         movieCrew.getRoles().add(movieCrewRole);
     }
 
-    public void removeMovieCrew(MovieCrew movieCrew) {
-        for (MovieCrewRole movieCrewRole : this.movieCrew) {
-            if (movieCrewRole.getMovie().equals(this) &&
-                    movieCrewRole.getMovieCrew().equals(movieCrew)) {
-                this.movieCrew.remove(movieCrewRole);
-                movieCrew.getRoles().remove(movieCrewRole);
-                movieCrewRole.setMovie(null);
-                movieCrewRole.setMovieCrew(null);
-            }
-
-        }
+    public void removeMovieCrew(MovieCrewRole movieCrew) {
+        this.movieCrew.remove(movieCrew);
     }
 
     @Override
