@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.message.Messages.ALREADY_LIKED;
-import static org.somuga.message.Messages.LIKE_NOT_FOUND;
+import static org.somuga.util.message.Messages.ALREADY_LIKED;
+import static org.somuga.util.message.Messages.LIKE_NOT_FOUND;
 
 @Service
 public class LikeService implements ILikeService {

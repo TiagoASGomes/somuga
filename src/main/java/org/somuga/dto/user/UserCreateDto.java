@@ -3,7 +3,7 @@ package org.somuga.dto.user;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.util.message.Messages.*;
 
 public record UserCreateDto(
 

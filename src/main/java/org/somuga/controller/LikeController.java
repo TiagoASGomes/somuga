@@ -27,23 +27,24 @@ public class LikeController {
         this.likeService = likeService;
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/public/user/{userId}")
     public ResponseEntity<List<LikePublicDto>> getAllByUserId(@PathVariable Long userId, Pageable page) {
         return new ResponseEntity<>(likeService.getAllByUserId(userId, page), HttpStatus.OK);
     }
 
-    @GetMapping("/media/{mediaId}")
+    @GetMapping("/public/media/{mediaId}")
     public ResponseEntity<List<LikePublicDto>> getAllByMediaId(@PathVariable Long mediaId, Pageable page) {
         return new ResponseEntity<>(likeService.getAllByMediaId(mediaId, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<LikePublicDto> create(@Valid @RequestBody LikeCreateDto like) throws UserNotFoundException, AlreadyLikedException, MediaNotFoundException {
         return new ResponseEntity<>(likeService.create(like), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws LikeNotFoundException {
+        //  TODO check if user created the like
         likeService.delete(id);
         return ResponseEntity.noContent().build();
     }

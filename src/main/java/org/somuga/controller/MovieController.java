@@ -26,38 +26,46 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<MoviePublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(movieService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{title}")
+    @GetMapping("/public/search/{title}")
     public ResponseEntity<List<MoviePublicDto>> searchByTitle(@PathVariable String title, Pageable page) {
         return new ResponseEntity<>(movieService.searchByTitle(title, page), HttpStatus.OK);
     }
 
-    @GetMapping("/crew/{crewId}")
+    @GetMapping("/public/crew/{crewId}")
     public ResponseEntity<List<MoviePublicDto>> getByCrewId(@PathVariable Long crewId, Pageable page) {
         return new ResponseEntity<>(movieService.getByCrewId(crewId, page), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<MoviePublicDto> getById(@PathVariable Long id) throws MovieNotFoundException {
         return new ResponseEntity<>(movieService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<MoviePublicDto> create(@Valid @RequestBody MovieCreateDto movie) throws MovieCrewNotFoundException, InvalidCrewRoleException {
         return new ResponseEntity<>(movieService.create(movie), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/private/{id}")
     public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException {
+        // TODO check if user created the movie
         return new ResponseEntity<>(movieService.update(id, movie), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException {
+        // TODO check if user created the movie
+        movieService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws MovieNotFoundException {
         movieService.delete(id);
         return ResponseEntity.noContent().build();
     }

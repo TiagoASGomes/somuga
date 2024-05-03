@@ -3,7 +3,7 @@ package org.somuga.dto.platform;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-import static org.somuga.message.Messages.INVALID_PLATFORM_NAME;
+import static org.somuga.util.message.Messages.INVALID_PLATFORM_NAME;
 
 public record PlatformCreateDto(
         @NotBlank(message = INVALID_PLATFORM_NAME)

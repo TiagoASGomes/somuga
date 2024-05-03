@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.util.message.Messages.*;
 
 @Service
 public class UserService implements IUserService {

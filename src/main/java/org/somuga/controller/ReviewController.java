@@ -28,33 +28,41 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<ReviewPublicDto> getById(@PathVariable Long id) throws ReviewNotFoundException {
         return new ResponseEntity<>(reviewService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/public/user/{userId}")
     public ResponseEntity<List<ReviewPublicDto>> getAllByUserId(@PathVariable Long userId, Pageable page) {
         return new ResponseEntity<>(reviewService.getAllByUserId(userId, page), HttpStatus.OK);
     }
 
-    @GetMapping("/media/{mediaId}")
+    @GetMapping("/public/media/{mediaId}")
     public ResponseEntity<List<ReviewPublicDto>> getAllByMediaId(@PathVariable Long mediaId, Pageable page) {
         return new ResponseEntity<>(reviewService.getAllByMediaId(mediaId, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<ReviewPublicDto> create(@Valid @RequestBody ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException {
         return new ResponseEntity<>(reviewService.create(review), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/private/{id}")
     public ResponseEntity<ReviewPublicDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewUpdateDto review) throws ReviewNotFoundException {
+        // TODO check if user created
         return new ResponseEntity<>(reviewService.updateReview(id, review), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException {
+        // TODO check if user created
+        reviewService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) throws ReviewNotFoundException {
         reviewService.delete(id);
         return ResponseEntity.noContent().build();
     }

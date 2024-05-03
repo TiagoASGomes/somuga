@@ -25,22 +25,22 @@ public class MovieCrewController {
     }
 
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(movieCrewService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<MovieCrewPublicDto> getById(@PathVariable Long id) throws MovieCrewNotFoundException {
         return new ResponseEntity<>(movieCrewService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{fullName}")
+    @GetMapping("/public/search/{fullName}")
     public ResponseEntity<List<MovieCrewPublicDto>> getByName(@PathVariable String fullName, Pageable page) {
         return new ResponseEntity<>(movieCrewService.getByName(fullName, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<MovieCrewPublicDto> create(@Valid @RequestBody MovieCrewCreateDto movieCrew) {
         return new ResponseEntity<>(movieCrewService.create(movieCrew), HttpStatus.CREATED);
     }

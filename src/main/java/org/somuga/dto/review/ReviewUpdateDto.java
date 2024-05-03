@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-import static org.somuga.message.Messages.INVALID_SCORE;
-import static org.somuga.message.Messages.MAX_REVIEW_CHARACTERS;
+import static org.somuga.util.message.Messages.INVALID_SCORE;
+import static org.somuga.util.message.Messages.MAX_REVIEW_CHARACTERS;
 
 public record ReviewUpdateDto(
         @Min(value = 1, message = INVALID_SCORE)
