@@ -33,5 +33,6 @@ public interface IGameService {
 
     Media findById(Long id) throws GameNotFoundException;
 
+    void adminDelete(Long id) throws GameNotFoundException;
 }
 

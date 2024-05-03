@@ -27,33 +27,41 @@ public class UserController {
         this.userService = service;
     }
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<UserPublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("/public/name/{name}")
     public ResponseEntity<List<UserPublicDto>> getAllByName(Pageable page, @PathVariable String name) {
         return new ResponseEntity<>(userService.getAllByName(page, name), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<UserPublicDto> getById(@PathVariable Long id) throws UserNotFoundException {
         return new ResponseEntity<>(userService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<UserPublicDto> create(@Valid @RequestBody UserCreateDto user) throws DuplicateFieldException {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/private/{id}")
     public ResponseEntity<UserPublicDto> updateUserName(@PathVariable Long id, @Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException {
+        //TODO check if the user is the same as the one in the token
         return new ResponseEntity<>(userService.updateUserName(id, user), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws UserNotFoundException {
+        //TODO check if the user is the same as the one in the token
+        userService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws UserNotFoundException {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.util.message.Messages.*;
 
 public record ReviewCreateDto(
         @Min(value = 0, message = ID_GREATER_THAN_0)

@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.somuga.message.Messages.GAME_NOT_FOUND;
+import static org.somuga.util.message.Messages.GAME_NOT_FOUND;
 
 @Service
 public class GameService implements IGameService {
@@ -107,6 +107,7 @@ public class GameService implements IGameService {
 
     @Override
     public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException {
+        //TODO check if user created the game
         Game game = findById(id);
         Developer developer = developerService.findByDeveloperName(gameDto.developerName());
         Set<GameGenre> genres = new HashSet<>();
@@ -129,6 +130,7 @@ public class GameService implements IGameService {
 
     @Override
     public void delete(Long id) throws GameNotFoundException {
+        //TODO check if user created the game
         findById(id);
         gameRepo.deleteById(id);
     }
@@ -136,5 +138,11 @@ public class GameService implements IGameService {
     @Override
     public Game findById(Long id) throws GameNotFoundException {
         return gameRepo.findById(id).orElseThrow(() -> new GameNotFoundException(GAME_NOT_FOUND + id));
+    }
+
+    @Override
+    public void adminDelete(Long id) throws GameNotFoundException {
+        findById(id);
+        gameRepo.deleteById(id);
     }
 }

@@ -1,4 +1,4 @@
-package org.somuga.message;
+package org.somuga.util.message;
 
 public class Messages {
 

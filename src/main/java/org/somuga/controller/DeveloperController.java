@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/developer")
+@CrossOrigin(origins = "*")
 public class DeveloperController {
 
     private final IDeveloperService developerService;
@@ -25,22 +26,22 @@ public class DeveloperController {
         this.developerService = developerService;
     }
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<DeveloperPublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(developerService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<DeveloperPublicDto> getById(@PathVariable Long id) throws DeveloperNotFoundException {
         return new ResponseEntity<>(developerService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/public/search/{name}")
     public ResponseEntity<List<DeveloperPublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(developerService.searchByName(name, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<DeveloperPublicDto> create(@Valid @RequestBody DeveloperCreateDto developerDto) throws DuplicateFieldException {
         return new ResponseEntity<>(developerService.create(developerDto), HttpStatus.CREATED);
     }

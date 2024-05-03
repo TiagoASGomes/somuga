@@ -25,22 +25,23 @@ public class GameGenreController {
         this.gameGenreService = gameGenreService;
     }
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<GameGenrePublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(gameGenreService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<GameGenrePublicDto> getById(@PathVariable Long id) throws GenreNotFoundException {
         return new ResponseEntity<>(gameGenreService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/public/search/{name}")
     public ResponseEntity<List<GameGenrePublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(gameGenreService.searchByName(name, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    //    TODO change to admin
+    @PostMapping("/private")
     public ResponseEntity<GameGenrePublicDto> create(@Valid @RequestBody GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
         return new ResponseEntity<>(gameGenreService.create(genreDto), HttpStatus.CREATED);
     }

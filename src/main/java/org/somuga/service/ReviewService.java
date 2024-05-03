@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.message.Messages.ALREADY_REVIEWED;
-import static org.somuga.message.Messages.REVIEW_NOT_FOUND;
+import static org.somuga.util.message.Messages.ALREADY_REVIEWED;
+import static org.somuga.util.message.Messages.REVIEW_NOT_FOUND;
 
 @Service
 public class ReviewService implements IReviewService {

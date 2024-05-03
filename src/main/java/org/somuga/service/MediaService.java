@@ -8,7 +8,7 @@ import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static org.somuga.message.Messages.MEDIA_NOT_FOUND;
+import static org.somuga.util.message.Messages.MEDIA_NOT_FOUND;
 
 @Service
 public class MediaService implements IMediaService {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.somuga.message.Messages.MOVIE_CREW_NOT_FOUND;
+import static org.somuga.util.message.Messages.MOVIE_CREW_NOT_FOUND;
 
 @Service
 public class MovieCrewService implements IMovieCrewService {

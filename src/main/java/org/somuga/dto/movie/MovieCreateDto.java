@@ -6,7 +6,7 @@ import org.somuga.dto.crew_role.CrewRoleCreateDto;
 import java.util.Date;
 import java.util.List;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.util.message.Messages.*;
 
 public record MovieCreateDto(
         @NotBlank(message = INVALID_TITLE)

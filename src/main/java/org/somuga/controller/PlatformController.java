@@ -25,23 +25,24 @@ public class PlatformController {
         this.platformService = platformService;
     }
 
-    @GetMapping
+    @GetMapping("/public")
     public ResponseEntity<List<PlatformPublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(platformService.getAll(page), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<PlatformPublicDto> getById(@PathVariable Long id) throws PlatformNotFoundException {
         return new ResponseEntity<>(platformService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/search/{name}")
+    @GetMapping("/public/search/{name}")
     public ResponseEntity<List<PlatformPublicDto>> searchByName(@PathVariable String name, Pageable page) {
         return new ResponseEntity<>(platformService.searchByName(name, page), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/private")
     public ResponseEntity<PlatformPublicDto> create(@Valid @RequestBody PlatformCreateDto platformDto) throws PlatformAlreadyExistsException {
+//         TODO change to admin
         return new ResponseEntity<>(platformService.create(platformDto), HttpStatus.CREATED);
     }
 

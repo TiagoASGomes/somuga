@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.Date;
 
-import static org.somuga.message.Messages.*;
+import static org.somuga.util.message.Messages.*;
 
 public record MovieCrewCreateDto(
         @NotBlank(message = INVALID_NAME)
