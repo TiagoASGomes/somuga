@@ -76,7 +76,7 @@ public class LikeControllerTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        developerRepository.save(new Developer(developerName.toLowerCase()));
+        developerRepository.save(new Developer(developerName, null));
         gameGenreRepository.save(new GameGenre(genreName.toLowerCase()));
         platformRepository.save(new Platform(platformName.toLowerCase()));
         user = createUser("UserName", "email@example.com");
