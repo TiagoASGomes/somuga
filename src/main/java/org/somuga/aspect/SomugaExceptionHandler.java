@@ -3,6 +3,7 @@ package org.somuga.aspect;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreAlreadyExistsException;
@@ -90,5 +91,17 @@ public class SomugaExceptionHandler {
                 request.getMethod(),
                 new Date()
         ), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidPermissionException.class)
+    public ResponseEntity<Error> handleForbidden(Exception e, HttpServletRequest request) {
+        logger.error(e.getMessage());
+        return new ResponseEntity<>(new Error(
+                e.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.FORBIDDEN.value(),
+                request.getMethod(),
+                new Date()
+        ), HttpStatus.FORBIDDEN);
     }
 }

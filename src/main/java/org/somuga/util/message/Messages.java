@@ -45,6 +45,7 @@ public class Messages {
     public static final String INVALID_DURATION = "Duration must be between 1 and 1440 minutes";
     public static final String INVALID_CREW_ROLE = "Crew cannot be empty";
     public static final String MAX_TITLE_CHARACTERS = "Title must be lower than 255 characters";
+    public static final String UNAUTHORIZED_UPDATE = "You are not authorized to update this entity because you are not the creator";
 
     private Messages() {
     }

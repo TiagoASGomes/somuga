@@ -33,8 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.somuga.util.message.Messages.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -44,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class DeveloperControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private final String USER = "google-auth2|1234567890";
     private final String PRIVATE_API_PATH = "/api/v1/developer/private";
     private final String PUBLIC_API_PATH = "/api/v1/developer/public";
     MockMvc mockMvc;
@@ -69,13 +69,13 @@ public class DeveloperControllerTest {
     }
 
     public DeveloperPublicDto createDeveloper(String name, List<String> socials) {
-        Developer developer = new Developer(name, socials);
+        Developer developer = new Developer(name, socials, USER);
 
         return DeveloperConverter.fromEntityToPublicDto(developerRepository.save(developer));
     }
 
     @Test
-    @WithMockUser(username = "user")
+    @WithMockUser(username = USER)
     @DisplayName("Test create developer and expect 201")
     public void testCreateDeveloperAuthorized() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
@@ -106,7 +106,7 @@ public class DeveloperControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user")
+    @WithMockUser(username = USER)
     @DisplayName("Test create developer with empty fullName and expect 400")
     public void testCreateDeveloperEmptyName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("", List.of("twitter.com/developer", "github.com/developer"));
@@ -127,7 +127,7 @@ public class DeveloperControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user")
+    @WithMockUser(username = USER)
     @DisplayName("Test create developer with null fullName and expect 400")
     public void testCreateDeveloperNullName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto(null, List.of("twitter.com/developer", "github.com/developer"));
@@ -148,7 +148,7 @@ public class DeveloperControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user")
+    @WithMockUser(username = USER)
     @DisplayName("Test create developer with fullName containing special characters and expect 400")
     public void testCreateDeveloperSpecialCharacters() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
@@ -169,7 +169,7 @@ public class DeveloperControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user")
+    @WithMockUser(username = USER)
     @DisplayName("Test create duplicate developer and expect 400")
     public void testCreateDuplicateDeveloper() throws Exception {
         createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
@@ -305,6 +305,62 @@ public class DeveloperControllerTest {
         DeveloperPublicDto[] developers = mapper.readValue(response, DeveloperPublicDto[].class);
 
         assertEquals(2, developers.length);
+    }
+
+    @Test
+    @WithMockUser(username = USER)
+    @DisplayName("Test update developer and expect 200")
+    public void testUpdateDeveloper() throws Exception {
+        DeveloperPublicDto developer = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+
+        DeveloperCreateDto developerUpdate = new DeveloperCreateDto("DeveloperUpdated", List.of("twitter.com/developer", "github.com/developer"));
+
+        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + developer.id())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(developerUpdate)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
+
+        assertEquals(developerUpdate.developerName(), developerPublicDto.developerName());
+        assertEquals(developer.id(), developerPublicDto.id());
+    }
+
+    @Test
+    @DisplayName("Test update developer without authorization and expect 401")
+    public void testUpdateDeveloperUnauthorized() throws Exception {
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+
+        mockMvc.perform(put(PRIVATE_API_PATH + "/1")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(developer)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "different-user|1234567890")
+    @DisplayName("Test update developer created by different user and expect 403")
+    public void testUpdateDeveloperDifferentUser() throws Exception {
+        DeveloperPublicDto developer = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+
+        DeveloperCreateDto developerUpdate = new DeveloperCreateDto("DeveloperUpdated", List.of("twitter.com/developer", "github.com/developer"));
+
+        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + developer.id())
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(developerUpdate)))
+                .andExpect(status().isForbidden())
+                .andReturn().getResponse().getContentAsString();
+
+        Error error = mapper.readValue(response, Error.class);
+
+        assertEquals(UNAUTHORIZED_UPDATE, error.getMessage());
+        assertEquals(403, error.getStatus());
+        assertEquals("PUT", error.getMethod());
+        assertEquals(PRIVATE_API_PATH + "/" + developer.id(), error.getPath());
     }
 
 

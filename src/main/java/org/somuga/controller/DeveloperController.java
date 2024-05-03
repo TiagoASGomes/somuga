@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.service.interfaces.IDeveloperService;
@@ -47,7 +48,7 @@ public class DeveloperController {
     }
 
     @PutMapping("/private/{id}")
-    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
+    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException {
         return new ResponseEntity<>(developerService.update(id, developerDto), HttpStatus.OK);
     }
 

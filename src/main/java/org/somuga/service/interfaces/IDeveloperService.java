@@ -3,6 +3,7 @@ package org.somuga.service.interfaces;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.springframework.data.domain.Pageable;
@@ -21,5 +22,5 @@ public interface IDeveloperService {
 
     Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException;
 
-    DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException;
+    DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException;
 }
