@@ -46,4 +46,9 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.create(developerDto), HttpStatus.CREATED);
     }
 
+    @PutMapping("/private/{id}")
+    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
+        return new ResponseEntity<>(developerService.update(id, developerDto), HttpStatus.OK);
+    }
+
 }

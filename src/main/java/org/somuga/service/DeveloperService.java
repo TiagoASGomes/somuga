@@ -38,30 +38,41 @@ public class DeveloperService implements IDeveloperService {
 
     @Override
     public List<DeveloperPublicDto> searchByName(String name, Pageable page) {
-        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findByDeveloperNameContaining(name.toLowerCase(), page).toList());
+        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findByDeveloperNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override
     public DeveloperPublicDto create(DeveloperCreateDto developerDto) throws DuplicateFieldException {
-        checkDuplicateDeveloperName(developerDto.developerName().toLowerCase());
-        Developer developer = new Developer(developerDto.developerName().toLowerCase());
+        if (checkDuplicateDeveloperName(developerDto.developerName())) {
+            throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerDto.developerName());
+        }
+        Developer developer = new Developer(developerDto.developerName(), developerDto.socials());
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 
     @Override
     public Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException {
-        return developerRepo.findByDeveloperName(developerName.toLowerCase()).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND_NAME + developerName));
+        return developerRepo.findByDeveloperNameIgnoreCase(developerName).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND_NAME + developerName));
+    }
+
+    @Override
+    public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
+        Developer developer = findById(id);
+        developer.setDeveloperName(developerDto.developerName());
+        developer.setSocials(developerDto.socials());
+        return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 
     private Developer findById(Long id) throws DeveloperNotFoundException {
         return developerRepo.findById(id).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND + id));
     }
 
-    private void checkDuplicateDeveloperName(String developerName) throws DuplicateFieldException {
+    private boolean checkDuplicateDeveloperName(String developerName) {
         try {
             findByDeveloperName(developerName);
-            throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerName);
+            return true;
         } catch (DeveloperNotFoundException ignored) {
+            return false;
         }
     }
 }

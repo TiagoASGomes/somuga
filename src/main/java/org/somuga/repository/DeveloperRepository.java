@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface DeveloperRepository extends JpaRepository<Developer, Long> {
 
-    Page<Developer> findByDeveloperNameContaining(String developerName, Pageable page);
+    Page<Developer> findByDeveloperNameContainingIgnoreCase(String developerName, Pageable page);
 
-    Optional<Developer> findByDeveloperName(String developerName);
+    Optional<Developer> findByDeveloperNameIgnoreCase(String developerName);
 }

@@ -10,7 +10,8 @@ public class DeveloperConverter {
     public static DeveloperPublicDto fromEntityToPublicDto(Developer developer) {
         return new DeveloperPublicDto(
                 developer.getId(),
-                developer.getDeveloperName()
+                developer.getDeveloperName(),
+                developer.getSocials()
         );
     }
 
