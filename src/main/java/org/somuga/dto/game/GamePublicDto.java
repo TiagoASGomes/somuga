@@ -18,6 +18,8 @@ public record GamePublicDto(
         Double price,
         String description,
         int reviews,
-        int likes
+        int likes,
+        String mediaUrl,
+        String imageUrl
 ) implements MediaPublicDto {
 }

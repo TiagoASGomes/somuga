@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
@@ -12,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class GameController {
         this.gameService = gameService;
     }
 
-    @GetMapping("/private")
+    @GetMapping("/public")
     public ResponseEntity<List<GamePublicDto>> getAll(Pageable page) {
         return new ResponseEntity<>(gameService.getAll(page), HttpStatus.OK);
     }
@@ -65,14 +64,12 @@ public class GameController {
     }
 
     @PutMapping("/private/{id}")
-    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<GamePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameCreateDto game) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException, InvalidPermissionException {
         return new ResponseEntity<>(gameService.update(id, game), HttpStatus.OK);
     }
 
     @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws GameNotFoundException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws GameNotFoundException, InvalidPermissionException {
         gameService.delete(id);
         return ResponseEntity.noContent().build();
     }
