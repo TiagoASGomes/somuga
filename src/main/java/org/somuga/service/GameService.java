@@ -106,7 +106,7 @@ public class GameService implements IGameService {
         game.setPlatforms(platforms);
         game.setMediaType(MediaType.GAME);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        game.setCreatedBy(auth.getName());
+        game.setMediaCreatorId(auth.getName());
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 
@@ -114,7 +114,7 @@ public class GameService implements IGameService {
     public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException, InvalidPermissionException {
         Game game = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!game.getCreatedBy().equals(auth.getName())) {
+        if (!game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
         }
         Developer developer = developerService.findByDeveloperName(gameDto.developerName());
@@ -140,7 +140,7 @@ public class GameService implements IGameService {
     public void delete(Long id) throws GameNotFoundException, InvalidPermissionException {
         Game game = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!game.getCreatedBy().equals(auth.getName())) {
+        if (!game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
         gameRepo.deleteById(id);

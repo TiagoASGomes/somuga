@@ -27,7 +27,7 @@ public abstract class Media {
     private String description;
     private String imageUrl;
     private String mediaUrl;
-    private String createdBy;
+    private String mediaCreatorId;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
@@ -109,11 +109,11 @@ public abstract class Media {
         this.mediaUrl = mediaUrl;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getMediaCreatorId() {
+        return mediaCreatorId;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setMediaCreatorId(String mediaCreatorId) {
+        this.mediaCreatorId = mediaCreatorId;
     }
 }

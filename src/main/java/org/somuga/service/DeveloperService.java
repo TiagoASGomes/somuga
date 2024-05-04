@@ -58,7 +58,7 @@ public class DeveloperService implements IDeveloperService {
     public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException {
         Developer developer = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!developer.getCreatedBy().equals(auth.getName())) {
+        if (!developer.getDeveloperCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
         }
         developer.setDeveloperName(developerDto.developerName());

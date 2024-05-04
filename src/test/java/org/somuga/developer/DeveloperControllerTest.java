@@ -1,11 +1,10 @@
 package org.somuga.developer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.somuga.aspect.Error;
 import org.somuga.converter.DeveloperConverter;
 import org.somuga.dto.developer.DeveloperCreateDto;
@@ -20,7 +19,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -37,10 +35,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ContextConfiguration
 @ActiveProfiles("test")
-public class DeveloperControllerTest {
+class DeveloperControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private final String USER = "google-auth2|1234567890";
@@ -55,7 +52,7 @@ public class DeveloperControllerTest {
     @SuppressWarnings("unused")
     private JwtDecoder jwtDecoder;
 
-    @Before
+    @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(controller)
@@ -63,7 +60,7 @@ public class DeveloperControllerTest {
                 .build();
     }
 
-    @After
+    @AfterEach
     public void cleanUp() {
         developerRepository.deleteAll();
     }
@@ -77,7 +74,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create developer and expect 201")
-    public void testCreateDeveloperAuthorized() throws Exception {
+    void testCreateDeveloperAuthorized() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -95,7 +92,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test create developer without authorization and expect 401")
-    public void testCreateDeveloperUnauthorized() throws Exception {
+    void testCreateDeveloperUnauthorized() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         mockMvc.perform(post(PRIVATE_API_PATH)
@@ -108,7 +105,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create developer with empty fullName and expect 400")
-    public void testCreateDeveloperEmptyName() throws Exception {
+    void testCreateDeveloperEmptyName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -129,7 +126,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create developer with null fullName and expect 400")
-    public void testCreateDeveloperNullName() throws Exception {
+    void testCreateDeveloperNullName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto(null, List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -150,7 +147,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create developer with fullName containing special characters and expect 400")
-    public void testCreateDeveloperSpecialCharacters() throws Exception {
+    void testCreateDeveloperSpecialCharacters() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -171,7 +168,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create duplicate developer and expect 400")
-    public void testCreateDuplicateDeveloper() throws Exception {
+    void testCreateDuplicateDeveloper() throws Exception {
         createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
@@ -193,7 +190,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get all developers and expect 200")
-    public void testGetAllDevelopers() throws Exception {
+    void testGetAllDevelopers() throws Exception {
         createDeveloper("Developer1", List.of("twitter.com/developer1", "github.com/developer1"));
         createDeveloper("Developer2", List.of("twitter.com/developer2", "github.com/developer2"));
 
@@ -209,7 +206,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get all developers with pagination and expect 200")
-    public void testGetAllDevelopersWithPagination() throws Exception {
+    void testGetAllDevelopersWithPagination() throws Exception {
         createDeveloper("Developer1", List.of("twitter.com/developer1", "github.com/developer1"));
         createDeveloper("Developer2", List.of("twitter.com/developer2", "github.com/developer2"));
         createDeveloper("Developer3", List.of("twitter.com/developer3", "github.com/developer3"));
@@ -226,7 +223,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get developer by id and expect 200")
-    public void testGetDeveloperById() throws Exception {
+    void testGetDeveloperById() throws Exception {
         DeveloperPublicDto developer = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + developer.id())
@@ -242,7 +239,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get developer by id that does not exist and expect 404")
-    public void testGetDeveloperByIdNotFound() throws Exception {
+    void testGetDeveloperByIdNotFound() throws Exception {
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "/9999999")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -258,7 +255,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get developer by fullName and expect 200")
-    public void testGetDeveloperByName() throws Exception {
+    void testGetDeveloperByName() throws Exception {
         createDeveloper("Developer1", List.of("twitter.com/developer1", "github.com/developer1"));
         createDeveloper("Developer2", List.of("twitter.com/developer2", "github.com/developer2"));
         createDeveloper("Developer3", List.of("twitter.com/developer3", "github.com/developer3"));
@@ -275,7 +272,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get developer by fullName that does not exist and expect 200")
-    public void testGetDeveloperByNameNotFound() throws Exception {
+    void testGetDeveloperByNameNotFound() throws Exception {
         createDeveloper("Developer1", List.of("twitter.com/developer1", "github.com/developer1"));
         createDeveloper("Developer2", List.of("twitter.com/developer2", "github.com/developer2"));
         createDeveloper("Developer3", List.of("twitter.com/developer3", "github.com/developer3"));
@@ -292,7 +289,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test get developer by fullName with pagination and expect 200")
-    public void testGetDeveloperByNameWithPagination() throws Exception {
+    void testGetDeveloperByNameWithPagination() throws Exception {
         createDeveloper("Developer1", List.of("twitter.com/developer1", "github.com/developer1"));
         createDeveloper("Developer2", List.of("twitter.com/developer2", "github.com/developer2"));
         createDeveloper("Developer3", List.of("twitter.com/developer3", "github.com/developer3"));
@@ -310,7 +307,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test update developer and expect 200")
-    public void testUpdateDeveloper() throws Exception {
+    void testUpdateDeveloper() throws Exception {
         DeveloperPublicDto developer = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         DeveloperCreateDto developerUpdate = new DeveloperCreateDto("DeveloperUpdated", List.of("twitter.com/developer", "github.com/developer"));
@@ -330,7 +327,7 @@ public class DeveloperControllerTest {
 
     @Test
     @DisplayName("Test update developer without authorization and expect 401")
-    public void testUpdateDeveloperUnauthorized() throws Exception {
+    void testUpdateDeveloperUnauthorized() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         mockMvc.perform(put(PRIVATE_API_PATH + "/1")
@@ -343,7 +340,7 @@ public class DeveloperControllerTest {
     @Test
     @WithMockUser(username = "different-user|1234567890")
     @DisplayName("Test update developer created by different user and expect 403")
-    public void testUpdateDeveloperDifferentUser() throws Exception {
+    void testUpdateDeveloperDifferentUser() throws Exception {
         DeveloperPublicDto developer = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
         DeveloperCreateDto developerUpdate = new DeveloperCreateDto("DeveloperUpdated", List.of("twitter.com/developer", "github.com/developer"));
