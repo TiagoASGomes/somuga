@@ -20,5 +20,4 @@ public interface IGameGenreService {
 
     GameGenre findByGenre(String genre) throws GenreNotFoundException;
 
-    GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreNotFoundException;
 }

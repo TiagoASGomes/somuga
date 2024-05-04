@@ -55,13 +55,6 @@ public class GameGenreService implements IGameGenreService {
         return gameGenreRepo.findByGenreIgnoreCase(genre).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND_NAME + genre));
     }
 
-    @Override
-    public GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreNotFoundException {
-        GameGenre genre = findById(id);
-        genre.setGenre(genreDto.genreName());
-        return GameGenreConverter.fromEntityToPublicDto(gameGenreRepo.save(genre));
-    }
-
     private boolean checkDuplicateGenre(String genre) {
         try {
             findByGenre(genre);

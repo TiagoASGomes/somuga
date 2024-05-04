@@ -46,8 +46,4 @@ public class GameGenreController {
         return new ResponseEntity<>(gameGenreService.create(genreDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/private/{id}")
-    public ResponseEntity<GameGenrePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameGenreCreateDto genreDto) throws GenreNotFoundException {
-        return new ResponseEntity<>(gameGenreService.update(id, genreDto), HttpStatus.OK);
-    }
 }
