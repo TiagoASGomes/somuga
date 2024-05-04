@@ -39,19 +39,19 @@ public class PlatformService implements IPlatformService {
 
     @Override
     public List<PlatformPublicDto> searchByName(String name, Pageable page) {
-        return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findByPlatformNameContaining(name.toLowerCase(), page).toList());
+        return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findByPlatformNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override
     public PlatformPublicDto create(PlatformCreateDto platformDto) throws PlatformAlreadyExistsException {
         checkDuplicatePlatform(platformDto.platformName());
-        Platform platform = new Platform(platformDto.platformName().toLowerCase());
+        Platform platform = new Platform(platformDto.platformName());
         return PlatformConverter.fromEntityToPublicDto(platformRepo.save(platform));
     }
 
     @Override
     public Platform findByPlatformName(String platformName) throws PlatformNotFoundException {
-        return platformRepo.findByPlatformName(platformName.toLowerCase()).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND_NAME + platformName));
+        return platformRepo.findByPlatformNameIgnoreCase(platformName).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND_NAME + platformName));
     }
 
     private void checkDuplicatePlatform(String platformName) throws PlatformAlreadyExistsException {

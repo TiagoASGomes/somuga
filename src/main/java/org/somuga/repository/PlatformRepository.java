@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface PlatformRepository extends JpaRepository<Platform, Long> {
 
-    Page<Platform> findByPlatformNameContaining(String platformName, Pageable page);
+    Page<Platform> findByPlatformNameContainingIgnoreCase(String platformName, Pageable page);
 
-    Optional<Platform> findByPlatformName(String platformName);
+    Optional<Platform> findByPlatformNameIgnoreCase(String platformName);
 }

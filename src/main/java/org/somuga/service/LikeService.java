@@ -52,11 +52,13 @@ public class LikeService implements ILikeService {
 
     @Override
     public LikePublicDto create(LikeCreateDto likeDto) throws UserNotFoundException, AlreadyLikedException, MediaNotFoundException {
-        Optional<Like> duplicateLike = likeRepo.findByMediaIdAndUserId(likeDto.mediaId(), likeDto.userId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userId = auth.getName();
+        Optional<Like> duplicateLike = likeRepo.findByMediaIdAndUserId(likeDto.mediaId(), userId);
         if (duplicateLike.isPresent()) {
             throw new AlreadyLikedException(ALREADY_LIKED);
         }
-        User user = userService.findById(likeDto.userId());
+        User user = userService.findById(userId);
         Media media = mediaService.findById(likeDto.mediaId());
         Like like = new Like(user, media);
         return LikeConverter.fromEntityToPublicDto(likeRepo.save(like));
