@@ -2,50 +2,67 @@ package org.somuga.game_genre;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.somuga.aspect.Error;
+import org.somuga.converter.GameGenreConverter;
 import org.somuga.dto.game_genre.GameGenreCreateDto;
 import org.somuga.dto.game_genre.GameGenrePublicDto;
+import org.somuga.entity.GameGenre;
 import org.somuga.repository.GameGenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.util.message.Messages.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@ContextConfiguration
 @ActiveProfiles("test")
 class GameGenreControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private final String USER = "google-auth2|1234567890";
     private final String API_PATH = "/api/v1/game_genre";
-    @Autowired
-    private MockMvc mockMvc;
+
+    MockMvc mockMvc;
     @Autowired
     private GameGenreRepository gameGenreRepository;
+    @Autowired
+    private WebApplicationContext controller;
+    @MockBean
+    @SuppressWarnings("unused")
+    private JwtDecoder jwtDecoder;
 
     @AfterEach
     public void cleanUp() {
         gameGenreRepository.deleteAll();
     }
 
-    public GameGenrePublicDto createGameGenre(String genreName) throws Exception {
-        GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto(genreName);
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(controller)
+                .apply(springSecurity())
+                .build();
+    }
 
-        return mapper.readValue(mockMvc.perform(post(API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString(), GameGenrePublicDto.class);
+    public GameGenrePublicDto createGameGenre(String genreName) {
+        GameGenre gameGenre = new GameGenre(genreName);
+        return GameGenreConverter.fromEntityToPublicDto(gameGenreRepository.save(gameGenre));
     }
 
     @Test

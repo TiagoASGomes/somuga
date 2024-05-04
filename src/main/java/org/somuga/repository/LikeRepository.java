@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface LikeRepository extends JpaRepository<Like, Long> {
-    Page<Like> findByUserId(Long userId, Pageable page);
+    Page<Like> findByUserId(String userId, Pageable page);
 
     Page<Like> findByMediaId(Long mediaId, Pageable page);
 
-    Optional<Like> findByMediaIdAndUserId(Long mediaId, Long userId);
+    Optional<Like> findByMediaIdAndUserId(Long mediaId, String userId);
 }

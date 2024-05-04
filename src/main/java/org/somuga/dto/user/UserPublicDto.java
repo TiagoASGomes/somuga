@@ -3,7 +3,7 @@ package org.somuga.dto.user;
 import java.util.Date;
 
 public record UserPublicDto(
-        Long id,
+        String id,
         String userName,
         String email,
         Date joinedDate

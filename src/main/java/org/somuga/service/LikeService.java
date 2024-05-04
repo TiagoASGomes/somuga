@@ -6,6 +6,7 @@ import org.somuga.dto.like.LikePublicDto;
 import org.somuga.entity.Like;
 import org.somuga.entity.Media;
 import org.somuga.entity.User;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
@@ -16,13 +17,14 @@ import org.somuga.service.interfaces.IMediaService;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.util.message.Messages.ALREADY_LIKED;
-import static org.somuga.util.message.Messages.LIKE_NOT_FOUND;
+import static org.somuga.util.message.Messages.*;
 
 @Service
 public class LikeService implements ILikeService {
@@ -39,7 +41,7 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public List<LikePublicDto> getAllByUserId(Long userId, Pageable page) {
+    public List<LikePublicDto> getAllByUserId(String userId, Pageable page) {
         return LikeConverter.fromEntityListToPublidDtoList(likeRepo.findByUserId(userId, page).toList());
     }
 
@@ -61,9 +63,12 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public void delete(Long id) throws LikeNotFoundException {
-        likeRepo.findById(id).orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + id));
-        //TODO verificar se é o user que criou
+    public void delete(Long id) throws LikeNotFoundException, InvalidPermissionException {
+        Like like = likeRepo.findById(id).orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + id));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!like.getUser().getId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
         likeRepo.deleteById(id);
     }
 }

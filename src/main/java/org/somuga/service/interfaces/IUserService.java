@@ -15,14 +15,14 @@ public interface IUserService {
 
     List<UserPublicDto> getAllByName(Pageable page, String name);
 
-    UserPublicDto getById(Long id) throws UserNotFoundException;
+    UserPublicDto getById(String id) throws UserNotFoundException;
 
     UserPublicDto create(UserCreateDto user) throws DuplicateFieldException;
 
-    UserPublicDto updateUserName(Long id, UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException;
+    UserPublicDto updateUserName(UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException;
 
-    void delete(Long id) throws UserNotFoundException;
+    void delete() throws UserNotFoundException;
 
-    User findById(Long id) throws UserNotFoundException;
+    User findById(String id) throws UserNotFoundException;
 
 }

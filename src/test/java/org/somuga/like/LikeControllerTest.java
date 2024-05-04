@@ -4,47 +4,51 @@
 //import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 //import org.junit.jupiter.api.*;
 //import org.somuga.aspect.Error;
-//import org.somuga.dto.game.GameCreateDto;
 //import org.somuga.dto.game.GamePublicDto;
 //import org.somuga.dto.like.LikeCreateDto;
 //import org.somuga.dto.user.UserCreateDto;
 //import org.somuga.dto.user.UserPublicDto;
 //import org.somuga.entity.Developer;
+//import org.somuga.entity.Game;
 //import org.somuga.entity.GameGenre;
 //import org.somuga.entity.Platform;
 //import org.somuga.repository.*;
 //import org.somuga.testDtos.LikeGameDto;
 //import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 //import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
 //import org.springframework.http.MediaType;
+//import org.springframework.security.oauth2.jwt.JwtDecoder;
 //import org.springframework.test.context.ActiveProfiles;
+//import org.springframework.test.context.ContextConfiguration;
 //import org.springframework.test.web.servlet.MockMvc;
+//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+//import org.springframework.web.context.WebApplicationContext;
 //
 //import java.util.Date;
-//import java.util.List;
 //
 //import static org.hamcrest.Matchers.hasSize;
 //import static org.junit.jupiter.api.Assertions.*;
 //import static org.somuga.util.message.Messages.*;
+//import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 //import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 //import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 //
 //@SpringBootTest
-//@AutoConfigureMockMvc
+//@ContextConfiguration
 //@ActiveProfiles("test")
 //public class LikeControllerTest {
 //
 //    private static final ObjectMapper mapper = new ObjectMapper();
+//    private final String USER = "google-auth2|1234567890";
 //    private final String API_PATH = "/api/v1/like";
 //    private final String developerName = "Developer";
 //    private final String genreName = "genre";
 //    private final String platformName = "platforms";
+//    MockMvc mockMvc;
 //    private GamePublicDto game;
 //    private UserPublicDto user;
-//    @Autowired
-//    private MockMvc mockMvc;
 //    @Autowired
 //    private UserRepository userTestRepository;
 //    @Autowired
@@ -57,6 +61,11 @@
 //    private GameGenreRepository gameGenreRepository;
 //    @Autowired
 //    private DeveloperRepository developerRepository;
+//    @Autowired
+//    private WebApplicationContext controller;
+//    @MockBean
+//    @SuppressWarnings("unused")
+//    private JwtDecoder jwtDecoder;
 //
 //    @BeforeAll
 //    public static void setUpMapper() {
@@ -76,6 +85,10 @@
 //
 //    @BeforeEach
 //    public void setUp() throws Exception {
+//        mockMvc = MockMvcBuilders
+//                .webAppContextSetup(controller)
+//                .apply(springSecurity())
+//                .build();
 //        developerRepository.save(new Developer(developerName, null, null));
 //        gameGenreRepository.save(new GameGenre(genreName.toLowerCase()));
 //        platformRepository.save(new Platform(platformName.toLowerCase()));
@@ -84,8 +97,10 @@
 //    }
 //
 //    public GamePublicDto createGame() throws Exception {
+//        Game game = new Game();
+//        game.setTitle("Game");
+//        game.setReleaseDate(new Date());
 //
-//        GameCreateDto gameDto = new GameCreateDto("Title", new Date(), developerName, List.of(genreName), List.of(platformName), 10.0, "Description");
 //
 //        String response = mockMvc.perform(post("/api/v1/game")
 //                        .contentType(MediaType.APPLICATION_JSON)

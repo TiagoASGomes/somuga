@@ -48,6 +48,7 @@ public class Messages {
     public static final String UNAUTHORIZED_UPDATE = "You are not authorized to update this entity because you are not the creator";
     public static final String UNAUTHORIZED_DELETE = "You are not authorized to delete this entity because you are not the creator";
     public static final String INVALID_MEDIA_URL = "Media URL cannot be empty";
+    public static final String INVALID_ID = "Id cannot be empty";
 
 
     private Messages() {

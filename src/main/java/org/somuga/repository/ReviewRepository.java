@@ -10,9 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Page<Review> findByUserId(Long userId, Pageable page);
+    Page<Review> findByUserId(String userId, Pageable page);
 
     Page<Review> findByMediaId(Long mediaId, Pageable page);
 
-    Optional<Review> findByMediaIdAndUserId(Long mediaId, Long userId);
+    Optional<Review> findByMediaIdAndUserId(Long mediaId, String userId);
 }
