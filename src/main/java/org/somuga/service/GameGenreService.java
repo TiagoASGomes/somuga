@@ -38,26 +38,36 @@ public class GameGenreService implements IGameGenreService {
 
     @Override
     public List<GameGenrePublicDto> searchByName(String name, Pageable page) {
-        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findByGenreContaining(name.toLowerCase(), page).toList());
+        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findByGenreContainingIgnoreCase(name.toLowerCase(), page).toList());
     }
 
     @Override
     public GameGenrePublicDto create(GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
-        checkDuplicateGenre(genreDto.genreName());
-        GameGenre genre = new GameGenre(genreDto.genreName().toLowerCase());
+        if (checkDuplicateGenre(genreDto.genreName())) {
+            throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
+        }
+        GameGenre genre = new GameGenre(genreDto.genreName());
         return GameGenreConverter.fromEntityToPublicDto(gameGenreRepo.save(genre));
     }
 
     @Override
     public GameGenre findByGenre(String genre) throws GenreNotFoundException {
-        return gameGenreRepo.findByGenre(genre.toLowerCase()).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND_NAME + genre));
+        return gameGenreRepo.findByGenreIgnoreCase(genre).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND_NAME + genre));
     }
 
-    private void checkDuplicateGenre(String genre) throws GenreAlreadyExistsException {
+    @Override
+    public GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreNotFoundException {
+        GameGenre genre = findById(id);
+        genre.setGenre(genreDto.genreName());
+        return GameGenreConverter.fromEntityToPublicDto(gameGenreRepo.save(genre));
+    }
+
+    private boolean checkDuplicateGenre(String genre) {
         try {
             findByGenre(genre);
-            throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genre);
+            return true;
         } catch (GenreNotFoundException ignored) {
+            return false;
         }
     }
 
