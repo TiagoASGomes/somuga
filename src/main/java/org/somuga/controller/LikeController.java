@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/like")
+@CrossOrigin(origins = "*")
 public class LikeController {
 
     private final ILikeService likeService;

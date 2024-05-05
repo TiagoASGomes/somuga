@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/review")
+@CrossOrigin(origins = "*")
 public class ReviewController {
 
     private final IReviewService reviewService;
@@ -51,13 +52,11 @@ public class ReviewController {
 
     @PatchMapping("/private/{id}")
     public ResponseEntity<ReviewPublicDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewUpdateDto review) throws ReviewNotFoundException, InvalidPermissionException {
-        // TODO check if user created
         return new ResponseEntity<>(reviewService.updateReview(id, review), HttpStatus.OK);
     }
 
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException, InvalidPermissionException {
-        // TODO check if user created
         reviewService.delete(id);
         return ResponseEntity.noContent().build();
     }

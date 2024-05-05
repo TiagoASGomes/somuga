@@ -110,7 +110,6 @@ public class LikeControllerTest {
         game.setGenres(gameGenres);
         game.setPlatforms(platforms);
         game.setMediaType(org.somuga.enums.MediaType.GAME);
-
         return gameRepository.save(game);
     }
 

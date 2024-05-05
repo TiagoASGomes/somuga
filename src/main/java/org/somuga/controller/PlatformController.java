@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/platform")
+@CrossOrigin(origins = "*")
 public class PlatformController {
 
     private final IPlatformService platformService;
@@ -42,7 +43,6 @@ public class PlatformController {
 
     @PostMapping("/private")
     public ResponseEntity<PlatformPublicDto> create(@Valid @RequestBody PlatformCreateDto platformDto) throws PlatformAlreadyExistsException {
-//         TODO change to admin
         return new ResponseEntity<>(platformService.create(platformDto), HttpStatus.CREATED);
     }
 

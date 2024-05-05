@@ -16,8 +16,9 @@ public class MovieConverter {
                 movie.getReleaseDate(),
                 movie.getDescription(),
                 movie.getDuration(),
-                fromEntityListToCrewRolePublicDtoList(movie.getMovieCrew())
-
+                fromEntityListToCrewRolePublicDtoList(movie.getMovieCrew()),
+                movie.getMediaUrl(),
+                movie.getImageUrl()
         );
     }
 
@@ -33,6 +34,8 @@ public class MovieConverter {
         movie.setReleaseDate(movieDto.releaseDate());
         movie.setDescription(movieDto.description());
         movie.setDuration(movieDto.duration());
+        movie.setMediaUrl(movieDto.mediaUrl());
+        movie.setImageUrl(movieDto.imageUrl());
         return movie;
     }
 

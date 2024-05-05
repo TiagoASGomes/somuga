@@ -12,6 +12,8 @@ public record MoviePublicDto(
         Date releaseDate,
         String description,
         Integer duration,
-        List<CrewRolePublicDto> crew
+        List<CrewRolePublicDto> crew,
+        String mediaUrl,
+        String imageUrl
 ) implements MediaPublicDto {
 }

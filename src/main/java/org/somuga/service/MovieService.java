@@ -9,6 +9,7 @@ import org.somuga.entity.MovieCrew;
 import org.somuga.entity.MovieCrewRole;
 import org.somuga.enums.MediaType;
 import org.somuga.enums.MovieRole;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
@@ -17,6 +18,8 @@ import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -70,13 +73,19 @@ public class MovieService implements IMovieService {
             movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), roleDto.characterName());
         }
         movie.setMediaType(MediaType.MOVIE);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        movie.setMediaCreatorId(auth.getName());
         return MovieConverter.fromEntityToPublicDto(movieRepo.save(movie));
     }
 
 
     @Override
-    public MoviePublicDto update(Long id, MovieCreateDto movieDto) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException {
+    public MoviePublicDto update(Long id, MovieCreateDto movieDto) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException, InvalidPermissionException {
         Movie movie = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!movie.getMediaCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
+        }
         validateCrew(movieDto.crew());
         List<CrewRoleCreateDto> newCrew = deleteOrphanedCrew(movie, movieDto.crew());
         movieRepo.saveAndFlush(movie);

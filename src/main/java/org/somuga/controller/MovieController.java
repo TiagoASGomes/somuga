@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/movie")
+@CrossOrigin(origins = "*")
 public class MovieController {
 
     private final IMovieService movieService;
@@ -52,14 +54,12 @@ public class MovieController {
     }
 
     @PutMapping("/private/{id}")
-    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException {
-        // TODO check if user created the movie
+    public ResponseEntity<MoviePublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException, InvalidPermissionException {
         return new ResponseEntity<>(movieService.update(id, movie), HttpStatus.OK);
     }
 
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException {
-        // TODO check if user created the movie
         movieService.delete(id);
         return ResponseEntity.noContent().build();
     }

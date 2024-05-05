@@ -2,42 +2,54 @@ package org.somuga.movie_crew;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.somuga.aspect.Error;
+import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
+import org.somuga.entity.MovieCrew;
 import org.somuga.repository.MovieCrewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.util.message.Messages.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@ContextConfiguration
 @ActiveProfiles("test")
 class MovieCrewControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    private final String API_PATH = "/api/v1/movie_crew";
+    private final String USER_ID = "google-auth2|1234567890";
+    private final String PRIVATE_API_PATH = "/api/v1/movie_crew/private";
+    private final String PUBLIC_API_PATH = "/api/v1/movie_crew/public";
     private final String NAME = "Test Name";
     private final Date BIRTH_DATE = new Date();
-    @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
     @Autowired
     private MovieCrewRepository movieCrewRepository;
+    @Autowired
+    private WebApplicationContext controller;
+    @MockBean
+    @SuppressWarnings("unused")
+    private JwtDecoder jwtDecoder;
 
     @BeforeAll
     public static void setUpMapper() {
@@ -49,22 +61,34 @@ class MovieCrewControllerTest {
         movieCrewRepository.deleteAll();
     }
 
-    public MovieCrewPublicDto createMovieCrew(String name, Date birthDate) throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(name, birthDate);
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(controller)
+                .apply(springSecurity())
+                .build();
+    }
 
-        String response = mockMvc.perform(post(API_PATH)
+    public MovieCrewPublicDto createMovieCrew(String name, Date birthDate) {
+        MovieCrew movieCrew = new MovieCrew(name, birthDate);
+        movieCrew.setCrewCreatorId(USER_ID);
+        return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(movieCrew));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create movie crew and expect status 201")
+    void testCreateMovieCrew() throws Exception {
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, BIRTH_DATE);
+
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
-        return mapper.readValue(response, MovieCrewPublicDto.class);
-    }
-
-    @Test
-    @DisplayName("Test create movie crew and expect status 201")
-    void testCreateMovieCrew() throws Exception {
-        MovieCrewPublicDto movieCrew = createMovieCrew(NAME, BIRTH_DATE);
+        MovieCrewPublicDto movieCrew = mapper.readValue(response, MovieCrewPublicDto.class);
 
         assertEquals(NAME, movieCrew.name());
         assertEquals(BIRTH_DATE, movieCrew.birthDate());
@@ -72,11 +96,13 @@ class MovieCrewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew with empty name and expect status 400")
     void testCreateMovieCrewEmptyName() throws Exception {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("", BIRTH_DATE);
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isBadRequest())
@@ -89,11 +115,13 @@ class MovieCrewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew with null name and expect status 400")
     void testCreateMovieCrewNullName() throws Exception {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(null, BIRTH_DATE);
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isBadRequest())
@@ -106,11 +134,13 @@ class MovieCrewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew with name over 50 characters and expect status 400")
     void testCreateMovieCrewNameOver50Characters() throws Exception {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("T".repeat(51), BIRTH_DATE);
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isBadRequest())
@@ -123,11 +153,13 @@ class MovieCrewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew with null birth date and expect status 400")
     void testCreateMovieCrewNullBirthDate() throws Exception {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, null);
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isBadRequest())
@@ -140,11 +172,13 @@ class MovieCrewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew with future birth date and expect status 400")
     void testCreateMovieCrewFutureBirthDate() throws Exception {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, new Date(System.currentTimeMillis() + 10000));
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(movieCrewCreateDto)))
                 .andExpect(status().isBadRequest())
@@ -162,7 +196,7 @@ class MovieCrewControllerTest {
         createMovieCrew(NAME, BIRTH_DATE);
         createMovieCrew(NAME + "a", BIRTH_DATE);
 
-        String response = mockMvc.perform(get(API_PATH))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -177,7 +211,7 @@ class MovieCrewControllerTest {
         createMovieCrew(NAME, BIRTH_DATE);
         createMovieCrew(NAME + "a", BIRTH_DATE);
 
-        String response = mockMvc.perform(get(API_PATH + "?page=0&size=1"))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=1"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -193,7 +227,7 @@ class MovieCrewControllerTest {
         createMovieCrew(NAME + "a", BIRTH_DATE);
         createMovieCrew("Different", BIRTH_DATE);
 
-        String response = mockMvc.perform(get(API_PATH + "/search/" + NAME))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/search/" + NAME))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -209,7 +243,7 @@ class MovieCrewControllerTest {
         createMovieCrew(NAME + "a", BIRTH_DATE);
         createMovieCrew("Different", BIRTH_DATE);
 
-        String response = mockMvc.perform(get(API_PATH + "/search/" + NAME + "?page=0&size=1"))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/search/" + NAME + "?page=0&size=1"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -223,7 +257,7 @@ class MovieCrewControllerTest {
     void testGetMovieCrewById() throws Exception {
         MovieCrewPublicDto movieCrew = createMovieCrew(NAME, BIRTH_DATE);
 
-        String response = mockMvc.perform(get(API_PATH + "/" + movieCrew.id()))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + movieCrew.id()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -237,7 +271,7 @@ class MovieCrewControllerTest {
     @Test
     @DisplayName("Test get movie crew by id and expect status 404")
     void testGetMovieCrewByIdNotFound() throws Exception {
-        mockMvc.perform(get(API_PATH + "/999999"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/999999"))
                 .andExpect(status().isNotFound());
     }
 

@@ -22,6 +22,7 @@ public class MovieCrew {
     @NaturalId
     private String fullName;
     private Date birthDate;
+    private String crewCreatorId;
     @OneToMany(mappedBy = "movieCrew",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
@@ -67,16 +68,24 @@ public class MovieCrew {
         this.roles = roles;
     }
 
+    public String getCrewCreatorId() {
+        return crewCreatorId;
+    }
+
+    public void setCrewCreatorId(String crewCreatorId) {
+        this.crewCreatorId = crewCreatorId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MovieCrew movieCrew = (MovieCrew) o;
-        return Objects.equals(id, movieCrew.id) && Objects.equals(fullName, movieCrew.fullName) && Objects.equals(birthDate, movieCrew.birthDate) && Objects.equals(roles, movieCrew.roles);
+        return Objects.equals(id, movieCrew.id) && Objects.equals(fullName, movieCrew.fullName) && Objects.equals(birthDate, movieCrew.birthDate) && Objects.equals(crewCreatorId, movieCrew.crewCreatorId) && Objects.equals(roles, movieCrew.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, fullName, birthDate, roles);
+        return Objects.hash(id, fullName, birthDate, crewCreatorId, roles);
     }
 }

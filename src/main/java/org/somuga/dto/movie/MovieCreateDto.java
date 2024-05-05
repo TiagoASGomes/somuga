@@ -24,6 +24,9 @@ public record MovieCreateDto(
         Integer duration,
         @NotNull(message = INVALID_CREW_ROLE)
         @Size(min = 1, message = INVALID_CREW_ROLE)
-        List<CrewRoleCreateDto> crew
+        List<CrewRoleCreateDto> crew,
+        @NotBlank(message = INVALID_MEDIA_URL)
+        String mediaUrl,
+        String imageUrl
 ) {
 }

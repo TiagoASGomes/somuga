@@ -2,6 +2,7 @@ package org.somuga.service.interfaces;
 
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.springframework.data.domain.Pageable;
 
@@ -15,4 +16,6 @@ public interface IMovieCrewService {
     List<MovieCrewPublicDto> getByName(String name, Pageable page);
 
     MovieCrewPublicDto create(MovieCrewCreateDto movieCrew);
+
+    MovieCrewPublicDto update(Long id, MovieCrewCreateDto movieCrew) throws MovieCrewNotFoundException, InvalidPermissionException;
 }
