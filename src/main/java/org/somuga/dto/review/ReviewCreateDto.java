@@ -2,14 +2,11 @@ package org.somuga.dto.review;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import static org.somuga.util.message.Messages.*;
 
 public record ReviewCreateDto(
-        @NotBlank(message = INVALID_ID)
-        String userId,
         @Min(value = 0, message = ID_GREATER_THAN_0)
         Long mediaId,
         @Min(value = 1, message = INVALID_SCORE)

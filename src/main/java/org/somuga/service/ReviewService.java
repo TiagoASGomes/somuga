@@ -59,11 +59,13 @@ public class ReviewService implements IReviewService {
 
     @Override
     public ReviewPublicDto create(ReviewCreateDto reviewDto) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException {
-        Optional<Review> duplicateReview = reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), reviewDto.userId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userId = auth.getName();
+        Optional<Review> duplicateReview = reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), userId);
         if (duplicateReview.isPresent()) {
             throw new AlreadyReviewedException(ALREADY_REVIEWED);
         }
-        User user = userService.findById(reviewDto.userId());
+        User user = userService.findById(userId);
         Media media = mediaService.findById(reviewDto.mediaId());
         Review review = new Review(reviewDto.reviewScore(), reviewDto.writtenReview(), user, media);
         return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));

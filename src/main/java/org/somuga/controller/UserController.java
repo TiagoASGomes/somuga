@@ -61,7 +61,6 @@ public class UserController {
 
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws UserNotFoundException {
-        //TODO implement this method
         userService.delete();
         return ResponseEntity.noContent().build();
     }
