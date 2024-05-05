@@ -49,7 +49,13 @@ public class UserService implements IUserService {
 
     @Override
     public UserPublicDto create(UserCreateDto userDto) throws DuplicateFieldException {
-        User user = UserConverter.fromCreateDtoToEntity(userDto);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String id = auth.getName();
+        Optional<User> duplicate = userRepo.findById(id);
+        if (duplicate.isPresent()) {
+            throw new DuplicateFieldException(DUPLICATE_USER + id);
+        }
+        User user = UserConverter.fromCreateDtoToEntity(userDto, id);
         checkDuplicateFields(user.getEmail(), user.getUserName());
         user.setActive(true);
         user.setJoinDate(new Date());

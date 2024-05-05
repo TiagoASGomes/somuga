@@ -89,7 +89,7 @@ public class ReviewControllerTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(controller)
                 .apply(springSecurity())
