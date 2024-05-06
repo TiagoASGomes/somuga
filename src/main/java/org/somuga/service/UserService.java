@@ -11,6 +11,8 @@ import org.somuga.repository.UserRepository;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -41,31 +43,38 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserPublicDto getById(Long id) throws UserNotFoundException {
+    public UserPublicDto getById(String id) throws UserNotFoundException {
         return UserConverter.fromEntityToPublicDto(findById(id));
     }
 
     @Override
     public UserPublicDto create(UserCreateDto userDto) throws DuplicateFieldException {
-        User user = UserConverter.fromCreateDtoToEntity(userDto);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String id = auth.getName();
+        Optional<User> duplicate = userRepo.findById(id);
+        if (duplicate.isPresent()) {
+            throw new DuplicateFieldException(DUPLICATE_USER + id);
+        }
+        User user = UserConverter.fromCreateDtoToEntity(userDto, id);
         checkDuplicateFields(user.getEmail(), user.getUserName());
         user.setActive(true);
         user.setJoinDate(new Date());
         return UserConverter.fromEntityToPublicDto(userRepo.save(user));
     }
 
-
     @Override
-    public UserPublicDto updateUserName(Long id, UserUpdateNameDto userDto) throws UserNotFoundException, DuplicateFieldException {
-        User user = findById(id);
+    public UserPublicDto updateUserName(UserUpdateNameDto userDto) throws UserNotFoundException, DuplicateFieldException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = findById(auth.getName());
         checkDuplicateFields("XXXXXX", userDto.userName());
         user.setUserName(userDto.userName());
         return UserConverter.fromEntityToPublicDto(userRepo.save(user));
     }
 
     @Override
-    public void delete(Long id) throws UserNotFoundException {
-        User user = findById(id);
+    public void delete() throws UserNotFoundException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = findById(auth.getName());
         user.setUserName("");
         user.setEmail("");
         user.setActive(false);
@@ -73,7 +82,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User findById(Long id) throws UserNotFoundException {
+    public User findById(String id) throws UserNotFoundException {
         return userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND + id));
     }
 

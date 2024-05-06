@@ -1,6 +1,9 @@
 package org.somuga.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 import java.util.Date;
 import java.util.Set;
@@ -10,8 +13,7 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     private String userName;
     private String email;
     @OneToMany(mappedBy = "user")
@@ -24,17 +26,26 @@ public class User {
     public User() {
     }
 
-    public User(String userName, String email) {
+    public User(String id, String userName, String email) {
+        this.id = id;
         this.userName = userName;
         this.email = email;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 
     public boolean isActive() {
@@ -51,14 +62,6 @@ public class User {
 
     public void setJoinDate(Date joinDate) {
         this.joinDate = joinDate;
-    }
-
-    public Set<Review> getRatings() {
-        return reviews;
-    }
-
-    public void setRatings(Set<Review> reviews) {
-        this.reviews = reviews;
     }
 
     public Set<Like> getLikes() {

@@ -24,7 +24,7 @@ public class UserConverter {
                 .toList();
     }
 
-    public static User fromCreateDtoToEntity(UserCreateDto user) {
-        return new User(user.userName(), user.email());
+    public static User fromCreateDtoToEntity(UserCreateDto user, String id) {
+        return new User(id, user.userName(), user.email());
     }
 }

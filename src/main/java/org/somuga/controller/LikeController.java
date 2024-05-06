@@ -3,6 +3,7 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.like.LikeCreateDto;
 import org.somuga.dto.like.LikePublicDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/like")
+@CrossOrigin(origins = "*")
 public class LikeController {
 
     private final ILikeService likeService;
@@ -28,7 +30,7 @@ public class LikeController {
     }
 
     @GetMapping("/public/user/{userId}")
-    public ResponseEntity<List<LikePublicDto>> getAllByUserId(@PathVariable Long userId, Pageable page) {
+    public ResponseEntity<List<LikePublicDto>> getAllByUserId(@PathVariable String userId, Pageable page) {
         return new ResponseEntity<>(likeService.getAllByUserId(userId, page), HttpStatus.OK);
     }
 
@@ -43,8 +45,7 @@ public class LikeController {
     }
 
     @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws LikeNotFoundException {
-        //  TODO check if user created the like
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws LikeNotFoundException, InvalidPermissionException {
         likeService.delete(id);
         return ResponseEntity.noContent().build();
     }

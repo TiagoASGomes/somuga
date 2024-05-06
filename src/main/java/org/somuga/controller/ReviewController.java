@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.somuga.dto.review.ReviewCreateDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/review")
+@CrossOrigin(origins = "*")
 public class ReviewController {
 
     private final IReviewService reviewService;
@@ -34,7 +36,7 @@ public class ReviewController {
     }
 
     @GetMapping("/public/user/{userId}")
-    public ResponseEntity<List<ReviewPublicDto>> getAllByUserId(@PathVariable Long userId, Pageable page) {
+    public ResponseEntity<List<ReviewPublicDto>> getAllByUserId(@PathVariable String userId, Pageable page) {
         return new ResponseEntity<>(reviewService.getAllByUserId(userId, page), HttpStatus.OK);
     }
 
@@ -49,20 +51,18 @@ public class ReviewController {
     }
 
     @PatchMapping("/private/{id}")
-    public ResponseEntity<ReviewPublicDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewUpdateDto review) throws ReviewNotFoundException {
-        // TODO check if user created
+    public ResponseEntity<ReviewPublicDto> updateReview(@PathVariable Long id, @Valid @RequestBody ReviewUpdateDto review) throws ReviewNotFoundException, InvalidPermissionException {
         return new ResponseEntity<>(reviewService.updateReview(id, review), HttpStatus.OK);
     }
 
     @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException {
-        // TODO check if user created
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException, InvalidPermissionException {
         reviewService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long id) throws ReviewNotFoundException {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id) throws ReviewNotFoundException, InvalidPermissionException {
         reviewService.delete(id);
         return ResponseEntity.noContent().build();
     }

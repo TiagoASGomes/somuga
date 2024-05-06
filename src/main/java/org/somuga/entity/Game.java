@@ -42,7 +42,6 @@ public class Game extends Media {
 
     public void setDeveloper(Developer developer) {
         this.developer = developer;
-        developer.addGame(this);
     }
 
     public Double getPrice() {

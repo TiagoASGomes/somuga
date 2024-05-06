@@ -25,6 +25,9 @@ public abstract class Media {
     private String title;
     private Date releaseDate;
     private String description;
+    private String imageUrl;
+    private String mediaUrl;
+    private String mediaCreatorId;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
@@ -88,5 +91,29 @@ public abstract class Media {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getMediaUrl() {
+        return mediaUrl;
+    }
+
+    public void setMediaUrl(String mediaUrl) {
+        this.mediaUrl = mediaUrl;
+    }
+
+    public String getMediaCreatorId() {
+        return mediaCreatorId;
+    }
+
+    public void setMediaCreatorId(String mediaCreatorId) {
+        this.mediaCreatorId = mediaCreatorId;
     }
 }

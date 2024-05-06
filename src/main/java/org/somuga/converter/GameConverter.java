@@ -23,7 +23,9 @@ public class GameConverter {
                 game.getPrice(),
                 game.getDescription(),
                 game.getReviews().size(),
-                game.getLikes().size()
+                game.getLikes().size(),
+                game.getMediaUrl(),
+                game.getImageUrl()
         );
     }
 
@@ -39,6 +41,8 @@ public class GameConverter {
         game.setReleaseDate(gameDto.releaseDate());
         game.setPrice(gameDto.price());
         game.setDescription(gameDto.description());
+        game.setMediaUrl(gameDto.mediaUrl());
+        game.setImageUrl(gameDto.imageUrl());
         return game;
     }
 }

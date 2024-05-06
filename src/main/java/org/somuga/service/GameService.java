@@ -8,6 +8,7 @@ import org.somuga.entity.Game;
 import org.somuga.entity.GameGenre;
 import org.somuga.entity.Platform;
 import org.somuga.enums.MediaType;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
@@ -16,13 +17,15 @@ import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.somuga.util.message.Messages.GAME_NOT_FOUND;
+import static org.somuga.util.message.Messages.*;
 
 @Service
 public class GameService implements IGameService {
@@ -102,13 +105,18 @@ public class GameService implements IGameService {
         game.setGenres(genres);
         game.setPlatforms(platforms);
         game.setMediaType(MediaType.GAME);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        game.setMediaCreatorId(auth.getName());
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 
     @Override
-    public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException {
-        //TODO check if user created the game
+    public GamePublicDto update(Long id, GameCreateDto gameDto) throws GameNotFoundException, DeveloperNotFoundException, PlatformNotFoundException, GenreNotFoundException, InvalidPermissionException {
         Game game = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!game.getMediaCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
+        }
         Developer developer = developerService.findByDeveloperName(gameDto.developerName());
         Set<GameGenre> genres = new HashSet<>();
         Set<Platform> platforms = new HashSet<>();
@@ -129,9 +137,12 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public void delete(Long id) throws GameNotFoundException {
-        //TODO check if user created the game
-        findById(id);
+    public void delete(Long id) throws GameNotFoundException, InvalidPermissionException {
+        Game game = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!game.getMediaCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
         gameRepo.deleteById(id);
     }
 

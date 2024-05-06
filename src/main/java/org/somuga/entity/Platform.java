@@ -2,6 +2,7 @@ package org.somuga.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -47,6 +48,11 @@ public class Platform {
     }
 
     public void addGame(Game game) {
-        games.add(game);
+        if (games == null) {
+            games = new ArrayList<>();
+            games.add(game);
+        } else if (!games.contains(game)) {
+            games.add(game);
+        }
     }
 }

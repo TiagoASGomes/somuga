@@ -8,9 +8,9 @@ public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private Media media;
 
     public Like() {

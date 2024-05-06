@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface GameGenreRepository extends JpaRepository<GameGenre, Long> {
-    Page<GameGenre> findByGenreContaining(String genre, Pageable page);
+    Page<GameGenre> findByGenreContainingIgnoreCase(String genre, Pageable page);
 
-    Optional<GameGenre> findByGenre(String genre);
+    Optional<GameGenre> findByGenreIgnoreCase(String genre);
 
 }

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Pattern;
 import static org.somuga.util.message.Messages.*;
 
 public record UserCreateDto(
-
         @NotBlank(message = NON_EMPTY_USERNAME)
         @Pattern(regexp = "[\\w]{4,20}", message = INVALID_USERNAME)
         String userName,

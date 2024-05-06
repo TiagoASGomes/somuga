@@ -7,6 +7,7 @@ import org.somuga.dto.review.ReviewUpdateDto;
 import org.somuga.entity.Media;
 import org.somuga.entity.Review;
 import org.somuga.entity.User;
+import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
@@ -17,13 +18,14 @@ import org.somuga.service.interfaces.IReviewService;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.util.message.Messages.ALREADY_REVIEWED;
-import static org.somuga.util.message.Messages.REVIEW_NOT_FOUND;
+import static org.somuga.util.message.Messages.*;
 
 @Service
 public class ReviewService implements IReviewService {
@@ -46,7 +48,7 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<ReviewPublicDto> getAllByUserId(Long userId, Pageable page) {
+    public List<ReviewPublicDto> getAllByUserId(String userId, Pageable page) {
         return ReviewConverter.fromEntityListToPublidDtoList(reviewRepo.findByUserId(userId, page).toList());
     }
 
@@ -57,28 +59,37 @@ public class ReviewService implements IReviewService {
 
     @Override
     public ReviewPublicDto create(ReviewCreateDto reviewDto) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException {
-        Optional<Review> duplicateReview = reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), reviewDto.userId());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userId = auth.getName();
+        Optional<Review> duplicateReview = reviewRepo.findByMediaIdAndUserId(reviewDto.mediaId(), userId);
         if (duplicateReview.isPresent()) {
             throw new AlreadyReviewedException(ALREADY_REVIEWED);
         }
-        User user = userService.findById(reviewDto.userId());
+        User user = userService.findById(userId);
         Media media = mediaService.findById(reviewDto.mediaId());
         Review review = new Review(reviewDto.reviewScore(), reviewDto.writtenReview(), user, media);
         return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));
     }
 
     @Override
-    public ReviewPublicDto updateReview(Long id, ReviewUpdateDto reviewDto) throws ReviewNotFoundException {
+    public ReviewPublicDto updateReview(Long id, ReviewUpdateDto reviewDto) throws ReviewNotFoundException, InvalidPermissionException {
         Review review = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!review.getUser().getId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
         review.setReviewScore(reviewDto.reviewScore());
         review.setWrittenReview(reviewDto.writtenReview());
         return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));
     }
 
     @Override
-    public void delete(Long id) throws ReviewNotFoundException {
-        findById(id);
-        //TODO verificar se é o user que criou
+    public void delete(Long id) throws ReviewNotFoundException, InvalidPermissionException {
+        Review review = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!review.getUser().getId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
         reviewRepo.deleteById(id);
     }
 

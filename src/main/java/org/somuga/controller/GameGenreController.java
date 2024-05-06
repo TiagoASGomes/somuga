@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/game_genre")
+@CrossOrigin(origins = "*")
 public class GameGenreController {
 
     private final IGameGenreService gameGenreService;
@@ -40,9 +41,9 @@ public class GameGenreController {
         return new ResponseEntity<>(gameGenreService.searchByName(name, page), HttpStatus.OK);
     }
 
-    //    TODO change to admin
     @PostMapping("/private")
     public ResponseEntity<GameGenrePublicDto> create(@Valid @RequestBody GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
         return new ResponseEntity<>(gameGenreService.create(genreDto), HttpStatus.CREATED);
     }
+
 }

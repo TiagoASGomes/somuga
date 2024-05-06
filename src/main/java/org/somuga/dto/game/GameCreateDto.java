@@ -22,6 +22,9 @@ public record GameCreateDto(
         Double price,
         @NotBlank(message = INVALID_DESCRIPTION)
         @Size(max = 1000, message = MAX_DESCRIPTION_CHARACTERS)
-        String description
+        String description,
+        @NotBlank(message = INVALID_MEDIA_URL)
+        String mediaUrl,
+        String imageUrl
 ) {
 }

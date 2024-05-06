@@ -12,14 +12,18 @@ public class Developer {
     private Long id;
     @Column(unique = true)
     private String developerName;
+    private String developerCreatorId;
+    private List<String> socials;
     @OneToMany(mappedBy = "developer")
     private List<Game> games;
 
     public Developer() {
     }
 
-    public Developer(String developerName) {
+    public Developer(String developerName, List<String> socials, String developerCreatorId) {
         this.developerName = developerName;
+        this.socials = socials;
+        this.developerCreatorId = developerCreatorId;
     }
 
     public Long getId() {
@@ -46,7 +50,19 @@ public class Developer {
         this.games = games;
     }
 
-    public void addGame(Game game) {
-        games.add(game);
+    public List<String> getSocials() {
+        return socials;
+    }
+
+    public void setSocials(List<String> socials) {
+        this.socials = socials;
+    }
+
+    public String getDeveloperCreatorId() {
+        return developerCreatorId;
+    }
+
+    public void setDeveloperCreatorId(String developerCreatorId) {
+        this.developerCreatorId = developerCreatorId;
     }
 }

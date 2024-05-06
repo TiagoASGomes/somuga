@@ -4,49 +4,57 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
 import org.somuga.aspect.Error;
-import org.somuga.dto.game.GameCreateDto;
-import org.somuga.dto.game.GamePublicDto;
+import org.somuga.converter.ReviewConverter;
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
-import org.somuga.dto.user.UserCreateDto;
-import org.somuga.dto.user.UserPublicDto;
-import org.somuga.entity.Developer;
-import org.somuga.entity.GameGenre;
-import org.somuga.entity.Platform;
+import org.somuga.entity.*;
 import org.somuga.repository.*;
 import org.somuga.testDtos.ReviewGameDto;
-import org.somuga.testDtos.ReviewMovieDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.util.message.Messages.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@ContextConfiguration
 @ActiveProfiles("test")
 public class ReviewControllerTest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
-    private final String API_PATH = "/api/v1/review";
+    private final String USER_ID = "google-auth2|1234567890";
+    private final String PRIVATE_API_PATH = "/api/v1/review/private";
+    private final String PUBLIC_API_PATH = "/api/v1/review/public";
     private final String developerName = "Developer";
     private final String genreName = "genre";
     private final String platformName = "platforms";
-    private GamePublicDto game;
-    private UserPublicDto user;
-    @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
+    private Developer developer;
+    private Set<GameGenre> gameGenres = new HashSet<>();
+    private Set<Platform> platforms = new HashSet();
+    private Game game;
+    private User user;
     @Autowired
     private UserRepository userTestRepository;
     @Autowired
@@ -59,6 +67,11 @@ public class ReviewControllerTest {
     private GameGenreRepository gameGenreRepository;
     @Autowired
     private DeveloperRepository developerRepository;
+    @Autowired
+    private WebApplicationContext controller;
+    @MockBean
+    @SuppressWarnings("unused")
+    private JwtDecoder jwtDecoder;
 
     @BeforeAll
     public static void setUpMapper() {
@@ -76,61 +89,47 @@ public class ReviewControllerTest {
     }
 
     @BeforeEach
-    public void setUp() throws Exception {
-        developerRepository.save(new Developer(developerName.toLowerCase()));
-        gameGenreRepository.save(new GameGenre(genreName.toLowerCase()));
-        platformRepository.save(new Platform(platformName.toLowerCase()));
-        user = createUser("UserName", "email@example.com");
+    public void setUp() {
+        mockMvc = MockMvcBuilders
+                .webAppContextSetup(controller)
+                .apply(springSecurity())
+                .build();
+        developer = developerRepository.save(new Developer(developerName, List.of(), USER_ID));
+        gameGenres.add(gameGenreRepository.save(new GameGenre(genreName)));
+        platforms.add(platformRepository.save(new Platform(platformName)));
+        user = createUser(USER_ID, "UserName", "email@example.com");
         game = createGame();
     }
 
-    public GamePublicDto createGame() throws Exception {
-
-        GameCreateDto gameDto = new GameCreateDto("Title", new Date(), developerName, List.of(genreName), List.of(platformName), 10.0, "Description");
-
-        String response = mockMvc.perform(post("/api/v1/game")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameDto)))
-                .andReturn().getResponse().getContentAsString();
-
-        return mapper.readValue(response, GamePublicDto.class);
+    public Game createGame() {
+        Game game = new Game();
+        game.setTitle("Game");
+        game.setReleaseDate(new Date());
+        game.setDeveloper(developer);
+        game.setGenres(gameGenres);
+        game.setPlatforms(platforms);
+        game.setMediaType(org.somuga.enums.MediaType.GAME);
+        return gameRepository.save(game);
     }
 
-
-    public UserPublicDto createUser(String userName, String email) throws Exception {
-        UserCreateDto userDto = new UserCreateDto(userName, email);
-
-        String response = mockMvc.perform(post("/api/v1/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-
-        return mapper.readValue(response, UserPublicDto.class);
+    public User createUser(String id, String userName, String email) {
+        User user = new User(id, userName, email);
+        return userTestRepository.save(user);
     }
 
-    public long createReview(Long userId, Long mediaId, org.somuga.enums.MediaType type) throws Exception {
-        ReviewCreateDto reviewCreateDto = new ReviewCreateDto(userId, mediaId, 5, "My Review");
-        String response = mockMvc.perform(post(API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-
-        if (type.equals(org.somuga.enums.MediaType.GAME)) {
-            return mapper.readValue(response, ReviewGameDto.class).id();
-        }
-        return mapper.readValue(response, ReviewMovieDto.class).id();
-
+    public ReviewPublicDto createReview(User user, Media media, int score, String review) {
+        Review reviewEntity = new Review(score, review, user, media);
+        return ReviewConverter.fromEntityToPublicDto(reviewTestRepository.save(reviewEntity));
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create game review and expect status 201 and like")
     void testCreateGameReview() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(user.id(), game.id(), 5, "My Review");
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "My Review");
 
-
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(reviewDto)))
                 .andExpect(status().isCreated())
@@ -139,22 +138,24 @@ public class ReviewControllerTest {
         ReviewGameDto review = mapper.readValue(response, ReviewGameDto.class);
 
         assertNotNull(review.id());
-        assertEquals(reviewDto.userId(), review.user().id());
+        assertEquals(USER_ID, review.user().id());
         assertEquals(reviewDto.mediaId(), review.media().id());
-        assertEquals(user.userName(), review.user().userName());
-        assertEquals(game.title(), review.media().title());
+        assertEquals(user.getUserName(), review.user().userName());
+        assertEquals(game.getTitle(), review.media().title());
         assertEquals(5, review.reviewScore());
         assertEquals("My Review", review.writtenReview());
     }
 
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create review with incorrect id and expect status 404 and message")
     void testCreateReviewIncorrectId() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(user.id(), 99999999L, 5, "My Review");
+        ReviewCreateDto reviewDto = new ReviewCreateDto(99999999L, 5, "My Review");
 
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(reviewDto)))
                 .andExpect(status().isNotFound())
@@ -166,15 +167,17 @@ public class ReviewControllerTest {
         assertEquals(404, error.getStatus());
         assertEquals("POST", error.getMethod());
         assertNotNull(error.getTimestamp());
-        assertEquals(API_PATH, error.getPath());
+        assertEquals(PRIVATE_API_PATH, error.getPath());
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create review with incorrect validation and expect status 400 and message")
     void testCreateLikeValidation() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(user.id() * -1, game.id() * -1, (int) (user.id() * 20), "A".repeat(1100));
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId() * -1, (int) (game.getId() * 11), "A".repeat(1100));
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(reviewDto)))
                 .andExpect(status().isBadRequest())
@@ -188,21 +191,24 @@ public class ReviewControllerTest {
         assertEquals(400, error.getStatus());
         assertEquals("POST", error.getMethod());
         assertNotNull(error.getTimestamp());
-        assertEquals(API_PATH, error.getPath());
+        assertEquals(PRIVATE_API_PATH, error.getPath());
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test create duplicate review and expect status 400 and message")
     void testCreateReviewDuplicate() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(user.id(), game.id(), 5, "My Review");
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "My Review");
 
 
-        mockMvc.perform(post(API_PATH)
+        mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(reviewDto)))
                 .andExpect(status().isCreated());
 
-        String response = mockMvc.perform(post(API_PATH)
+        String response = mockMvc.perform(post(PRIVATE_API_PATH)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(reviewDto)))
                 .andExpect(status().isBadRequest())
@@ -214,23 +220,23 @@ public class ReviewControllerTest {
         assertEquals(400, error.getStatus());
         assertEquals("POST", error.getMethod());
         assertNotNull(error.getTimestamp());
-        assertEquals(API_PATH, error.getPath());
+        assertEquals(PRIVATE_API_PATH, error.getPath());
     }
 
     @Test
     @DisplayName("Test get review by id and expect status 200 and review")
     void testGetReviewById() throws Exception {
-        long id = createReview(user.id(), game.id(), org.somuga.enums.MediaType.GAME);
+        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
 
-        String response = mockMvc.perform(get(API_PATH + "/" + id))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + reviewDto.id()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         ReviewGameDto review = mapper.readValue(response, ReviewGameDto.class);
 
-        assertEquals(id, review.id());
-        assertEquals(user.id(), review.user().id());
-        assertEquals(game.id(), review.media().id());
+        assertEquals(reviewDto.id(), review.id());
+        assertEquals(user.getId(), review.user().id());
+        assertEquals(game.getId(), review.media().id());
         assertEquals(5, review.reviewScore());
         assertEquals("My Review", review.writtenReview());
     }
@@ -238,7 +244,7 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get review by id with no review and expect status 404 and message")
     void testGetReviewByIdNotFound() throws Exception {
-        String response = mockMvc.perform(get(API_PATH + "/" + 9999999))
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + 9999999))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -248,18 +254,18 @@ public class ReviewControllerTest {
         assertEquals(404, error.getStatus());
         assertEquals("GET", error.getMethod());
         assertNotNull(error.getTimestamp());
-        assertEquals(API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(PUBLIC_API_PATH + "/" + 9999999, error.getPath());
     }
 
     @Test
     @DisplayName("Test get all reviews from user and expect status 200 and list with reviews")
     void testGetAllReviewsFromUser() throws Exception {
-        long userId = createUser("UserName2", "email2@example.com").id();
+        User user = createUser(USER_ID, "UserName2", "email2@example.com");
         for (int i = 0; i < 3; i++) {
-            createReview(userId, createGame().id(), org.somuga.enums.MediaType.GAME);
+            createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/user/" + userId))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));
     }
@@ -267,15 +273,15 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get all reviews from user paged and expect status 200 and list with reviews and pages")
     void testGetAllReviewsFromUserPaged() throws Exception {
-        long userId = createUser("UserName2", "email2@example.com").id();
+        User user = createUser(USER_ID, "UserName2", "email2@example.com");
         for (int i = 0; i < 3; i++) {
-            createReview(userId, createGame().id(), org.somuga.enums.MediaType.GAME);
+            createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/user/" + userId + "?page=0&size=2"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=0&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
-        mockMvc.perform(get(API_PATH + "/user/" + userId + "?page=1&size=2"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=1&size=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -283,12 +289,12 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get all reviews from user with no reviews and expect status 200 and empty list")
     void testGetAllReviewsFromUserWithNoUserReviews() throws Exception {
-        long userId = createUser("UserName2", "email2@example.com").id();
+        User user = createUser(USER_ID, "UserName2", "email2@example.com");
         for (int i = 0; i < 3; i++) {
-            createReview(userId, createGame().id(), org.somuga.enums.MediaType.GAME);
+            createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/user/" + 99999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + 99999))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -298,12 +304,12 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get all reviews from media and expect status 200 and list with reviews")
     void testGetAllReviewsFromMedia() throws Exception {
-        long mediaId = createGame().id();
+        Game game = createGame();
         for (int i = 0; i < 6; i++) {
-            createReview(createUser("Name" + i, "email" + i + "@example.com").id(), mediaId, org.somuga.enums.MediaType.GAME);
+            createReview(createUser(USER_ID, "Name" + i, "email" + i + "@example.com"), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/media/" + mediaId))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(6)));
     }
@@ -311,15 +317,15 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get all reviews from media paged and expect status 200 and list with reviews and pages")
     void testGetAllReviewsFromMediaPaged() throws Exception {
-        long mediaId = createGame().id();
+        Game game = createGame();
         for (int i = 0; i < 6; i++) {
-            createReview(createUser("Name" + i, "email" + i + "@example.com").id(), mediaId, org.somuga.enums.MediaType.GAME);
+            createReview(createUser(USER_ID, "Name" + i, "email" + i + "@example.com"), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/media/" + mediaId + "?page=0&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId() + "?page=0&size=4"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)));
-        mockMvc.perform(get(API_PATH + "/media/" + mediaId + "?page=1&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId() + "?page=1&size=4"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
 
@@ -328,23 +334,25 @@ public class ReviewControllerTest {
     @Test
     @DisplayName("Test get all reviews from media with no reviews and expect status 200 and empty list")
     void testGetAllReviewsFromMediaWithNoMediaReviews() throws Exception {
-        long mediaId = createGame().id();
+        Game game = createGame();
         for (int i = 0; i < 6; i++) {
-            createReview(createUser("Name" + i, "email" + i + "@example.com").id(), mediaId, org.somuga.enums.MediaType.GAME);
+            createReview(createUser(USER_ID, "Name" + i, "email" + i + "@example.com"), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(API_PATH + "/media/" + 999999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + 999999))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test update review and expect status 200 and updated review")
     void testUpdateReview() throws Exception {
-        long reviewId = createReview(user.id(), game.id(), org.somuga.enums.MediaType.GAME);
+        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
         ReviewUpdateDto updateDto = new ReviewUpdateDto(6, "New Review");
 
-        String response = mockMvc.perform(patch(API_PATH + "/" + reviewId)
+        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + reviewDto.id())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
@@ -352,17 +360,19 @@ public class ReviewControllerTest {
 
         ReviewGameDto review = mapper.readValue(response, ReviewGameDto.class);
 
-        assertEquals(reviewId, review.id());
+        assertEquals(reviewDto.id(), review.id());
         assertEquals(6, review.reviewScore());
         assertEquals("New Review", review.writtenReview());
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test update review with no review and expect status 404 and message")
     void testUpdateReviewNotFound() throws Exception {
         ReviewUpdateDto updateDto = new ReviewUpdateDto(6, "New Review");
 
-        String response = mockMvc.perform(patch(API_PATH + "/" + 9999999)
+        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + 9999999)
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isNotFound())
@@ -370,7 +380,7 @@ public class ReviewControllerTest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
         assertEquals("PATCH", error.getMethod());
         assertEquals(REVIEW_NOT_FOUND + 9999999, error.getMessage());
         assertEquals(404, error.getStatus());
@@ -378,12 +388,14 @@ public class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test update review with validation errors and expect status 400 and message")
     void testUpdateReviewValidation() throws Exception {
-        long reviewId = createReview(user.id(), game.id(), org.somuga.enums.MediaType.GAME);
-        ReviewUpdateDto updateDto = new ReviewUpdateDto((int) (user.id() * 20), "A".repeat(1100));
+        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
+        ReviewUpdateDto updateDto = new ReviewUpdateDto((int) (game.getId() * 20), "A".repeat(1100));
 
-        String response = mockMvc.perform(patch(API_PATH + "/" + reviewId)
+        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + reviewDto.id())
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
@@ -391,7 +403,7 @@ public class ReviewControllerTest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(API_PATH + "/" + reviewId, error.getPath());
+        assertEquals(PRIVATE_API_PATH + "/" + reviewDto.id(), error.getPath());
         assertEquals("PATCH", error.getMethod());
         assertTrue(error.getMessage().contains(INVALID_SCORE));
         assertTrue(error.getMessage().contains(MAX_REVIEW_CHARACTERS));
@@ -400,24 +412,26 @@ public class ReviewControllerTest {
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test delete review and expect status 200 and deleted review")
     void testDeleteReview() throws Exception {
-        long reviewId = createReview(user.id(), game.id(), org.somuga.enums.MediaType.GAME);
+        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
 
-        mockMvc.perform(delete(API_PATH + "/" + reviewId))
+        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + reviewDto.id())
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get(API_PATH + "/user/" + user.id()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+        assertEquals(0, reviewTestRepository.count());
 
     }
 
     @Test
+    @WithMockUser(username = USER_ID)
     @DisplayName("Test delete review with no review and expect status 404 and message")
     void testDeleteReviewNotFound() throws Exception {
 
-        String response = mockMvc.perform(delete(API_PATH + "/" + 9999999))
+        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/" + 9999999)
+                        .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -427,6 +441,6 @@ public class ReviewControllerTest {
         assertEquals(404, error.getStatus());
         assertEquals("DELETE", error.getMethod());
         assertNotNull(error.getTimestamp());
-        assertEquals(API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
     }
 }

@@ -18,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final IUserService userService;
@@ -38,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/public/{id}")
-    public ResponseEntity<UserPublicDto> getById(@PathVariable Long id) throws UserNotFoundException {
+    public ResponseEntity<UserPublicDto> getById(@PathVariable String id) throws UserNotFoundException {
         return new ResponseEntity<>(userService.getById(id), HttpStatus.OK);
     }
 
@@ -47,22 +48,20 @@ public class UserController {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/private/{id}")
-    public ResponseEntity<UserPublicDto> updateUserName(@PathVariable Long id, @Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException {
-        //TODO check if the user is the same as the one in the token
-        return new ResponseEntity<>(userService.updateUserName(id, user), HttpStatus.OK);
+    @PatchMapping("/private")
+    public ResponseEntity<UserPublicDto> updateUserName(@Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException {
+        return new ResponseEntity<>(userService.updateUserName(user), HttpStatus.OK);
     }
 
-    @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws UserNotFoundException {
-        //TODO check if the user is the same as the one in the token
-        userService.delete(id);
+    @DeleteMapping("/private")
+    public ResponseEntity<Void> delete() throws UserNotFoundException {
+        userService.delete();
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws UserNotFoundException {
-        userService.delete(id);
+        userService.delete();
         return ResponseEntity.noContent().build();
     }
 }
