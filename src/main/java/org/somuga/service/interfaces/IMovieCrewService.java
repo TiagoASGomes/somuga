@@ -18,4 +18,6 @@ public interface IMovieCrewService {
     MovieCrewPublicDto create(MovieCrewCreateDto movieCrew);
 
     MovieCrewPublicDto update(Long id, MovieCrewCreateDto movieCrew) throws MovieCrewNotFoundException, InvalidPermissionException;
+
+    void delete(Long id) throws MovieCrewNotFoundException, InvalidPermissionException;
 }

@@ -67,6 +67,16 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
+    public void delete(Long id) throws DeveloperNotFoundException, InvalidPermissionException {
+        Developer developer = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!developer.getDeveloperCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
+        }
+        developerRepo.deleteById(id);
+    }
+
+    @Override
     public Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException {
         return developerRepo.findByDeveloperNameIgnoreCase(developerName).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND_NAME + developerName));
     }

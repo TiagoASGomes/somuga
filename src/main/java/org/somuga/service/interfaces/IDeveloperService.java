@@ -23,4 +23,6 @@ public interface IDeveloperService {
     Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException;
 
     DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException;
+
+    void delete(Long id) throws DeveloperNotFoundException, InvalidPermissionException;
 }

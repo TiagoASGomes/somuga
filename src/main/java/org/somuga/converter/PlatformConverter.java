@@ -8,6 +8,7 @@ import java.util.List;
 public class PlatformConverter {
 
     public static PlatformPublicDto fromEntityToPublicDto(Platform platform) {
+        if (platform == null) return null;
         return new PlatformPublicDto(
                 platform.getId(),
                 platform.getPlatformName()

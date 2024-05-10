@@ -3,7 +3,6 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
-import org.somuga.dto.user.UserUpdateNameDto;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.somuga.service.interfaces.IUserService;
@@ -48,8 +47,8 @@ public class UserController {
         return new ResponseEntity<>(userService.create(user), HttpStatus.CREATED);
     }
 
-    @PatchMapping("/private")
-    public ResponseEntity<UserPublicDto> updateUserName(@Valid @RequestBody UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException {
+    @PutMapping("/private")
+    public ResponseEntity<UserPublicDto> updateUserName(@Valid @RequestBody UserCreateDto user) throws UserNotFoundException, DuplicateFieldException {
         return new ResponseEntity<>(userService.updateUserName(user), HttpStatus.OK);
     }
 

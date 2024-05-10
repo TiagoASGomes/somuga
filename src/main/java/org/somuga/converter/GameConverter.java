@@ -12,7 +12,8 @@ public class GameConverter {
         if (game == null) return null;
         if (game.getReviews() == null) game.setReviews(Set.of());
         if (game.getLikes() == null) game.setLikes(Set.of());
-
+        if (game.getGenres() == null) game.setGenres(Set.of());
+        if (game.getPlatforms() == null) game.setPlatforms(Set.of());
         return new GamePublicDto(
                 game.getId(),
                 game.getTitle(),

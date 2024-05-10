@@ -76,7 +76,7 @@ public class ReviewService implements IReviewService {
         Review review = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!review.getUser().getId().equals(auth.getName())) {
-            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
         }
         review.setReviewScore(reviewDto.reviewScore());
         review.setWrittenReview(reviewDto.writtenReview());

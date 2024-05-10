@@ -1,7 +1,8 @@
 package org.somuga.dto.movie;
 
 import jakarta.validation.constraints.*;
-import org.somuga.dto.crew_role.CrewRoleCreateDto;
+import org.somuga.dto.crew_role.MovieRoleCreateDto;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,7 @@ public record MovieCreateDto(
         @NotBlank(message = INVALID_TITLE)
         @Size(max = 255, message = MAX_TITLE_CHARACTERS)
         String title,
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
         @Past(message = INVALID_RELEASE_DATE)
         @NotNull(message = INVALID_RELEASE_DATE)
         Date releaseDate,
@@ -24,7 +26,7 @@ public record MovieCreateDto(
         Integer duration,
         @NotNull(message = INVALID_CREW_ROLE)
         @Size(min = 1, message = INVALID_CREW_ROLE)
-        List<CrewRoleCreateDto> crew,
+        List<MovieRoleCreateDto> crew,
         @NotBlank(message = INVALID_MEDIA_URL)
         String mediaUrl,
         String imageUrl

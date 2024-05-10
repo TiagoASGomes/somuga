@@ -1,9 +1,6 @@
 package org.somuga.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.Set;
@@ -14,8 +11,8 @@ public class User {
 
     @Id
     private String id;
+    @Column(name = "user_name", nullable = false)
     private String userName;
-    private String email;
     @OneToMany(mappedBy = "user")
     private Set<Like> likes;
     @OneToMany(mappedBy = "user")
@@ -26,10 +23,9 @@ public class User {
     public User() {
     }
 
-    public User(String id, String userName, String email) {
+    public User(String id, String userName) {
         this.id = id;
         this.userName = userName;
-        this.email = email;
     }
 
     public String getId() {
@@ -70,14 +66,6 @@ public class User {
 
     public void setLikes(Set<Like> likes) {
         this.likes = likes;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getUserName() {

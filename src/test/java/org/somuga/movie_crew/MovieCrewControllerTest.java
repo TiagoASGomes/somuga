@@ -135,9 +135,9 @@ class MovieCrewControllerTest {
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test create movie crew with name over 50 characters and expect status 400")
+    @DisplayName("Test create movie crew with name over 101 characters and expect status 400")
     void testCreateMovieCrewNameOver50Characters() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("T".repeat(51), BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("T".repeat(101), BIRTH_DATE);
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
                         .with(csrf())

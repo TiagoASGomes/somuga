@@ -7,7 +7,6 @@ import org.somuga.aspect.Error;
 import org.somuga.converter.UserConverter;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
-import org.somuga.dto.user.UserUpdateNameDto;
 import org.somuga.entity.User;
 import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +42,7 @@ public class UserControllerTest {
     private final String PRIVATE_API_PATH = "/api/v1/user/private";
     private final String PUBLIC_API_PATH = "/api/v1/user/public";
     private final String USERNAME = "UserName";
-    private final String EMAIL = "email@example.com";
-    private final UserCreateDto userCreateDto = new UserCreateDto(USERNAME, EMAIL);
+    private final UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
     MockMvc mockMvc;
     @Autowired
     private UserRepository userTestRepository;
@@ -72,8 +70,8 @@ public class UserControllerTest {
                 .build();
     }
 
-    public UserPublicDto createUser(String id, String name, String email) {
-        User user = new User(id, name, email);
+    public UserPublicDto createUser(String id, String name) {
+        User user = new User(id, name);
         user.setJoinDate(new Date());
         user.setActive(true);
         return UserConverter.fromEntityToPublicDto(userTestRepository.save(user));
@@ -92,7 +90,6 @@ public class UserControllerTest {
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
         assertEquals(USERNAME, user.userName());
-        assertEquals(EMAIL, user.email());
         assertEquals(USER_ID, user.id());
         assertNotNull(user.joinedDate());
     }
@@ -101,7 +98,7 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with invalid body and expect status 400 and error message")
     void testCreateInvalidBody() throws Exception {
-        UserCreateDto user = new UserCreateDto("ABC", "INVALID");
+        UserCreateDto user = new UserCreateDto("ABC");
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
                         .with(csrf())
@@ -114,7 +111,6 @@ public class UserControllerTest {
 
         assertEquals(400, error.getStatus());
         assertTrue(error.getMessage().contains(INVALID_USERNAME));
-        assertTrue(error.getMessage().contains(INVALID_EMAIL));
         assertEquals(PRIVATE_API_PATH, error.getPath());
         assertEquals("POST", error.getMethod());
     }
@@ -123,7 +119,7 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with empty fields and expect status 400 and error message")
     void testCreateEmptyFields() throws Exception {
-        UserCreateDto user = new UserCreateDto("", "");
+        UserCreateDto user = new UserCreateDto("");
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
                         .with(csrf())
@@ -136,7 +132,6 @@ public class UserControllerTest {
 
         assertEquals(400, error.getStatus());
         assertTrue(error.getMessage().contains(NON_EMPTY_USERNAME));
-        assertTrue(error.getMessage().contains(NON_EMPTY_EMAIL));
         assertEquals(PRIVATE_API_PATH, error.getPath());
         assertEquals("POST", error.getMethod());
     }
@@ -157,7 +152,7 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID + 1)
     @DisplayName("Test create user with duplicate userName and expect status 400 and error message")
     void testCreateDuplicateName() throws Exception {
-        createUser(USER_ID, USERNAME, "email2@example.com");
+        createUser(USER_ID, USERNAME);
 
         List<User> users = userTestRepository.findAll();
 
@@ -176,32 +171,12 @@ public class UserControllerTest {
         assertEquals("POST", error.getMethod());
     }
 
-    @Test
-    @WithMockUser(username = USER_ID + 1)
-    @DisplayName("Test create user with duplicate email and expect status 400 and error message")
-    void testCreateDuplicateEmail() throws Exception {
-        createUser(USER_ID, "userName2", EMAIL);
-
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        Error error = mapper.readValue(response, Error.class);
-
-        assertEquals(DUPLICATE_EMAIL + EMAIL, error.getMessage());
-        assertEquals(400, error.getStatus());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
-        assertEquals("POST", error.getMethod());
-    }
 
     @Test
     @DisplayName("Test get all users with 2 users present and expect status 200 and 2 users")
     void testGetAll2Users() throws Exception {
         for (int i = 0; i < 2; i++) {
-            createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com");
+            createUser(USER_ID + i, USERNAME + i);
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH))
@@ -223,7 +198,7 @@ public class UserControllerTest {
     @DisplayName("Test get all users with 5 and a page limit of 3 and expect 3 users in page 0 and 2 users in page 1")
     void testGetAllPaged() throws Exception {
         for (int i = 0; i < 5; i++) {
-            createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com");
+            createUser(USER_ID + i, USERNAME + i);
         }
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=3"))
                 .andExpect(status().isOk())
@@ -239,7 +214,7 @@ public class UserControllerTest {
     @DisplayName("Test get all with page size over 100 and expect list with 100 users")
     void testGetAllPagedMaxSize() throws Exception {
         for (int i = 0; i < 101; i++) {
-            createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com");
+            createUser(USER_ID + i, USERNAME + i);
         }
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=101"))
                 .andExpect(status().isOk())
@@ -252,7 +227,7 @@ public class UserControllerTest {
     void testGetAllWithDeletedUsers() throws Exception {
         String id = "";
         for (int i = 0; i < 3; i++) {
-            id = createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com").id();
+            id = createUser(USER_ID + i, USERNAME + i).id();
         }
         userTestRepository.deleteById(id);
         mockMvc.perform(get(PUBLIC_API_PATH))
@@ -266,7 +241,7 @@ public class UserControllerTest {
     void testGetAllWithDeletedUsersPaged() throws Exception {
         String id = "";
         for (int i = 0; i < 5; i++) {
-            id = createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com").id();
+            id = createUser(USER_ID + i, USERNAME + i).id();
         }
         userTestRepository.deleteById(id);
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4"))
@@ -283,9 +258,9 @@ public class UserControllerTest {
     @DisplayName("Test get users all by fullName with 3 matched and expect list with 3 users")
     void testGetAllByName() throws Exception {
         for (int i = 0; i < 3; i++) {
-            createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com");
+            createUser(USER_ID + i, USERNAME + i);
         }
-        createUser(USER_ID + "A", "Teste", "teste@example.com");
+        createUser(USER_ID + "A", "Teste");
         mockMvc.perform(get(PUBLIC_API_PATH + "/name/" + USERNAME))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -296,7 +271,7 @@ public class UserControllerTest {
     @DisplayName("Test get users all by fullName with 0 matches and expect empty list")
     void testGetAllByNameNoFound() throws Exception {
         for (int i = 0; i < 3; i++) {
-            createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com");
+            createUser(USER_ID + i, USERNAME + i);
         }
         mockMvc.perform(get(PUBLIC_API_PATH + "/name/NotFound"))
                 .andExpect(status().isOk())
@@ -309,7 +284,7 @@ public class UserControllerTest {
     void testGetAllByNameWithDeleted() throws Exception {
         String id = "";
         for (int i = 0; i < 3; i++) {
-            id = createUser(USER_ID + i, USERNAME + i, "email" + i + "@example.com").id();
+            id = createUser(USER_ID + i, USERNAME + i).id();
         }
         userTestRepository.deleteById(id);
         mockMvc.perform(get(PUBLIC_API_PATH + "/name/" + USERNAME))
@@ -321,7 +296,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test get user by id and expect status 200 and user")
     void testGetById() throws Exception {
-        String id = createUser(USER_ID, USERNAME, EMAIL).id();
+        String id = createUser(USER_ID, USERNAME).id();
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + id))
                 .andExpect(status().isOk())
@@ -330,7 +305,6 @@ public class UserControllerTest {
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
 
         assertEquals(id, user.id());
-        assertEquals(EMAIL, user.email());
         assertEquals(USERNAME, user.userName());
         assertNotNull(user.joinedDate());
     }
@@ -356,10 +330,10 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username and expect status 200 and updated user")
     void testUpdateUserName() throws Exception {
-        createUser(USER_ID, USERNAME, EMAIL);
-        UserUpdateNameDto updateNameDto = new UserUpdateNameDto("NewName");
+        createUser(USER_ID, USERNAME);
+        UserCreateDto updateNameDto = new UserCreateDto("NewName");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH)
+        String response = mockMvc.perform(put(PRIVATE_API_PATH)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateNameDto)))
@@ -370,16 +344,15 @@ public class UserControllerTest {
 
         assertEquals(USER_ID, user.id());
         assertEquals("NewName", user.userName());
-        assertEquals(EMAIL, user.email());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username with not existing user and expect status 404 and message")
     void testUpdateUserNameNotFound() throws Exception {
-        UserUpdateNameDto updateNameDto = new UserUpdateNameDto("NewName");
+        UserCreateDto updateNameDto = new UserCreateDto("NewName");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH)
+        String response = mockMvc.perform(put(PRIVATE_API_PATH)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateNameDto)))
@@ -391,7 +364,7 @@ public class UserControllerTest {
         assertEquals(USER_NOT_FOUND + USER_ID, error.getMessage());
         assertEquals(404, error.getStatus());
         assertEquals(PRIVATE_API_PATH, error.getPath());
-        assertEquals("PATCH", error.getMethod());
+        assertEquals("PUT", error.getMethod());
         assertNotNull(error.getTimestamp());
     }
 
@@ -399,11 +372,11 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username with duplicate fullName and expect status 400 and message")
     void testUpdateUserNameDuplicateName() throws Exception {
-        createUser(USER_ID, USERNAME, EMAIL);
-        createUser(USER_ID + 1, "NewName", "newemail@example.com");
-        UserUpdateNameDto updateNameDto = new UserUpdateNameDto("NewName");
+        createUser(USER_ID, USERNAME);
+        createUser(USER_ID + 1, "NewName");
+        UserCreateDto updateNameDto = new UserCreateDto("NewName");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH)
+        String response = mockMvc.perform(put(PRIVATE_API_PATH)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateNameDto)))
@@ -415,7 +388,7 @@ public class UserControllerTest {
         assertEquals(DUPLICATE_USERNAME + "NewName", error.getMessage());
         assertEquals(400, error.getStatus());
         assertEquals(PRIVATE_API_PATH, error.getPath());
-        assertEquals("PATCH", error.getMethod());
+        assertEquals("PUT", error.getMethod());
         assertNotNull(error.getTimestamp());
     }
 
@@ -423,22 +396,14 @@ public class UserControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete user and expect status 204 and deleted user")
     void testDelete() throws Exception {
-        createUser(USER_ID, USERNAME, EMAIL);
+        createUser(USER_ID, USERNAME);
 
         mockMvc.perform(delete(PRIVATE_API_PATH)
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + USER_ID))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
-
-        assertEquals(USER_ID, user.id());
-        assertEquals("", user.email());
-        assertEquals("", user.userName());
-        assertNotNull(user.joinedDate());
+        mockMvc.perform(get(PUBLIC_API_PATH + "/" + USER_ID))
+                .andExpect(status().isNotFound());
     }
 
     @Test

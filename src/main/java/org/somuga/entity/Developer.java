@@ -10,11 +10,13 @@ public class Developer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(unique = true, name = "developer_name", nullable = false)
     private String developerName;
+    @Column(name = "developer_creator_id", nullable = false)
     private String developerCreatorId;
     private List<String> socials;
-    @OneToMany(mappedBy = "developer")
+    @OneToMany(mappedBy = "developer",
+            fetch = FetchType.LAZY)
     private List<Game> games;
 
     public Developer() {

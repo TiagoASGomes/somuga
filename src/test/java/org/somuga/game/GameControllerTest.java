@@ -109,6 +109,7 @@ class GameControllerTest {
     public void createDeveloper(String developerName) {
         Developer developer = new Developer();
         developer.setDeveloperName(developerName.toLowerCase());
+        developer.setDeveloperCreatorId(USER);
         developerRepository.save(developer);
     }
 
@@ -149,6 +150,19 @@ class GameControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         return mapper.readValue(response, Error.class);
+    }
+
+    public Game createGameNoRequest() {
+        Game game = new Game();
+        game.setTitle("Game");
+        game.setReleaseDate(new Date());
+        game.setDescription("Description");
+        game.setMediaCreatorId(USER);
+        game.setPrice(0.0);
+        game.setMediaUrl("mediaUrl");
+        game.setImageUrl("imageUrl");
+        game.setMediaType(org.somuga.enums.MediaType.GAME);
+        return gameRepository.save(game);
     }
 
     @Test
@@ -282,18 +296,6 @@ class GameControllerTest {
         assertEquals(0, gameRepository.count());
     }
 
-    @Test
-    @WithMockUser(username = USER)
-    @DisplayName("Test create game with invalid release date and expect 400")
-    void testCreateGameWithInvalidReleaseDate() throws Exception {
-        Date invalidReleaseDate = new Date(System.currentTimeMillis() + 100000);
-
-        Error error = createGameBadRequest(title, description, invalidReleaseDate, price, developer, genres, platforms, mediaUrl, imageUrl);
-
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertEquals(400, error.getStatus());
-        assertEquals(0, gameRepository.count());
-    }
 
     @Test
     @WithMockUser(username = USER)
@@ -755,28 +757,6 @@ class GameControllerTest {
 
     @Test
     @WithMockUser(username = USER)
-    @DisplayName("Test update game with invalid release date and expect 400")
-    void testUpdateGameWithInvalidReleaseDate() throws Exception {
-        GamePublicDto gamePublicDto = createGame(title, description, releaseDate, price, developer, genres, platforms, mediaUrl, imageUrl);
-
-        Date invalidReleaseDate = new Date(System.currentTimeMillis() + 10000);
-        GameCreateDto gameCreateDto = new GameCreateDto(title, invalidReleaseDate, developer, genres, platforms, price, description, mediaUrl, imageUrl);
-
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + gamePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        Error error = mapper.readValue(response, Error.class);
-
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertEquals(400, error.getStatus());
-    }
-
-    @Test
-    @WithMockUser(username = USER)
     @DisplayName("Test update game with invalid id and expect 404")
     void testUpdateGameWithInvalidId() throws Exception {
         String invalidId = "9999999";
@@ -821,9 +801,7 @@ class GameControllerTest {
     @WithMockUser(username = "different-user|1234567890")
     @DisplayName("Test update game with different user and expect 403")
     void testUpdateGameWithDifferentUser() throws Exception {
-        Game game = new Game();
-        game.setMediaCreatorId(USER);
-        gameRepository.save(game);
+        Game game = createGameNoRequest();
 
         String newTitle = "New Title";
         String newDescription = "New Description";

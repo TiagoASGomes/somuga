@@ -59,13 +59,7 @@ public class MovieController {
     }
 
     @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException {
-        movieService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws MovieNotFoundException {
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException, InvalidPermissionException {
         movieService.delete(id);
         return ResponseEntity.noContent().build();
     }

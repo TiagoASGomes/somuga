@@ -11,9 +11,9 @@ public class Platform {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String platformName;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Game> games;
 
     public Platform() {
@@ -53,6 +53,13 @@ public class Platform {
             games.add(game);
         } else if (!games.contains(game)) {
             games.add(game);
+        }
+    }
+
+    public void removeGame(Game game) {
+        if (games != null) {
+            games.remove(game);
+            game.removePlatform(this);
         }
     }
 }

@@ -37,9 +37,9 @@ public class MovieCrewController {
         return new ResponseEntity<>(movieCrewService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/public/search/{fullName}")
-    public ResponseEntity<List<MovieCrewPublicDto>> getByName(@PathVariable String fullName, Pageable page) {
-        return new ResponseEntity<>(movieCrewService.getByName(fullName, page), HttpStatus.OK);
+    @GetMapping("/public/search/{name}")
+    public ResponseEntity<List<MovieCrewPublicDto>> getByName(@PathVariable String name, Pageable page) {
+        return new ResponseEntity<>(movieCrewService.getByName(name, page), HttpStatus.OK);
     }
 
     @PostMapping("/private")
@@ -50,5 +50,11 @@ public class MovieCrewController {
     @PutMapping("/private/{id}")
     public ResponseEntity<MovieCrewPublicDto> update(@PathVariable Long id, @Valid @RequestBody MovieCrewCreateDto movieCrew) throws MovieCrewNotFoundException, InvalidPermissionException {
         return new ResponseEntity<>(movieCrewService.update(id, movieCrew), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/private/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieCrewNotFoundException, InvalidPermissionException {
+        movieCrewService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

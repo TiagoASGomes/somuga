@@ -22,11 +22,16 @@ public abstract class Media {
     private Long id;
     @Enumerated(EnumType.STRING)
     private MediaType mediaType;
+    @Column(nullable = false, name = "title")
     private String title;
     private Date releaseDate;
+    @Column(length = 1000, nullable = false, name = "description")
     private String description;
+    @Column(name = "image_url")
     private String imageUrl;
+    @Column(name = "media_url", nullable = false)
     private String mediaUrl;
+    @Column(name = "media_creator_id", nullable = false)
     private String mediaCreatorId;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,

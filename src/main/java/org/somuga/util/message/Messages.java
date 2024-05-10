@@ -16,7 +16,7 @@ public class Messages {
     public static final String GENRE_NOT_FOUND_NAME = "No genre found with fullName: ";
     public static final String MOVIE_CREW_NOT_FOUND = "No crew member found with id: ";
     public static final String NON_EMPTY_USERNAME = "Username cannot be empty";
-    public static final String INVALID_USERNAME = "Username must be between 4 and 20 characters, and can only contain letters, numbers, - and spaces";
+    public static final String INVALID_USERNAME = "Username must be between 4 and 20 characters, and can only contain letters, numbers and underscores";
     public static final String NON_EMPTY_EMAIL = "Email cannot be empty";
     public static final String INVALID_EMAIL = "Invalid email";
     public static final String DUPLICATE_EMAIL = "User with already exists with this email: ";
@@ -33,12 +33,12 @@ public class Messages {
     public static final String DEVELOPER_ALREADY_EXISTS = "Developer already exists with this fullName: ";
     public static final String PLATFORM_ALREADY_EXISTS = "Platform already exists with this fullName: ";
     public static final String GENRE_ALREADY_EXISTS = "Genre already exists with this fullName: ";
-    public static final String INVALID_RELEASE_DATE = "Release date cannot be in the future";
+    public static final String INVALID_RELEASE_DATE = "Release date cannot be empty";
     public static final String INVALID_PRICE = "Price must be between 0 and 1000";
     public static final String INVALID_DESCRIPTION = "Description field cannot be empty";
     public static final String MAX_DESCRIPTION_CHARACTERS = "Description must be lower that 1000 characters";
     public static final String INVALID_NAME = "Name field cannot be empty";
-    public static final String INVALID_NAME_SIZE = "Name must be between 1 and 50 characters";
+    public static final String INVALID_NAME_SIZE = "Name must be between 3 and 100 characters";
     public static final String INVALID_BIRTH_DATE = "Birth date must be in the past";
     public static final String INVALID_MOVIE_ROLE = "Invalid movie role";
     public static final String INVALID_CHARACTER_NAME = "Character name must be lower than 255 characters";
@@ -49,6 +49,10 @@ public class Messages {
     public static final String UNAUTHORIZED_DELETE = "You are not authorized to delete this entity because you are not the creator";
     public static final String INVALID_MEDIA_URL = "Media URL cannot be empty";
     public static final String DUPLICATE_USER = "User already exists with this id: ";
+    public static final String INVALID_PLATFORMS = "Platforms cannot be empty";
+    public static final String INVALID_GENRES = "Genres cannot be empty";
+    public static final String INVALID_DEVELOPER = "Developer cannot be empty";
+    public static final String CHARACTER_NAME_REQUIRED = "Character name is required for actors";
 
 
     private Messages() {

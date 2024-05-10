@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
 import org.somuga.aspect.Error;
-import org.somuga.dto.crew_role.CrewRoleCreateDto;
+import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.MovieCrew;
@@ -97,7 +97,7 @@ class MovieControllerTest {
         movieCrewRepository.saveAll(crew);
     }
 
-    public MoviePublicDto createMovie(String title, Date releaseDate, String description, Integer duration, List<CrewRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
+    public MoviePublicDto createMovie(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -110,7 +110,7 @@ class MovieControllerTest {
         return mapper.readValue(response, MoviePublicDto.class);
     }
 
-    public Error createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<CrewRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
+    public Error createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -123,22 +123,22 @@ class MovieControllerTest {
         return mapper.readValue(response, Error.class);
     }
 
-    public List<CrewRoleCreateDto> createAllRoles() {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = new ArrayList<>();
+    public List<MovieRoleCreateDto> createAllRoles() {
+        List<MovieRoleCreateDto> movieRoleCreateDtos = new ArrayList<>();
         for (MovieCrew movieCrew : crew) {
             if (movieCrew.getFullName().equals("Actor")) {
-                CrewRoleCreateDto crewRoleCreateDto = new CrewRoleCreateDto(movieCrew.getId(), movieCrew.getFullName().toUpperCase(), "Character1");
-                crewRoleCreateDtos.add(crewRoleCreateDto);
+                MovieRoleCreateDto movieRoleCreateDto = new MovieRoleCreateDto(movieCrew.getId(), movieCrew.getFullName().toUpperCase(), "Character1");
+                movieRoleCreateDtos.add(movieRoleCreateDto);
                 continue;
             }
-            CrewRoleCreateDto crewRoleCreateDto = new CrewRoleCreateDto(movieCrew.getId(), movieCrew.getFullName().toUpperCase(), "");
-            crewRoleCreateDtos.add(crewRoleCreateDto);
+            MovieRoleCreateDto movieRoleCreateDto = new MovieRoleCreateDto(movieCrew.getId(), movieCrew.getFullName().toUpperCase(), "");
+            movieRoleCreateDtos.add(movieRoleCreateDto);
         }
-        return crewRoleCreateDtos;
+        return movieRoleCreateDtos;
     }
 
-    public List<CrewRoleCreateDto> createOneRole(Long id, String fullName, String character) {
-        return List.of(new CrewRoleCreateDto(id, fullName, character));
+    public List<MovieRoleCreateDto> createOneRole(Long id, String fullName, String character) {
+        return List.of(new MovieRoleCreateDto(id, fullName, character));
     }
 
     @Test
@@ -302,9 +302,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with crew role id under 0 and expect status 400")
     void testCreateMovieWithCrewRoleIdUnder0() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(-1L, "ACTOR", "Character1");
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(-1L, "ACTOR", "Character1");
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(ID_GREATER_THAN_0));
         assertEquals(400, error.getStatus());
@@ -314,9 +314,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with crew role id null and expect status 400")
     void testCreateMovieWithCrewRoleIdNull() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(null, "ACTOR", "Character1");
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(null, "ACTOR", "Character1");
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(ID_GREATER_THAN_0));
         assertEquals(400, error.getStatus());
@@ -326,9 +326,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with crew role null and expect status 400")
     void testCreateMovieWithCrewRoleNull() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(1L, null, "Character1");
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(1L, null, "Character1");
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(INVALID_MOVIE_ROLE));
         assertEquals(400, error.getStatus());
@@ -338,9 +338,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with crew role empty and expect status 400")
     void testCreateMovieWithCrewRoleEmpty() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(1L, "", "Character1");
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(1L, "", "Character1");
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(INVALID_MOVIE_ROLE));
         assertEquals(400, error.getStatus());
@@ -350,9 +350,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with invalid crew role and expect status 400")
     void testCreateMovieWithInvalidCrewRole() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(1L, "INVALID", "Character1");
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(1L, "INVALID", "Character1");
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(INVALID_MOVIE_ROLE));
         assertEquals(400, error.getStatus());
@@ -362,9 +362,9 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with character name exceeding 255 characters and expect status 400")
     void testCreateMovieWithCharacterNameExceeding255Characters() throws Exception {
-        List<CrewRoleCreateDto> crewRoleCreateDtos = createOneRole(1L, "ACTOR", "a".repeat(256));
+        List<MovieRoleCreateDto> movieRoleCreateDtos = createOneRole(1L, "ACTOR", "a".repeat(256));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crewRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
         assertTrue(error.getMessage().contains(INVALID_CHARACTER_NAME));
         assertEquals(400, error.getStatus());
@@ -444,10 +444,10 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test get all movies by crew id and expect status 200")
     void testGetAllMoviesByCrewId() throws Exception {
-        List<CrewRoleCreateDto> crew = createAllRoles();
+        List<MovieRoleCreateDto> crew = createAllRoles();
         createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
-        CrewRoleCreateDto lastCrew = crew.remove(1);
+        MovieRoleCreateDto lastCrew = crew.remove(1);
         createMovie(TITLE + 3, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "/crew/" + lastCrew.movieCrewId())
@@ -464,10 +464,10 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test get all movies by crew id with pagination and expect status 200")
     void testGetAllMoviesByCrewIdWithPagination() throws Exception {
-        List<CrewRoleCreateDto> crew = createAllRoles();
+        List<MovieRoleCreateDto> crew = createAllRoles();
         createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
-        CrewRoleCreateDto lastCrew = crew.remove(1);
+        MovieRoleCreateDto lastCrew = crew.remove(1);
         createMovie(TITLE + 3, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "/crew/" + lastCrew.movieCrewId() + "?page=0&size=1")
@@ -517,7 +517,7 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update movie and expect status 200")
     void testUpdateMovie() throws Exception {
-        List<CrewRoleCreateDto> crew = createAllRoles();
+        List<MovieRoleCreateDto> crew = createAllRoles();
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
         String newTitle = "New Title";
         Date newReleaseDate = new Date();
@@ -548,7 +548,7 @@ class MovieControllerTest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update movie invalid id and expect status 404")
     void testUpdateMovieInvalidId() throws Exception {
-        List<CrewRoleCreateDto> crew = createAllRoles();
+        List<MovieRoleCreateDto> crew = createAllRoles();
         String newTitle = "New Title";
         Date newReleaseDate = new Date();
         String newDescription = "New Description";

@@ -24,7 +24,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -95,9 +94,6 @@ public class LikeControllerTest {
                 .webAppContextSetup(controller)
                 .apply(springSecurity())
                 .build();
-        developer = developerRepository.save(new Developer(developerName, List.of(), USER_ID));
-        gameGenres.add(gameGenreRepository.save(new GameGenre(genreName)));
-        platforms.add(platformRepository.save(new Platform(platformName)));
         user = createUser(USER_ID, "UserName", "email@example.com");
         game = createGame();
     }
@@ -106,15 +102,17 @@ public class LikeControllerTest {
         Game game = new Game();
         game.setTitle("Game");
         game.setReleaseDate(new Date());
-        game.setDeveloper(developer);
-        game.setGenres(gameGenres);
-        game.setPlatforms(platforms);
+        game.setDescription("Description");
+        game.setMediaCreatorId(USER_ID);
+        game.setPrice(0.0);
+        game.setMediaUrl("mediaUrl");
+        game.setImageUrl("imageUrl");
         game.setMediaType(org.somuga.enums.MediaType.GAME);
         return gameRepository.save(game);
     }
 
     public User createUser(String id, String userName, String email) {
-        User user = new User(id, userName, email);
+        User user = new User(id, userName);
         return userTestRepository.save(user);
     }
 

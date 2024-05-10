@@ -126,6 +126,7 @@ public class GameService implements IGameService {
         for (String genreName : gameDto.genres()) {
             genres.add(genreService.findByGenre(genreName));
         }
+        removePlatformAndGenre(game);
         game.setDeveloper(developer);
         game.setGenres(genres);
         game.setPlatforms(platforms);
@@ -143,7 +144,20 @@ public class GameService implements IGameService {
         if (!game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
-        gameRepo.deleteById(id);
+        removePlatformAndGenre(game);
+        gameRepo.delete(game);
+    }
+
+    private void removePlatformAndGenre(Game game) {
+        Set<Platform> platforms = new HashSet<>(game.getPlatforms());
+        Set<GameGenre> genres = new HashSet<>(game.getGenres());
+        for (Platform platform : platforms) {
+            platform.removeGame(game);
+        }
+        for (GameGenre genre : genres) {
+            genre.removeGame(game);
+        }
+        gameRepo.save(game);
     }
 
     @Override

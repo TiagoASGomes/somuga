@@ -8,6 +8,7 @@ import java.util.List;
 public class DeveloperConverter {
 
     public static DeveloperPublicDto fromEntityToPublicDto(Developer developer) {
+        if (developer == null) return null;
         return new DeveloperPublicDto(
                 developer.getId(),
                 developer.getDeveloperName(),
