@@ -1,7 +1,7 @@
 package org.somuga.service;
 
 import org.somuga.converter.MovieConverter;
-import org.somuga.dto.crew_role.CrewRoleCreateDto;
+import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
@@ -65,12 +65,16 @@ public class MovieService implements IMovieService {
         validateCrew(movieDto.crew());
         Movie movie = MovieConverter.fromCreateDtoToEntity(movieDto);
         List<MovieCrew> crew = new ArrayList<>();
-        for (CrewRoleCreateDto roleDto : movieDto.crew()) {
+        for (MovieRoleCreateDto roleDto : movieDto.crew()) {
             crew.add(crewService.findById(roleDto.movieCrewId()));
         }
         for (int i = 0; i < crew.size(); i++) {
-            CrewRoleCreateDto roleDto = movieDto.crew().get(i);
-            movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), roleDto.characterName());
+            MovieRoleCreateDto roleDto = movieDto.crew().get(i);
+            if (!roleDto.movieRole().equals(MovieRole.ACTOR.toString())) {
+                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), "");
+            } else {
+                movie.addMovieCrew(crew.get(i), MovieRole.ACTOR, roleDto.characterName());
+            }
         }
         movie.setMediaType(MediaType.MOVIE);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -87,27 +91,37 @@ public class MovieService implements IMovieService {
             throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
         }
         validateCrew(movieDto.crew());
-        List<CrewRoleCreateDto> newCrew = deleteOrphanedCrew(movie, movieDto.crew());
-        movieRepo.saveAndFlush(movie);
+        List<MovieCrewRole> toDelete = new ArrayList<>(movie.getMovieCrew());
+        for (MovieCrewRole role : toDelete) {
+            movie.removeMovieCrew(role);
+        }
         movie.setTitle(movieDto.title());
         movie.setReleaseDate(movieDto.releaseDate());
         movie.setDuration(movieDto.duration());
         movie.setDescription(movieDto.description());
         List<MovieCrew> crew = new ArrayList<>();
-        for (CrewRoleCreateDto roleDto : newCrew) {
+        for (MovieRoleCreateDto roleDto : movieDto.crew()) {
             crew.add(crewService.findById(roleDto.movieCrewId()));
         }
         for (int i = 0; i < crew.size(); i++) {
-            CrewRoleCreateDto roleDto = newCrew.get(i);
-            movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), roleDto.characterName());
+            MovieRoleCreateDto roleDto = movieDto.crew().get(i);
+            if (!roleDto.movieRole().equals(MovieRole.ACTOR.toString())) {
+                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), "");
+            } else {
+                movie.addMovieCrew(crew.get(i), MovieRole.ACTOR, roleDto.characterName());
+            }
         }
         return MovieConverter.fromEntityToPublicDto(movieRepo.save(movie));
     }
 
 
     @Override
-    public void delete(Long id) throws MovieNotFoundException {
-        findById(id);
+    public void delete(Long id) throws MovieNotFoundException, InvalidPermissionException {
+        Movie movie = findById(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!movie.getMediaCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
         movieRepo.deleteById(id);
     }
 
@@ -116,8 +130,8 @@ public class MovieService implements IMovieService {
         return movieRepo.findById(id).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND + id));
     }
 
-    private void validateCrew(List<CrewRoleCreateDto> crew) throws InvalidCrewRoleException {
-        for (CrewRoleCreateDto roleDto : crew) {
+    private void validateCrew(List<MovieRoleCreateDto> crew) throws InvalidCrewRoleException {
+        for (MovieRoleCreateDto roleDto : crew) {
             if (roleDto.movieCrewId() == null || roleDto.movieCrewId() <= 0) {
                 throw new InvalidCrewRoleException(ID_GREATER_THAN_0);
             }
@@ -132,21 +146,9 @@ public class MovieService implements IMovieService {
             } catch (IllegalArgumentException e) {
                 throw new InvalidCrewRoleException(INVALID_MOVIE_ROLE);
             }
-        }
-    }
-
-    private List<CrewRoleCreateDto> deleteOrphanedCrew(Movie movie, List<CrewRoleCreateDto> crew) {
-        List<CrewRoleCreateDto> newCrew = crew;
-        List<MovieCrewRole> toDelete = new ArrayList<>();
-        for (MovieCrewRole role : movie.getMovieCrew()) {
-            if (crew.stream().noneMatch(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()))) {
-                movieCrewRoleRepo.delete(role);
-                toDelete.add(role);
-            } else {
-                newCrew.removeIf(c -> c.movieCrewId().equals(role.getId().getMovieCrewId()));
+            if (roleDto.movieRole().equals(MovieRole.ACTOR.toString()) && roleDto.characterName().isEmpty()) {
+                throw new InvalidCrewRoleException(CHARACTER_NAME_REQUIRED);
             }
         }
-        movie.getMovieCrew().removeAll(toDelete);
-        return newCrew;
     }
 }

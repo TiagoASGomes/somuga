@@ -14,7 +14,6 @@ public class UserConverter {
     public static UserPublicDto fromEntityToPublicDto(User user) {
         return new UserPublicDto(user.getId(),
                 user.getUserName(),
-                user.getEmail(),
                 user.getJoinDate());
     }
 
@@ -25,6 +24,6 @@ public class UserConverter {
     }
 
     public static User fromCreateDtoToEntity(UserCreateDto user, String id) {
-        return new User(id, user.userName(), user.email());
+        return new User(id, user.userName());
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 public class GameGenreConverter {
 
     public static GameGenrePublicDto fromEntityToPublicDto(GameGenre gameGenre) {
+        if (gameGenre == null) return null;
         return new GameGenrePublicDto(
                 gameGenre.getId(),
                 gameGenre.getGenre()

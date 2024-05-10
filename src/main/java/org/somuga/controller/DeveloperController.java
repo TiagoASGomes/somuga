@@ -52,4 +52,10 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.update(id, developerDto), HttpStatus.OK);
     }
 
+    @DeleteMapping("/private/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws DeveloperNotFoundException, InvalidPermissionException {
+        developerService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 }

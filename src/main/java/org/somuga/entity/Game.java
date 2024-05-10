@@ -8,14 +8,13 @@ import java.util.Set;
 @Table(name = "games")
 public class Game extends Media {
 
+    @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private Double price;
     @ManyToOne
     private Developer developer;
-    @ManyToMany(mappedBy = "games",
-            cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "games")
     private Set<GameGenre> genres;
-    @ManyToMany(mappedBy = "games",
-            cascade = CascadeType.REMOVE)
+    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "games")
     private Set<Platform> platforms;
 
     public Set<Platform> getPlatforms() {
@@ -50,5 +49,17 @@ public class Game extends Media {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public void removePlatform(Platform platform) {
+        if (platforms != null) {
+            platforms.remove(platform);
+        }
+    }
+
+    public void removeGenre(GameGenre genre) {
+        if (genres != null) {
+            genres.remove(genre);
+        }
     }
 }

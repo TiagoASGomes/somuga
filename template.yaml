@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Spring HTTP - Somuga
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+    BinaryMediaTypes:
+      - "*/*"
+
+Resources:
+  SomugaLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.somuga.LambdaHandler::handleRequest
+      Runtime: java17
+      CodeUri: .
+      Architectures:
+        - x86_64
+      MemorySize: 2048
+      Policies: AWSLambdaBasicExecutionRole
+      SnapStart:
+        ApplyOn: "PublishedVersions"
+      AutoPublishAlias: "prod"
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: any

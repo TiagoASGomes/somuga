@@ -10,12 +10,16 @@ import static org.somuga.util.message.Messages.*;
 
 public record GameCreateDto(
         @NotBlank(message = INVALID_TITLE)
+        @Size(max = 255, message = MAX_TITLE_CHARACTERS)
         String title,
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        @PastOrPresent(message = INVALID_RELEASE_DATE)
+        @NotNull(message = INVALID_RELEASE_DATE)
         Date releaseDate,
+        @NotNull(message = INVALID_DEVELOPER)
         String developerName,
+        @NotNull(message = INVALID_GENRES)
         List<String> genres,
+        @NotNull(message = INVALID_PLATFORMS)
         List<String> platformsNames,
         @Min(value = 0, message = INVALID_PRICE)
         @Max(value = 1000, message = INVALID_PRICE)

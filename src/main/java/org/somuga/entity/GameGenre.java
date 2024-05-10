@@ -11,9 +11,9 @@ public class GameGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 50, name = "genre")
     private String genre;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     private List<Game> games;
 
     public GameGenre() {
@@ -53,6 +53,13 @@ public class GameGenre {
             games.add(game);
         } else if (!games.contains(game)) {
             games.add(game);
+        }
+    }
+
+    public void removeGame(Game game) {
+        if (games != null) {
+            games.remove(game);
+            game.removeGenre(this);
         }
     }
 }

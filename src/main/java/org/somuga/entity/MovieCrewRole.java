@@ -30,9 +30,11 @@ public class MovieCrewRole {
     public MovieCrewRole() {
     }
 
-    public MovieCrewRole(MovieCrew movieCrew, Movie movie) {
+    public MovieCrewRole(MovieCrew movieCrew, Movie movie, MovieRole movieRole, String characterName) {
         this.movieCrew = movieCrew;
         this.movie = movie;
+        this.movieRole = movieRole;
+        this.characterName = characterName;
         this.id = new MovieCrewRoleId(movie.getId(), movieCrew.getId());
     }
 

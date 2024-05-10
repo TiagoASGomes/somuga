@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.somuga.util.message.Messages.MOVIE_CREW_NOT_FOUND;
-import static org.somuga.util.message.Messages.UNAUTHORIZED_UPDATE;
+import static org.somuga.util.message.Messages.*;
 
 @Service
 public class MovieCrewService implements IMovieCrewService {
@@ -62,6 +61,16 @@ public class MovieCrewService implements IMovieCrewService {
         crew.setFullName(movieCrew.fullName());
         crew.setBirthDate(movieCrew.birthDate());
         return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(crew));
+    }
+
+    @Override
+    public void delete(Long id) throws MovieCrewNotFoundException, InvalidPermissionException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        MovieCrew crew = findById(id);
+        if (!crew.getCrewCreatorId().equals(auth.getName())) {
+            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
+        }
+        movieCrewRepository.deleteById(id);
     }
 
     public MovieCrew findById(Long id) throws MovieCrewNotFoundException {

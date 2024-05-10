@@ -60,10 +60,5 @@ public class ReviewController {
         reviewService.delete(id);
         return ResponseEntity.noContent().build();
     }
-
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long id) throws ReviewNotFoundException, InvalidPermissionException {
-        reviewService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+    
 }

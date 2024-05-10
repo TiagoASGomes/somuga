@@ -1,9 +1,6 @@
 package org.somuga.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import org.somuga.enums.MovieRole;
 
 import java.util.ArrayList;
@@ -14,6 +11,7 @@ import java.util.Objects;
 @Table(name = "movies")
 public class Movie extends Media {
 
+    @Column(name = "duration")
     private Integer duration;
 
     @OneToMany(mappedBy = "movie",
@@ -38,15 +36,16 @@ public class Movie extends Media {
     }
 
     public void addMovieCrew(MovieCrew movieCrew, MovieRole movieRole, String characterName) {
-        MovieCrewRole movieCrewRole = new MovieCrewRole(movieCrew, this);
-        movieCrewRole.setMovieRole(movieRole);
-        movieCrewRole.setCharacterName(characterName);
+        MovieCrewRole movieCrewRole = new MovieCrewRole(movieCrew, this, movieRole, characterName);
         this.movieCrew.add(movieCrewRole);
-        movieCrew.getRoles().add(movieCrewRole);
     }
 
     public void removeMovieCrew(MovieCrewRole movieCrew) {
+        if (this.movieCrew == null) {
+            return;
+        }
         this.movieCrew.remove(movieCrew);
+        movieCrew.getMovieCrew().removeRole(movieCrew);
     }
 
     @Override

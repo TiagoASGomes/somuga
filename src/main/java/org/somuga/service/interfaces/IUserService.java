@@ -2,7 +2,6 @@ package org.somuga.service.interfaces;
 
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
-import org.somuga.dto.user.UserUpdateNameDto;
 import org.somuga.entity.User;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
@@ -19,7 +18,7 @@ public interface IUserService {
 
     UserPublicDto create(UserCreateDto user) throws DuplicateFieldException;
 
-    UserPublicDto updateUserName(UserUpdateNameDto user) throws UserNotFoundException, DuplicateFieldException;
+    UserPublicDto updateUserName(UserCreateDto user) throws UserNotFoundException, DuplicateFieldException;
 
     void delete() throws UserNotFoundException;
 

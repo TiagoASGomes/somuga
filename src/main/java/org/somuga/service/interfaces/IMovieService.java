@@ -25,7 +25,7 @@ public interface IMovieService {
 
     MoviePublicDto update(Long id, MovieCreateDto movie) throws MovieNotFoundException, MovieCrewNotFoundException, InvalidCrewRoleException, InvalidPermissionException;
 
-    void delete(Long id) throws MovieNotFoundException;
+    void delete(Long id) throws MovieNotFoundException, InvalidPermissionException;
 
     Movie findById(Long id) throws MovieNotFoundException;
 

@@ -1,9 +1,6 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.NaturalIdCache;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,14 +9,12 @@ import java.util.Objects;
 
 @Entity(name = "MovieCrew")
 @Table(name = "movie_crew")
-@NaturalIdCache
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class MovieCrew {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NaturalId
+    @Column(name = "full_name", nullable = false)
     private String fullName;
     private Date birthDate;
     private String crewCreatorId;
@@ -76,6 +71,13 @@ public class MovieCrew {
         this.crewCreatorId = crewCreatorId;
     }
 
+    public void removeRole(MovieCrewRole role) {
+        if (this.roles == null) {
+            return;
+        }
+        this.roles.remove(role);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,5 +89,12 @@ public class MovieCrew {
     @Override
     public int hashCode() {
         return Objects.hash(id, fullName, birthDate, crewCreatorId, roles);
+    }
+
+    public void addRole(MovieCrewRole movieCrewRole) {
+        if (roles == null) {
+            roles = new ArrayList<>();
+        }
+        roles.add(movieCrewRole);
     }
 }

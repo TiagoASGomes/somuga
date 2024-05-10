@@ -1,1 +1,0 @@
-docker run --name somuga -e MYSQL_DATABASE=somuga -e MYSQL_ROOT_PASSWORD=secret -p3306:3306 -d mysql:8.0
