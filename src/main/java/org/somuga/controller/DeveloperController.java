@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +29,8 @@ public class DeveloperController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<DeveloperPublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(developerService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<DeveloperPublicDto>> getAll() {
+        return new ResponseEntity<>(developerService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
@@ -43,6 +44,7 @@ public class DeveloperController {
     }
 
     @PostMapping("/private")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DeveloperPublicDto> create(@Valid @RequestBody DeveloperCreateDto developerDto) throws DuplicateFieldException {
         return new ResponseEntity<>(developerService.create(developerDto), HttpStatus.CREATED);
     }

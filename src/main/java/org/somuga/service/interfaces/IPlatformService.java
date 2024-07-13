@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface IPlatformService {
-    List<PlatformPublicDto> getAll(Pageable page);
+    List<PlatformPublicDto> getAll();
 
     PlatformPublicDto getById(Long id) throws PlatformNotFoundException;
 

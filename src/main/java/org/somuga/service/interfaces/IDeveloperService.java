@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface IDeveloperService {
 
-    List<DeveloperPublicDto> getAll(Pageable page);
+    List<DeveloperPublicDto> getAll();
 
     DeveloperPublicDto getById(Long id) throws DeveloperNotFoundException;
 

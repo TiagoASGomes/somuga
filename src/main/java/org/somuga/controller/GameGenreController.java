@@ -27,8 +27,8 @@ public class GameGenreController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<GameGenrePublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(gameGenreService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<GameGenrePublicDto>> getAll() {
+        return new ResponseEntity<>(gameGenreService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")

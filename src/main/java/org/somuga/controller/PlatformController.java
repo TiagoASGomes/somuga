@@ -27,8 +27,8 @@ public class PlatformController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<PlatformPublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(platformService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<PlatformPublicDto>> getAll() {
+        return new ResponseEntity<>(platformService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")

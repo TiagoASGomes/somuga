@@ -30,8 +30,8 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
-    public List<DeveloperPublicDto> getAll(Pageable page) {
-        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll(page).toList());
+    public List<DeveloperPublicDto> getAll() {
+        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll());
     }
 
     @Override

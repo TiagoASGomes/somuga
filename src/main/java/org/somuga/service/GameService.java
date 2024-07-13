@@ -46,7 +46,12 @@ public class GameService implements IGameService {
 
     @Override
     public List<GamePublicDto> getAll(Pageable page) {
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findAll(page).toList());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<Game> games = gameRepo.findAll(page).toList();
+        if (!auth.getName().equals("anonymousUser")) {
+            //TODO Add likes
+        }
+        return GameConverter.fromEntityListToPublicDtoList(games);
     }
 
     @Override

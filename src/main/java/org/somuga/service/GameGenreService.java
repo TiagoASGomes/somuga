@@ -27,8 +27,8 @@ public class GameGenreService implements IGameGenreService {
     }
 
     @Override
-    public List<GameGenrePublicDto> getAll(Pageable page) {
-        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findAll(page).toList());
+    public List<GameGenrePublicDto> getAll() {
+        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findAll());
     }
 
     @Override
