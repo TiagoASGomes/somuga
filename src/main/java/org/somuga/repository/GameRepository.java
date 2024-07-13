@@ -3,11 +3,12 @@ package org.somuga.repository;
 import org.somuga.entity.Game;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface GameRepository extends MediaBaseRepository<Game> {
+public interface GameRepository extends MediaBaseRepository<Game>, JpaSpecificationExecutor<Game> {
 
     @Query(value = """
             SELECT * FROM games g

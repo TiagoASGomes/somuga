@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,33 +31,17 @@ public class GameController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<GamePublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(gameService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<GamePublicDto>> getAll(Pageable page,
+                                                      @RequestParam(required = false) String title,
+                                                      @RequestParam(required = false) List<String> platform,
+                                                      @RequestParam(required = false) List<String> genre,
+                                                      @RequestParam(required = false) String developer) {
+        return new ResponseEntity<>(gameService.getAll(page, title, platform, genre, developer), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
     public ResponseEntity<GamePublicDto> getById(@PathVariable Long id) throws GameNotFoundException {
         return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/platform/{platformName}")
-    public ResponseEntity<List<GamePublicDto>> getByPlatform(@PathVariable String platformName, Pageable page) {
-        return new ResponseEntity<>(gameService.getByPlatform(platformName, page), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/genre/{genreName}")
-    public ResponseEntity<List<GamePublicDto>> getByGenre(@PathVariable String genreName, Pageable page) {
-        return new ResponseEntity<>(gameService.getByGenre(genreName, page), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/developer/{developerName}")
-    public ResponseEntity<List<GamePublicDto>> getByDeveloper(@PathVariable String developerName, Pageable page) {
-        return new ResponseEntity<>(gameService.getByDeveloper(developerName, page), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/search/{name}")
-    public ResponseEntity<List<GamePublicDto>> searchByName(@PathVariable String name, Pageable page) {
-        return new ResponseEntity<>(gameService.searchByName(name, page), HttpStatus.OK);
     }
 
     @PostMapping("/private")
@@ -76,6 +61,7 @@ public class GameController {
     }
 
     @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws GameNotFoundException {
         gameService.adminDelete(id);
         return ResponseEntity.noContent().build();
