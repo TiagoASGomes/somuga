@@ -13,6 +13,8 @@ import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie.InvalidCrewRoleException;
 import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
+import org.somuga.filters.SearchCriteria;
+import org.somuga.filters.movie.MovieSpecificationBuilder;
 import org.somuga.repository.MovieCrewRoleRepository;
 import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
@@ -42,18 +44,37 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public List<MoviePublicDto> getAll(Pageable page) {
-        return MovieConverter.fromEntityListToPublicDtoList(movieRepo.findAll(page).toList());
+    public List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewId) {
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<SearchCriteria> params = createSearchCriteria(title, crewId);
+        MovieSpecificationBuilder builder = new MovieSpecificationBuilder();
+        params.forEach(builder::with);
+
+        List<Movie> movies = movieRepo.findAll(builder.build(), page).toList();
+        List<MoviePublicDto> moviePublicDtos = MovieConverter.fromEntityListToPublicDtoList(movies);
+
+        if (!user.equals("anonymousUser")) {
+            addUserLikes(moviePublicDtos, user);
+        }
+
+        return moviePublicDtos;
     }
 
-    @Override
-    public List<MoviePublicDto> searchByTitle(String title, Pageable page) {
-        return MovieConverter.fromEntityListToPublicDtoList(movieRepo.findByTitleContainingIgnoreCase(title, page).toList());
+    private void addUserLikes(List<MoviePublicDto> moviePublicDtos, String user) {
     }
 
-    @Override
-    public List<MoviePublicDto> getByCrewId(Long crewId, Pageable page) {
-        return MovieConverter.fromEntityListToPublicDtoList(movieRepo.findByCrewId(crewId, page).toList());
+    private List<SearchCriteria> createSearchCriteria(String title, List<Long> crewId) {
+        List<SearchCriteria> params = new ArrayList<>();
+        if (title != null) {
+            params.add(new SearchCriteria("title", title));
+        }
+        if (crewId != null) {
+            for (Long id : crewId) {
+                params.add(new SearchCriteria("crewId", id.toString()));
+            }
+        }
+        return params;
     }
 
     @Override

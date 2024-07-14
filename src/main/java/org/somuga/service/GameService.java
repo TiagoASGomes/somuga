@@ -13,6 +13,8 @@ import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.game.GameNotFoundException;
 import org.somuga.exception.game_genre.GenreNotFoundException;
 import org.somuga.exception.platform.PlatformNotFoundException;
+import org.somuga.filters.SearchCriteria;
+import org.somuga.filters.game.GameSpecificationBuilder;
 import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,43 +48,45 @@ public class GameService implements IGameService {
 
 
     @Override
-    public List<GamePublicDto> getAll(Pageable page) {
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findAll(page).toList());
-    }
+    public List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer) {
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    @Override
-    public List<GamePublicDto> getByPlatform(String platformName, Pageable page) {
-        try {
-            platformService.findByPlatformName(platformName);
-        } catch (Exception e) {
-            return List.of();
+        List<SearchCriteria> params = createSearchCriteria(title, platform, genre, developer);
+        GameSpecificationBuilder builder = new GameSpecificationBuilder();
+        params.forEach(builder::with);
+
+        List<Game> games = gameRepo.findAll(builder.build(), page).toList();
+        List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
+
+        if (!user.equals("anonymousUser")) {
+            addUserLikes(gamePublicDtos, user);
         }
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByPlatform(platformName.toLowerCase(), page).toList());
+        return gamePublicDtos;
     }
 
-    @Override
-    public List<GamePublicDto> getByGenre(String genreName, Pageable page) {
-        try {
-            genreService.findByGenre(genreName);
-        } catch (Exception e) {
-            return List.of();
+    private List<SearchCriteria> createSearchCriteria(String name, List<String> platform, List<String> genre, String developer) {
+        List<SearchCriteria> params = new ArrayList<>();
+        if (name != null) {
+            params.add(new SearchCriteria("title", name));
         }
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByGenre(genreName.toLowerCase(), page).toList());
-    }
-
-    @Override
-    public List<GamePublicDto> getByDeveloper(String developerName, Pageable page) {
-        try {
-            developerService.findByDeveloperName(developerName);
-        } catch (Exception e) {
-            return List.of();
+        if (platform != null) {
+            for (String platformName : platform) {
+                params.add(new SearchCriteria("platform", platformName));
+            }
         }
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByDeveloper(developerName.toLowerCase(), page).toList());
+        if (genre != null) {
+            for (String genreName : genre) {
+                params.add(new SearchCriteria("genre", genreName));
+            }
+        }
+        if (developer != null) {
+            params.add(new SearchCriteria("developer", developer));
+        }
+        return params;
     }
 
-    @Override
-    public List<GamePublicDto> searchByName(String name, Pageable page) {
-        return GameConverter.fromEntityListToPublicDtoList(gameRepo.findByTitleContainingIgnoreCase(name, page).toList());
+    private void addUserLikes(List<GamePublicDto> games, String name) {
+
     }
 
     @Override
@@ -167,7 +172,8 @@ public class GameService implements IGameService {
 
     @Override
     public void adminDelete(Long id) throws GameNotFoundException {
-        findById(id);
+        Game game = findById(id);
+        removePlatformAndGenre(game);
         gameRepo.deleteById(id);
     }
 }

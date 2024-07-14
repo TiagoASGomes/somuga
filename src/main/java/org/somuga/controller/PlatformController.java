@@ -7,7 +7,6 @@ import org.somuga.exception.platform.PlatformAlreadyExistsException;
 import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.service.interfaces.IPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,18 +26,13 @@ public class PlatformController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<PlatformPublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(platformService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<PlatformPublicDto>> getAll(@RequestParam(required = false) String name) {
+        return new ResponseEntity<>(platformService.getAll(name), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
     public ResponseEntity<PlatformPublicDto> getById(@PathVariable Long id) throws PlatformNotFoundException {
         return new ResponseEntity<>(platformService.getById(id), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/search/{name}")
-    public ResponseEntity<List<PlatformPublicDto>> searchByName(@PathVariable String name, Pageable page) {
-        return new ResponseEntity<>(platformService.searchByName(name, page), HttpStatus.OK);
     }
 
     @PostMapping("/private")

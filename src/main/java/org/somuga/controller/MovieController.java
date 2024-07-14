@@ -29,18 +29,11 @@ public class MovieController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<MoviePublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(movieService.getAll(page), HttpStatus.OK);
-    }
+    public ResponseEntity<List<MoviePublicDto>> getAll(Pageable page,
+                                                       @RequestParam(required = false) String title,
+                                                       @RequestParam(required = false) List<Long> crewId) {
 
-    @GetMapping("/public/search/{title}")
-    public ResponseEntity<List<MoviePublicDto>> searchByTitle(@PathVariable String title, Pageable page) {
-        return new ResponseEntity<>(movieService.searchByTitle(title, page), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/crew/{crewId}")
-    public ResponseEntity<List<MoviePublicDto>> getByCrewId(@PathVariable Long crewId, Pageable page) {
-        return new ResponseEntity<>(movieService.getByCrewId(crewId, page), HttpStatus.OK);
+        return new ResponseEntity<>(movieService.getAll(page, title, crewId), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")

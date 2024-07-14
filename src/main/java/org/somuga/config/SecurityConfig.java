@@ -2,6 +2,7 @@ package org.somuga.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -11,8 +12,8 @@ import static org.springframework.security.web.util.matcher.RegexRequestMatcher.
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
-
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -20,7 +21,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(regexMatcher("/api/.*/public.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/private.*")).authenticated()
-                        .requestMatchers(regexMatcher("/api/.*/admin.*")).hasRole("ADMIN")
+                        .requestMatchers(regexMatcher("/swagger-ui.*")).permitAll()
+                        .requestMatchers(regexMatcher("/swagger-resources.*")).permitAll()
+                        .requestMatchers(regexMatcher("/v3/api-docs.*")).permitAll()
                 )
                 .cors(withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2
