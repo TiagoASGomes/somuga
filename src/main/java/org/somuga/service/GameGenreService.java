@@ -9,6 +9,7 @@ import org.somuga.exception.game_genre.GenreNotFoundException;
 import org.somuga.repository.GameGenreRepository;
 import org.somuga.service.interfaces.IGameGenreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +27,18 @@ public class GameGenreService implements IGameGenreService {
     }
 
     @Override
-    public List<GameGenrePublicDto> getAll(String name) {
-        if (name != null) {
-            return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findByGenreContainingIgnoreCase(name));
-        }
-        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findAll());
+    public List<GameGenrePublicDto> getAll(Pageable page) {
+        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findAll(page).toList());
     }
 
     @Override
     public GameGenrePublicDto getById(Long id) throws GenreNotFoundException {
         return GameGenreConverter.fromEntityToPublicDto(findById(id));
+    }
+
+    @Override
+    public List<GameGenrePublicDto> searchByName(String name, Pageable page) {
+        return GameGenreConverter.fromEntityListToPublicDtoList(gameGenreRepo.findByGenreContainingIgnoreCase(name.toLowerCase(), page).toList());
     }
 
     @Override

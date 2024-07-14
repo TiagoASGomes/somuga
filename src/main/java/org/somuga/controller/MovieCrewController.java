@@ -28,13 +28,18 @@ public class MovieCrewController {
 
 
     @GetMapping("/public")
-    public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {
-        return new ResponseEntity<>(movieCrewService.getAll(page, name), HttpStatus.OK);
+    public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page) {
+        return new ResponseEntity<>(movieCrewService.getAll(page), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
     public ResponseEntity<MovieCrewPublicDto> getById(@PathVariable Long id) throws MovieCrewNotFoundException {
         return new ResponseEntity<>(movieCrewService.getById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/public/search/{name}")
+    public ResponseEntity<List<MovieCrewPublicDto>> getByName(@PathVariable String name, Pageable page) {
+        return new ResponseEntity<>(movieCrewService.getByName(name, page), HttpStatus.OK);
     }
 
     @PostMapping("/private")

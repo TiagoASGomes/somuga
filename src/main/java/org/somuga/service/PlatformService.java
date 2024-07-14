@@ -9,6 +9,7 @@ import org.somuga.exception.platform.PlatformNotFoundException;
 import org.somuga.repository.PlatformRepository;
 import org.somuga.service.interfaces.IPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,16 +27,19 @@ public class PlatformService implements IPlatformService {
     }
 
     @Override
-    public List<PlatformPublicDto> getAll(String name) {
-        if (name != null) {
-            return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findByPlatformNameContainingIgnoreCase(name));
-        }
-        return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findAll());
+    public List<PlatformPublicDto> getAll(Pageable page) {
+        List<Platform> platforms = platformRepo.findAll(page).toList();
+        return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findAll(page).toList());
     }
 
     @Override
     public PlatformPublicDto getById(Long id) throws PlatformNotFoundException {
         return PlatformConverter.fromEntityToPublicDto(findById(id));
+    }
+
+    @Override
+    public List<PlatformPublicDto> searchByName(String name, Pageable page) {
+        return PlatformConverter.fromEntityListToPublicDtoList(platformRepo.findByPlatformNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override

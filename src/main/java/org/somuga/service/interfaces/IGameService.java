@@ -14,7 +14,15 @@ import java.util.List;
 
 public interface IGameService {
 
-    List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer);
+    List<GamePublicDto> getAll(Pageable page);
+
+    List<GamePublicDto> getByPlatform(String platformName, Pageable page);
+
+    List<GamePublicDto> getByGenre(String genreName, Pageable page);
+
+    List<GamePublicDto> getByDeveloper(String developerName, Pageable page);
+
+    List<GamePublicDto> searchByName(String name, Pageable page);
 
     GamePublicDto getById(Long id) throws GameNotFoundException;
 
