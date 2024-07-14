@@ -16,8 +16,6 @@ public interface IGameService {
 
     List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer);
 
-    List<GamePublicDto> searchByName(String name, Pageable page);
-
     GamePublicDto getById(Long id) throws GameNotFoundException;
 
     GamePublicDto create(GameCreateDto game) throws GenreNotFoundException, DeveloperNotFoundException, PlatformNotFoundException;

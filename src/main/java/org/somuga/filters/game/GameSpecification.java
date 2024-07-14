@@ -1,10 +1,11 @@
-package org.somuga.util.filters;
+package org.somuga.filters.game;
 
 import jakarta.persistence.criteria.*;
 import org.somuga.entity.Developer;
 import org.somuga.entity.Game;
 import org.somuga.entity.GameGenre;
 import org.somuga.entity.Platform;
+import org.somuga.filters.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
 public class GameSpecification implements Specification<Game> {

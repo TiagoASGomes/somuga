@@ -60,7 +60,7 @@ public class GameController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/admin/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws GameNotFoundException {
         gameService.adminDelete(id);

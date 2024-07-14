@@ -1,4 +1,4 @@
-package org.somuga.util.filters;
+package org.somuga.filters;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

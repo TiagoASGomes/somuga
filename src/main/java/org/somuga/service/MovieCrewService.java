@@ -29,18 +29,16 @@ public class MovieCrewService implements IMovieCrewService {
     }
 
     @Override
-    public List<MovieCrewPublicDto> getAll(Pageable page) {
+    public List<MovieCrewPublicDto> getAll(Pageable page, String name) {
+        if (name != null) {
+            return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByFullNameContainingIgnoreCase(name, page).toList());
+        }
         return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findAll(page).toList());
     }
 
     @Override
     public MovieCrewPublicDto getById(Long id) throws MovieCrewNotFoundException {
         return MovieCrewConverter.fromEntityToPublicDto(findById(id));
-    }
-
-    @Override
-    public List<MovieCrewPublicDto> getByName(String name, Pageable page) {
-        return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByFullNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.repository.DeveloperRepository;
 import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -30,18 +29,16 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
-    public List<DeveloperPublicDto> getAll() {
+    public List<DeveloperPublicDto> getAll(String name) {
+        if (name != null) {
+            return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findByDeveloperNameContainingIgnoreCase(name));
+        }
         return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll());
     }
 
     @Override
     public DeveloperPublicDto getById(Long id) throws DeveloperNotFoundException {
         return DeveloperConverter.fromEntityToPublicDto(findById(id));
-    }
-
-    @Override
-    public List<DeveloperPublicDto> searchByName(String name, Pageable page) {
-        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findByDeveloperNameContainingIgnoreCase(name, page).toList());
     }
 
     @Override
