@@ -8,9 +8,9 @@ import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +28,8 @@ public class DeveloperController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<DeveloperPublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(developerService.getAll(page), HttpStatus.OK);
+    public ResponseEntity<List<DeveloperPublicDto>> getAll(@RequestParam(required = false) String name) {
+        return new ResponseEntity<>(developerService.getAll(name), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
@@ -37,12 +37,8 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.getById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/public/search/{name}")
-    public ResponseEntity<List<DeveloperPublicDto>> searchByName(@PathVariable String name, Pageable page) {
-        return new ResponseEntity<>(developerService.searchByName(name, page), HttpStatus.OK);
-    }
-
     @PostMapping("/private")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<DeveloperPublicDto> create(@Valid @RequestBody DeveloperCreateDto developerDto) throws DuplicateFieldException {
         return new ResponseEntity<>(developerService.create(developerDto), HttpStatus.CREATED);
     }
