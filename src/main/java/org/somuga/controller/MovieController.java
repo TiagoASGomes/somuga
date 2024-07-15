@@ -12,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/movie")
-@CrossOrigin(origins = "*")
 public class MovieController {
 
     private final IMovieService movieService;
@@ -54,6 +54,13 @@ public class MovieController {
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException, InvalidPermissionException {
         movieService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws MovieNotFoundException {
+        movieService.adminDelete(id);
         return ResponseEntity.noContent().build();
     }
 }

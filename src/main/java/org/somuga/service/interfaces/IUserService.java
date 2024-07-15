@@ -24,4 +24,5 @@ public interface IUserService {
 
     User findById(String id) throws UserNotFoundException;
 
+    void adminDelete(String id) throws UserNotFoundException;
 }

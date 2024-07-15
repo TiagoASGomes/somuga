@@ -12,8 +12,6 @@ public class Developer {
     private Long id;
     @Column(unique = true, name = "developer_name", nullable = false)
     private String developerName;
-    @Column(name = "developer_creator_id", nullable = false)
-    private String developerCreatorId;
     private List<String> socials;
     @OneToMany(mappedBy = "developer",
             fetch = FetchType.LAZY)
@@ -22,10 +20,9 @@ public class Developer {
     public Developer() {
     }
 
-    public Developer(String developerName, List<String> socials, String developerCreatorId) {
+    public Developer(String developerName, List<String> socials) {
         this.developerName = developerName;
         this.socials = socials;
-        this.developerCreatorId = developerCreatorId;
     }
 
     public Long getId() {
@@ -58,13 +55,5 @@ public class Developer {
 
     public void setSocials(List<String> socials) {
         this.socials = socials;
-    }
-
-    public String getDeveloperCreatorId() {
-        return developerCreatorId;
-    }
-
-    public void setDeveloperCreatorId(String developerCreatorId) {
-        this.developerCreatorId = developerCreatorId;
     }
 }

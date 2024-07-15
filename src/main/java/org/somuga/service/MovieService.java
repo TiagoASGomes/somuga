@@ -15,7 +15,6 @@ import org.somuga.exception.movie.MovieNotFoundException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.filters.SearchCriteria;
 import org.somuga.filters.movie.MovieSpecificationBuilder;
-import org.somuga.repository.MovieCrewRoleRepository;
 import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +33,11 @@ public class MovieService implements IMovieService {
 
     private final MovieRepository movieRepo;
     private final MovieCrewService crewService;
-    private final MovieCrewRoleRepository movieCrewRoleRepo;
 
     @Autowired
-    public MovieService(MovieRepository movieRepo, MovieCrewService crewService, MovieCrewRoleRepository movieCrewRoleRepo) {
+    public MovieService(MovieRepository movieRepo, MovieCrewService crewService) {
         this.movieRepo = movieRepo;
         this.crewService = crewService;
-        this.movieCrewRoleRepo = movieCrewRoleRepo;
     }
 
     @Override
@@ -149,6 +146,12 @@ public class MovieService implements IMovieService {
     @Override
     public Movie findById(Long id) throws MovieNotFoundException {
         return movieRepo.findById(id).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND + id));
+    }
+
+    @Override
+    public void adminDelete(Long id) throws MovieNotFoundException {
+        findById(id);
+        movieRepo.deleteById(id);
     }
 
     private void validateCrew(List<MovieRoleCreateDto> crew) throws InvalidCrewRoleException {

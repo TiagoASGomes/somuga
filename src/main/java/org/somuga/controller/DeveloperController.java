@@ -3,7 +3,6 @@ package org.somuga.controller;
 import jakarta.validation.Valid;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
-import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.service.interfaces.IDeveloperService;
@@ -16,8 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/developer")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/v1/game/developer")
 public class DeveloperController {
 
     private final IDeveloperService developerService;
@@ -44,12 +42,14 @@ public class DeveloperController {
     }
 
     @PutMapping("/private/{id}")
-    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
         return new ResponseEntity<>(developerService.update(id, developerDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws DeveloperNotFoundException, InvalidPermissionException {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws DeveloperNotFoundException {
         developerService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

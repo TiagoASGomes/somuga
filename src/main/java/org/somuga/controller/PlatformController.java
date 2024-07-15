@@ -9,13 +9,13 @@ import org.somuga.service.interfaces.IPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/platform")
-@CrossOrigin(origins = "*")
 public class PlatformController {
 
     private final IPlatformService platformService;
@@ -36,8 +36,22 @@ public class PlatformController {
     }
 
     @PostMapping("/private")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<PlatformPublicDto> create(@Valid @RequestBody PlatformCreateDto platformDto) throws PlatformAlreadyExistsException {
         return new ResponseEntity<>(platformService.create(platformDto), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/private/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<PlatformPublicDto> update(@PathVariable Long id, @Valid @RequestBody PlatformCreateDto platformDto) throws PlatformNotFoundException, PlatformAlreadyExistsException {
+        return new ResponseEntity<>(platformService.update(id, platformDto), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/private/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws PlatformNotFoundException {
+        platformService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

@@ -93,6 +93,12 @@ public class ReviewService implements IReviewService {
         reviewRepo.deleteById(id);
     }
 
+    @Override
+    public void adminDelete(Long id) throws ReviewNotFoundException {
+        findById(id);
+        reviewRepo.deleteById(id);
+    }
+
     private Review findById(Long id) throws ReviewNotFoundException {
         return reviewRepo.findById(id).orElseThrow(() -> new ReviewNotFoundException(REVIEW_NOT_FOUND + id));
     }

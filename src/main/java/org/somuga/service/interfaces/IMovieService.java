@@ -25,4 +25,5 @@ public interface IMovieService {
 
     Movie findById(Long id) throws MovieNotFoundException;
 
+    void adminDelete(Long id) throws MovieNotFoundException;
 }

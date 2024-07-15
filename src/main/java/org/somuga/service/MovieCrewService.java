@@ -71,6 +71,12 @@ public class MovieCrewService implements IMovieCrewService {
         movieCrewRepository.deleteById(id);
     }
 
+    @Override
+    public void adminDelete(Long id) throws MovieCrewNotFoundException {
+        findById(id);
+        movieCrewRepository.deleteById(id);
+    }
+
     public MovieCrew findById(Long id) throws MovieCrewNotFoundException {
         return movieCrewRepository.findById(id).orElseThrow(() -> new MovieCrewNotFoundException(MOVIE_CREW_NOT_FOUND + id));
     }

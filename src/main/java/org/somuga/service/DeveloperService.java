@@ -4,14 +4,11 @@ import org.somuga.converter.DeveloperConverter;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
-import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.repository.DeveloperRepository;
 import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,30 +43,21 @@ public class DeveloperService implements IDeveloperService {
         if (checkDuplicateDeveloperName(developerDto.developerName())) {
             throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerDto.developerName());
         }
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Developer developer = new Developer(developerDto.developerName(), developerDto.socials(), auth.getName());
+        Developer developer = new Developer(developerDto.developerName(), developerDto.socials());
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 
     @Override
-    public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, InvalidPermissionException {
+    public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
         Developer developer = findById(id);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!developer.getDeveloperCreatorId().equals(auth.getName())) {
-            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
-        }
         developer.setDeveloperName(developerDto.developerName());
         developer.setSocials(developerDto.socials());
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 
     @Override
-    public void delete(Long id) throws DeveloperNotFoundException, InvalidPermissionException {
-        Developer developer = findById(id);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!developer.getDeveloperCreatorId().equals(auth.getName())) {
-            throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
-        }
+    public void delete(Long id) throws DeveloperNotFoundException {
+        findById(id);
         developerRepo.deleteById(id);
     }
 

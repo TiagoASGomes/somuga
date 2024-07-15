@@ -20,7 +20,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/game")
-@CrossOrigin(origins = "*")
 public class GameController {
 
     private final IGameService gameService;
@@ -60,7 +59,7 @@ public class GameController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws GameNotFoundException {
         gameService.adminDelete(id);
