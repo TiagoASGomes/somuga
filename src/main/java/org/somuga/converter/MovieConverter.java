@@ -3,6 +3,7 @@ package org.somuga.converter;
 import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.movie.MovieCreateDto;
+import org.somuga.dto.movie.MovieLikePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrewRole;
@@ -77,6 +78,28 @@ public class MovieConverter {
                 movieCrewRole.getCharacterName(),
                 movieCrewRole.getMovie().getTitle(),
                 movieCrewRole.getMovie().getReleaseDate()
+        );
+    }
+
+    public static MovieLikePublicDto fromEntityToLikePublicDto(Movie movie, boolean isLiked) {
+        if (movie.getReviews() == null) {
+            movie.setReviews(new HashSet<>());
+        }
+        if (movie.getLikes() == null) {
+            movie.setLikes(new HashSet<>());
+        }
+        return new MovieLikePublicDto(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getReleaseDate(),
+                movie.getDescription(),
+                movie.getDuration(),
+                fromEntityListToMovieRolePublicDtoList(movie.getMovieCrew()),
+                movie.getMediaUrl(),
+                movie.getImageUrl(),
+                movie.getLikes().size(),
+                movie.getReviews().size(),
+                isLiked
         );
     }
 }

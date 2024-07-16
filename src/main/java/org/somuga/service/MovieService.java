@@ -3,6 +3,7 @@ package org.somuga.service;
 import org.somuga.converter.MovieConverter;
 import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
+import org.somuga.dto.movie.MovieLikePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrew;
@@ -42,23 +43,13 @@ public class MovieService implements IMovieService {
 
     @Override
     public List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewId) {
-        String user = SecurityContextHolder.getContext().getAuthentication().getName();
-
         List<SearchCriteria> params = createSearchCriteria(title, crewId);
         MovieSpecificationBuilder builder = new MovieSpecificationBuilder();
         params.forEach(builder::with);
 
         List<Movie> movies = movieRepo.findAll(builder.build(), page).toList();
-        List<MoviePublicDto> moviePublicDtos = MovieConverter.fromEntityListToPublicDtoList(movies);
 
-        if (!user.equals("anonymousUser")) {
-            addUserLikes(moviePublicDtos, user);
-        }
-
-        return moviePublicDtos;
-    }
-
-    private void addUserLikes(List<MoviePublicDto> moviePublicDtos, String user) {
+        return MovieConverter.fromEntityListToPublicDtoList(movies);
     }
 
     private List<SearchCriteria> createSearchCriteria(String title, List<Long> crewId) {
@@ -75,8 +66,16 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public MoviePublicDto getById(Long id) throws MovieNotFoundException {
-        return MovieConverter.fromEntityToPublicDto(findById(id));
+    public MovieLikePublicDto getById(Long id) throws MovieNotFoundException {
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        Movie movie = findById(id);
+        if (user.equals("anonymousUser")) {
+            return MovieConverter.fromEntityToLikePublicDto(movie, false);
+        }
+        boolean isLiked = movie.getLikes()
+                .stream()
+                .anyMatch(like -> like.getUser().getId().equals(user));
+        return MovieConverter.fromEntityToLikePublicDto(movie, isLiked);
     }
 
     public MoviePublicDto create(MovieCreateDto movieDto) throws MovieCrewNotFoundException, InvalidCrewRoleException {

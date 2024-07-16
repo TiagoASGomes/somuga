@@ -2,6 +2,7 @@ package org.somuga.controller;
 
 import jakarta.validation.Valid;
 import org.somuga.dto.movie.MovieCreateDto;
+import org.somuga.dto.movie.MovieLikePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie.InvalidCrewRoleException;
@@ -37,7 +38,7 @@ public class MovieController {
     }
 
     @GetMapping("/public/{id}")
-    public ResponseEntity<MoviePublicDto> getById(@PathVariable Long id) throws MovieNotFoundException {
+    public ResponseEntity<MovieLikePublicDto> getById(@PathVariable Long id) throws MovieNotFoundException {
         return new ResponseEntity<>(movieService.getById(id), HttpStatus.OK);
     }
 

@@ -2,6 +2,7 @@ package org.somuga.controller;
 
 import jakarta.validation.Valid;
 import org.somuga.dto.game.GameCreateDto;
+import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -39,7 +40,7 @@ public class GameController {
     }
 
     @GetMapping("/public/{id}")
-    public ResponseEntity<GamePublicDto> getById(@PathVariable Long id) throws GameNotFoundException {
+    public ResponseEntity<GameLikePublicDto> getById(@PathVariable Long id) throws GameNotFoundException {
         return new ResponseEntity<>(gameService.getById(id), HttpStatus.OK);
     }
 

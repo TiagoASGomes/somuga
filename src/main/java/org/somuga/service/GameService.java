@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.converter.GameConverter;
 import org.somuga.dto.game.GameCreateDto;
+import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.entity.Game;
@@ -49,19 +50,13 @@ public class GameService implements IGameService {
 
     @Override
     public List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer) {
-        String user = SecurityContextHolder.getContext().getAuthentication().getName();
-
         List<SearchCriteria> params = createSearchCriteria(title, platform, genre, developer);
         GameSpecificationBuilder builder = new GameSpecificationBuilder();
         params.forEach(builder::with);
 
         List<Game> games = gameRepo.findAll(builder.build(), page).toList();
-        List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
 
-        if (!user.equals("anonymousUser")) {
-            addUserLikes(gamePublicDtos, user);
-        }
-        return gamePublicDtos;
+        return GameConverter.fromEntityListToPublicDtoList(games);
     }
 
     private List<SearchCriteria> createSearchCriteria(String name, List<String> platform, List<String> genre, String developer) {
@@ -85,13 +80,17 @@ public class GameService implements IGameService {
         return params;
     }
 
-    private void addUserLikes(List<GamePublicDto> games, String name) {
-
-    }
-
     @Override
-    public GamePublicDto getById(Long id) throws GameNotFoundException {
-        return GameConverter.fromEntityToPublicDto(findById(id));
+    public GameLikePublicDto getById(Long id) throws GameNotFoundException {
+        String user = SecurityContextHolder.getContext().getAuthentication().getName();
+        Game game = findById(id);
+        if (user.equals("anonymousUser")) {
+            return GameConverter.fromEntityToPublicLikeDto(game, false);
+        }
+        boolean isLiked = game.getLikes()
+                .stream()
+                .anyMatch(like -> like.getUser().getId().equals(user));
+        return GameConverter.fromEntityToPublicLikeDto(game, isLiked);
     }
 
     @Override
