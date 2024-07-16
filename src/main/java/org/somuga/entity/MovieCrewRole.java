@@ -1,6 +1,7 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.somuga.enums.MovieRole;
 import org.somuga.util.id_class.MovieCrewRoleId;
 
@@ -8,6 +9,11 @@ import java.util.Objects;
 
 @Entity(name = "MovieCrewRole")
 @Table(name = "movie_crew_role")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieCrewRole {
 
     @EmbeddedId
@@ -26,57 +32,6 @@ public class MovieCrewRole {
     private MovieRole movieRole;
     @Column(name = "character_name")
     private String characterName;
-
-    public MovieCrewRole() {
-    }
-
-    public MovieCrewRole(MovieCrew movieCrew, Movie movie, MovieRole movieRole, String characterName) {
-        this.movieCrew = movieCrew;
-        this.movie = movie;
-        this.movieRole = movieRole;
-        this.characterName = characterName;
-        this.id = new MovieCrewRoleId(movie.getId(), movieCrew.getId());
-    }
-
-    public MovieCrewRoleId getId() {
-        return id;
-    }
-
-    public void setId(MovieCrewRoleId id) {
-        this.id = id;
-    }
-
-    public MovieCrew getMovieCrew() {
-        return movieCrew;
-    }
-
-    public void setMovieCrew(MovieCrew movieCrew) {
-        this.movieCrew = movieCrew;
-    }
-
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Movie movie) {
-        this.movie = movie;
-    }
-
-    public MovieRole getMovieRole() {
-        return movieRole;
-    }
-
-    public void setMovieRole(MovieRole movieRole) {
-        this.movieRole = movieRole;
-    }
-
-    public String getCharacterName() {
-        return characterName;
-    }
-
-    public void setCharacterName(String characterName) {
-        this.characterName = characterName;
-    }
 
     @Override
     public boolean equals(Object o) {

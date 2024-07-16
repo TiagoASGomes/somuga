@@ -1,11 +1,21 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "games")
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Game extends Media {
 
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
@@ -17,39 +27,15 @@ public class Game extends Media {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "games")
     private Set<Platform> platforms;
 
-    public Set<Platform> getPlatforms() {
-        return platforms;
-    }
-
-    public void setPlatforms(Set<Platform> platforms) {
-        this.platforms = platforms;
-        platforms.forEach(platform -> platform.addGame(this));
-    }
-
-    public Set<GameGenre> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(Set<GameGenre> genres) {
-        this.genres = genres;
-        genres.forEach(genre -> genre.addGame(this));
-    }
-
-    public Developer getDeveloper() {
-        return developer;
-    }
-
-    public void setDeveloper(Developer developer) {
-        this.developer = developer;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+//    public void setPlatforms(Set<Platform> platforms) {
+//        this.platforms = platforms;
+//        platforms.forEach(platform -> platform.addGame(this));
+//    }
+//
+//    public void setGenres(Set<GameGenre> genres) {
+//        this.genres = genres;
+//        genres.forEach(genre -> genre.addGame(this));
+//    }
 
     public void removePlatform(Platform platform) {
         if (platforms != null) {

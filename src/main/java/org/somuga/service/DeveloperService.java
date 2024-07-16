@@ -43,7 +43,7 @@ public class DeveloperService implements IDeveloperService {
         if (checkDuplicateDeveloperName(developerDto.developerName())) {
             throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerDto.developerName());
         }
-        Developer developer = new Developer(developerDto.developerName(), developerDto.socials());
+        Developer developer = DeveloperConverter.fromCreateDtoToEntity(developerDto);
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 

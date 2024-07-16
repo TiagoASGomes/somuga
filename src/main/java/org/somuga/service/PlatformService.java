@@ -43,7 +43,7 @@ public class PlatformService implements IPlatformService {
         if (checkDuplicatePlatform(platformDto.platformName())) {
             throw new PlatformAlreadyExistsException(PLATFORM_ALREADY_EXISTS + platformDto.platformName());
         }
-        Platform platform = new Platform(platformDto.platformName());
+        Platform platform = PlatformConverter.fromCreateDtoToEntity(platformDto);
         return PlatformConverter.fromEntityToPublicDto(platformRepo.save(platform));
     }
 

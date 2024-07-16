@@ -1,12 +1,18 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "game_genres")
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,37 +21,6 @@ public class GameGenre {
     private String genre;
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Game> games;
-
-    public GameGenre() {
-    }
-
-    public GameGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public List<Game> getGames() {
-        return games;
-    }
-
-    public void setGames(List<Game> games) {
-        this.games = games;
-    }
 
     public void addGame(Game game) {
         if (games == null) {

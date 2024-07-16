@@ -24,10 +24,10 @@ public class MovieCrewConverter {
     }
 
     public static MovieCrew fromCreateDtoToEntity(MovieCrewCreateDto movieCrewCreateDto) {
-        return new MovieCrew(
-                movieCrewCreateDto.fullName(),
-                movieCrewCreateDto.birthDate()
-        );
+        return MovieCrew.builder()
+                .fullName(movieCrewCreateDto.fullName())
+                .birthDate(movieCrewCreateDto.birthDate())
+                .build();
     }
 
 }

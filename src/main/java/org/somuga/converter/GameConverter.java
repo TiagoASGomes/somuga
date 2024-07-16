@@ -37,13 +37,13 @@ public class GameConverter {
     }
 
     public static Game fromCreateDtoToEntity(GameCreateDto gameDto) {
-        Game game = new Game();
-        game.setTitle(gameDto.title());
-        game.setReleaseDate(gameDto.releaseDate());
-        game.setPrice(gameDto.price());
-        game.setDescription(gameDto.description());
-        game.setMediaUrl(gameDto.mediaUrl());
-        game.setImageUrl(gameDto.imageUrl());
-        return game;
+        return Game.builder()
+                .title(gameDto.title())
+                .releaseDate(gameDto.releaseDate())
+                .price(gameDto.price())
+                .description(gameDto.description())
+                .mediaUrl(gameDto.mediaUrl())
+                .imageUrl(gameDto.imageUrl())
+                .build();
     }
 }

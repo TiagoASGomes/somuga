@@ -1,14 +1,24 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MovieRole;
+import org.somuga.util.id_class.MovieCrewRoleId;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "Movie")
 @Table(name = "movies")
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Movie extends Media {
 
     @Column(name = "duration")
@@ -17,26 +27,16 @@ public class Movie extends Media {
     @OneToMany(mappedBy = "movie",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private List<MovieCrewRole> movieCrew = new ArrayList<>();
-
-    public List<MovieCrewRole> getMovieCrew() {
-        return movieCrew;
-    }
-
-    public void setMovieCrew(List<MovieCrewRole> movieCrew) {
-        this.movieCrew = movieCrew;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
+    private List<MovieCrewRole> movieCrew;
 
     public void addMovieCrew(MovieCrew movieCrew, MovieRole movieRole, String characterName) {
-        MovieCrewRole movieCrewRole = new MovieCrewRole(movieCrew, this, movieRole, characterName);
+        MovieCrewRole movieCrewRole = MovieCrewRole.builder()
+                .movieCrew(movieCrew)
+                .movie(this)
+                .movieRole(movieRole)
+                .characterName(characterName)
+                .id(new MovieCrewRoleId(this.getId(), movieCrew.getId()))
+                .build();
         this.movieCrew.add(movieCrewRole);
     }
 

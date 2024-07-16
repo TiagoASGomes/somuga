@@ -39,14 +39,14 @@ public class MovieConverter {
     }
 
     public static Movie fromCreateDtoToEntity(MovieCreateDto movieDto) {
-        Movie movie = new Movie();
-        movie.setTitle(movieDto.title());
-        movie.setReleaseDate(movieDto.releaseDate());
-        movie.setDescription(movieDto.description());
-        movie.setDuration(movieDto.duration());
-        movie.setMediaUrl(movieDto.mediaUrl());
-        movie.setImageUrl(movieDto.imageUrl());
-        return movie;
+        return Movie.builder()
+                .title(movieDto.title())
+                .releaseDate(movieDto.releaseDate())
+                .description(movieDto.description())
+                .duration(movieDto.duration())
+                .mediaUrl(movieDto.mediaUrl())
+                .imageUrl(movieDto.imageUrl())
+                .build();
     }
 
     public static MovieRolePublicDto fromEntityToMovieRolePublicDto(MovieCrewRole role) {

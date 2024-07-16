@@ -43,7 +43,7 @@ public class GameGenreService implements IGameGenreService {
         if (checkDuplicateGenre(genreDto.genreName())) {
             throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
         }
-        GameGenre genre = new GameGenre(genreDto.genreName());
+        GameGenre genre = GameGenreConverter.fromCreateDtoToEntity(genreDto);
         return GameGenreConverter.fromEntityToPublicDto(gameGenreRepo.save(genre));
     }
 
