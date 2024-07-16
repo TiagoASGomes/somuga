@@ -2,41 +2,25 @@ package org.somuga.util.id_class;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class MovieCrewRoleId implements Serializable {
 
     @Column(name = "movie_id")
     private Long movieId;
     @Column(name = "movie_crew_id")
     private Long movieCrewId;
-
-    public MovieCrewRoleId() {
-    }
-
-    public MovieCrewRoleId(Long movieId, Long movieCrewId) {
-        this.movieId = movieId;
-        this.movieCrewId = movieCrewId;
-    }
-
-    public Long getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(Long movieId) {
-        this.movieId = movieId;
-    }
-
-    public Long getMovieCrewId() {
-        return movieCrewId;
-    }
-
-    public void setMovieCrewId(Long movieCrewId) {
-        this.movieCrewId = movieCrewId;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -67,7 +67,7 @@ public class ReviewService implements IReviewService {
         }
         User user = userService.findById(userId);
         Media media = mediaService.findById(reviewDto.mediaId());
-        Review review = new Review(reviewDto.reviewScore(), reviewDto.writtenReview(), user, media);
+        Review review = ReviewConverter.fromCreateDtoToEntity(reviewDto, user, media);
         return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));
     }
 
@@ -90,6 +90,12 @@ public class ReviewService implements IReviewService {
         if (!review.getUser().getId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
+        reviewRepo.deleteById(id);
+    }
+
+    @Override
+    public void adminDelete(Long id) throws ReviewNotFoundException {
+        findById(id);
         reviewRepo.deleteById(id);
     }
 

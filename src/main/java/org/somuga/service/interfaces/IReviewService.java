@@ -24,4 +24,6 @@ public interface IReviewService {
     ReviewPublicDto updateReview(Long id, ReviewUpdateDto review) throws ReviewNotFoundException, InvalidPermissionException;
 
     void delete(Long id) throws ReviewNotFoundException, InvalidPermissionException;
+
+    void adminDelete(Long id) throws ReviewNotFoundException;
 }

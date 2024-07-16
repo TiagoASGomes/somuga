@@ -94,6 +94,12 @@ public class UserService implements IUserService {
         return userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND + id));
     }
 
+    @Override
+    public void adminDelete(String id) throws UserNotFoundException {
+        findById(id);
+        userRepo.deleteById(id);
+    }
+
     private void checkDuplicateFields(String userName) throws DuplicateFieldException {
         Optional<User> opt = userRepo.findByUserName(userName);
         if (opt.isPresent()) {

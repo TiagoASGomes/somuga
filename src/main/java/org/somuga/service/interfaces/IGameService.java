@@ -1,6 +1,7 @@
 package org.somuga.service.interfaces;
 
 import org.somuga.dto.game.GameCreateDto;
+import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Media;
 import org.somuga.exception.InvalidPermissionException;
@@ -16,7 +17,7 @@ public interface IGameService {
 
     List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer);
 
-    GamePublicDto getById(Long id) throws GameNotFoundException;
+    GameLikePublicDto getById(Long id) throws GameNotFoundException;
 
     GamePublicDto create(GameCreateDto game) throws GenreNotFoundException, DeveloperNotFoundException, PlatformNotFoundException;
 

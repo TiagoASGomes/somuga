@@ -1,5 +1,6 @@
 package org.somuga.converter;
 
+import org.somuga.dto.platform.PlatformCreateDto;
 import org.somuga.dto.platform.PlatformPublicDto;
 import org.somuga.entity.Platform;
 
@@ -21,4 +22,9 @@ public class PlatformConverter {
                 .toList();
     }
 
+    public static Platform fromCreateDtoToEntity(PlatformCreateDto platformDto) {
+        return Platform.builder()
+                .platformName(platformDto.platformName())
+                .build();
+    }
 }

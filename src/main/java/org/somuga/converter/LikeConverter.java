@@ -4,6 +4,8 @@ import org.somuga.dto.like.LikePublicDto;
 import org.somuga.dto.media.MediaPublicDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.Like;
+import org.somuga.entity.Media;
+import org.somuga.entity.User;
 
 import java.util.List;
 
@@ -24,4 +26,10 @@ public class LikeConverter {
                 .toList();
     }
 
+    public static Like fromCreateDtoToEntity(User user, Media media) {
+        return Like.builder()
+                .user(user)
+                .media(media)
+                .build();
+    }
 }

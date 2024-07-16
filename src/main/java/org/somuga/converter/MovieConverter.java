@@ -3,6 +3,7 @@ package org.somuga.converter;
 import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.movie.MovieCreateDto;
+import org.somuga.dto.movie.MovieLikePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrewRole;
@@ -39,14 +40,14 @@ public class MovieConverter {
     }
 
     public static Movie fromCreateDtoToEntity(MovieCreateDto movieDto) {
-        Movie movie = new Movie();
-        movie.setTitle(movieDto.title());
-        movie.setReleaseDate(movieDto.releaseDate());
-        movie.setDescription(movieDto.description());
-        movie.setDuration(movieDto.duration());
-        movie.setMediaUrl(movieDto.mediaUrl());
-        movie.setImageUrl(movieDto.imageUrl());
-        return movie;
+        return Movie.builder()
+                .title(movieDto.title())
+                .releaseDate(movieDto.releaseDate())
+                .description(movieDto.description())
+                .duration(movieDto.duration())
+                .mediaUrl(movieDto.mediaUrl())
+                .imageUrl(movieDto.imageUrl())
+                .build();
     }
 
     public static MovieRolePublicDto fromEntityToMovieRolePublicDto(MovieCrewRole role) {
@@ -77,6 +78,28 @@ public class MovieConverter {
                 movieCrewRole.getCharacterName(),
                 movieCrewRole.getMovie().getTitle(),
                 movieCrewRole.getMovie().getReleaseDate()
+        );
+    }
+
+    public static MovieLikePublicDto fromEntityToLikePublicDto(Movie movie, boolean isLiked) {
+        if (movie.getReviews() == null) {
+            movie.setReviews(new HashSet<>());
+        }
+        if (movie.getLikes() == null) {
+            movie.setLikes(new HashSet<>());
+        }
+        return new MovieLikePublicDto(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getReleaseDate(),
+                movie.getDescription(),
+                movie.getDuration(),
+                fromEntityListToMovieRolePublicDtoList(movie.getMovieCrew()),
+                movie.getMediaUrl(),
+                movie.getImageUrl(),
+                movie.getLikes().size(),
+                movie.getReviews().size(),
+                isLiked
         );
     }
 }

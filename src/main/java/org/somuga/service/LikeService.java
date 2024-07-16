@@ -60,7 +60,7 @@ public class LikeService implements ILikeService {
         }
         User user = userService.findById(userId);
         Media media = mediaService.findById(likeDto.mediaId());
-        Like like = new Like(user, media);
+        Like like = LikeConverter.fromCreateDtoToEntity(user, media);
         return LikeConverter.fromEntityToPublicDto(likeRepo.save(like));
     }
 

@@ -24,6 +24,9 @@ public class UserConverter {
     }
 
     public static User fromCreateDtoToEntity(UserCreateDto user, String id) {
-        return new User(id, user.userName());
+        return User.builder()
+                .id(id)
+                .userName(user.userName())
+                .build();
     }
 }

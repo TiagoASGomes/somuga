@@ -110,4 +110,16 @@ public class SomugaExceptionHandler {
                 new Date()
         ), HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Error> handleException(Exception e, HttpServletRequest request) {
+        logger.error(e.getMessage());
+        return new ResponseEntity<>(new Error(
+                e.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                request.getMethod(),
+                new Date()
+        ), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

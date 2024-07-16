@@ -21,9 +21,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(regexMatcher("/api/.*/public.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/private.*")).authenticated()
-                        .requestMatchers(regexMatcher("/swagger-ui.*")).permitAll()
-                        .requestMatchers(regexMatcher("/swagger-resources.*")).permitAll()
-                        .requestMatchers(regexMatcher("/v3/api-docs.*")).permitAll()
+                        .requestMatchers(regexMatcher("/swagger.*|/v3/api-docs.*")).permitAll()
                 )
                 .cors(withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2

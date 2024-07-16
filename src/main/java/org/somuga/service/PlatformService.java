@@ -43,13 +43,29 @@ public class PlatformService implements IPlatformService {
         if (checkDuplicatePlatform(platformDto.platformName())) {
             throw new PlatformAlreadyExistsException(PLATFORM_ALREADY_EXISTS + platformDto.platformName());
         }
-        Platform platform = new Platform(platformDto.platformName());
+        Platform platform = PlatformConverter.fromCreateDtoToEntity(platformDto);
         return PlatformConverter.fromEntityToPublicDto(platformRepo.save(platform));
     }
 
     @Override
     public Platform findByPlatformName(String platformName) throws PlatformNotFoundException {
         return platformRepo.findByPlatformNameIgnoreCase(platformName).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND_NAME + platformName));
+    }
+
+    @Override
+    public PlatformPublicDto update(Long id, PlatformCreateDto platformDto) throws PlatformAlreadyExistsException, PlatformNotFoundException {
+        if (checkDuplicatePlatform(platformDto.platformName())) {
+            throw new PlatformAlreadyExistsException(PLATFORM_ALREADY_EXISTS + platformDto.platformName());
+        }
+        Platform platform = findById(id);
+        platform.setPlatformName(platformDto.platformName());
+        return PlatformConverter.fromEntityToPublicDto(platformRepo.save(platform));
+    }
+
+    @Override
+    public void delete(Long id) throws PlatformNotFoundException {
+        findById(id);
+        platformRepo.deleteById(id);
     }
 
     private boolean checkDuplicatePlatform(String platformName) {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/user")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     private final IUserService userService;
@@ -59,8 +59,9 @@ public class UserController {
     }
 
     @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deleteAdmin(@PathVariable Long id) throws UserNotFoundException {
-        userService.delete();
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> adminDelete(@PathVariable String id) throws UserNotFoundException {
+        userService.adminDelete(id);
         return ResponseEntity.noContent().build();
     }
 }

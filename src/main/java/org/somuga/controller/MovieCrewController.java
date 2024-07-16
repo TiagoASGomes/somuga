@@ -10,13 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/movie_crew")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/v1/movie/crew")
 public class MovieCrewController {
 
     private final IMovieCrewService movieCrewService;
@@ -25,7 +25,6 @@ public class MovieCrewController {
     public MovieCrewController(IMovieCrewService movieCrewService) {
         this.movieCrewService = movieCrewService;
     }
-
 
     @GetMapping("/public")
     public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {
@@ -50,6 +49,13 @@ public class MovieCrewController {
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieCrewNotFoundException, InvalidPermissionException {
         movieCrewService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws MovieCrewNotFoundException {
+        movieCrewService.adminDelete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
