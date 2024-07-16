@@ -1,4 +1,4 @@
-package org.somuga.testDtos;
+package org.somuga.testUtils;
 
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.dto.user.UserPublicDto;

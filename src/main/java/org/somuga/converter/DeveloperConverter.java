@@ -21,12 +21,14 @@ public class DeveloperConverter {
     }
 
     public static List<DeveloperPublicDto> fromEntityListToPublicDtoList(List<Developer> developers) {
+        if (developers == null) return null;
         return developers.stream()
                 .map(DeveloperConverter::fromEntityToPublicDto)
                 .toList();
     }
 
     public static Developer fromCreateDtoToEntity(DeveloperCreateDto developerDto) {
+        if (developerDto == null) return new Developer();
         return Developer.builder()
                 .developerName(developerDto.developerName())
                 .socials(developerDto.socials())
