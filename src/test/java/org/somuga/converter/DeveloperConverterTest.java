@@ -7,12 +7,14 @@ import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ContextConfiguration
 @ActiveProfiles("test")
 class DeveloperConverterTest {
 
