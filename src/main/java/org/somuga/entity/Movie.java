@@ -9,6 +9,7 @@ import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MovieRole;
 import org.somuga.util.id_class.MovieCrewRoleId;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +38,9 @@ public class Movie extends Media {
                 .characterName(characterName)
                 .id(new MovieCrewRoleId(this.getId(), movieCrew.getId()))
                 .build();
+        if (this.movieCrew == null) {
+            this.movieCrew = new ArrayList<>();
+        }
         this.movieCrew.add(movieCrewRole);
     }
 

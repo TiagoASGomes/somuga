@@ -66,7 +66,8 @@ public class DeveloperService implements IDeveloperService {
         return developerRepo.findByDeveloperNameIgnoreCase(developerName).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND_NAME + developerName));
     }
 
-    private Developer findById(Long id) throws DeveloperNotFoundException {
+    @Override
+    public Developer findById(Long id) throws DeveloperNotFoundException {
         return developerRepo.findById(id).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND + id));
     }
 

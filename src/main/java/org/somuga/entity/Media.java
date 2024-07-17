@@ -9,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MediaType;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "media")
@@ -46,10 +46,10 @@ public abstract class Media {
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private Set<Like> likes;
+    private List<Like> likes;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private Set<Review> reviews;
+    private List<Review> reviews;
 
 }

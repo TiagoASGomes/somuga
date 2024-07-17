@@ -6,6 +6,10 @@ import org.somuga.entity.Media;
 import org.somuga.entity.Movie;
 
 public class MediaConverter {
+
+    private MediaConverter() {
+    }
+
     public static MediaPublicDto fromMediaEntityToPublicDto(Media media) {
         if (media == null) return null;
         return switch (media.getMediaType()) {

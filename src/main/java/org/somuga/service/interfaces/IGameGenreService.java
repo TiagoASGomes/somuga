@@ -20,4 +20,6 @@ public interface IGameGenreService {
     GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreAlreadyExistsException, GenreNotFoundException;
 
     void delete(Long id) throws GenreNotFoundException;
+
+    GameGenre findById(Long id) throws GenreNotFoundException;
 }

@@ -77,7 +77,9 @@ public class PlatformService implements IPlatformService {
         }
     }
 
-    private Platform findById(Long id) throws PlatformNotFoundException {
+    @Override
+    public Platform findById(Long id) throws PlatformNotFoundException {
         return platformRepo.findById(id).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND + id));
     }
+
 }

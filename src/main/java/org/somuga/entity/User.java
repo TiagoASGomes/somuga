@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -20,9 +20,9 @@ public class User {
     @Column(name = "user_name", nullable = false)
     private String userName;
     @OneToMany(mappedBy = "user")
-    private Set<Like> likes;
+    private List<Like> likes;
     @OneToMany(mappedBy = "user")
-    private Set<Review> reviews;
+    private List<Review> reviews;
     private Date joinDate;
     private boolean active;
 

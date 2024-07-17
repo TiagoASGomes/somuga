@@ -5,23 +5,25 @@ import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Game;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class GameConverter {
+
+    private GameConverter() {
+    }
+
     public static GamePublicDto fromEntityToPublicDto(Game game) {
         if (game == null) return null;
-        if (game.getReviews() == null) game.setReviews(Set.of());
-        if (game.getLikes() == null) game.setLikes(Set.of());
-        if (game.getGenres() == null) game.setGenres(Set.of());
-        if (game.getPlatforms() == null) game.setPlatforms(Set.of());
+        if (game.getReviews() == null) game.setReviews(new ArrayList<>());
+        if (game.getLikes() == null) game.setLikes(new ArrayList<>());
         return new GamePublicDto(
                 game.getId(),
                 game.getTitle(),
                 game.getReleaseDate(),
                 DeveloperConverter.fromEntityToPublicDto(game.getDeveloper()),
-                game.getGenres().stream().map(GameGenreConverter::fromEntityToPublicDto).toList(),
-                game.getPlatforms().stream().map(PlatformConverter::fromEntityToPublicDto).toList(),
+                GameGenreConverter.fromEntityListToPublicDtoList(game.getGenres()),
+                PlatformConverter.fromEntityListToPublicDtoList(game.getPlatforms()),
                 game.getPrice(),
                 game.getDescription(),
                 game.getReviews().size(),
@@ -32,12 +34,14 @@ public class GameConverter {
     }
 
     public static List<GamePublicDto> fromEntityListToPublicDtoList(List<Game> games) {
+        if (games == null) return new ArrayList<>();
         return games.stream()
-                .map(game -> fromEntityToPublicDto(game))
+                .map(GameConverter::fromEntityToPublicDto)
                 .toList();
     }
 
     public static Game fromCreateDtoToEntity(GameCreateDto gameDto) {
+        if (gameDto == null) return null;
         return Game.builder()
                 .title(gameDto.title())
                 .releaseDate(gameDto.releaseDate())
@@ -49,24 +53,9 @@ public class GameConverter {
     }
 
     public static GameLikePublicDto fromEntityToPublicLikeDto(Game game, boolean isLiked) {
-        if (game == null) return null;
-        if (game.getReviews() == null) game.setReviews(Set.of());
-        if (game.getLikes() == null) game.setLikes(Set.of());
-        if (game.getGenres() == null) game.setGenres(Set.of());
-        if (game.getPlatforms() == null) game.setPlatforms(Set.of());
+        GamePublicDto gamePublicDto = fromEntityToPublicDto(game);
         return new GameLikePublicDto(
-                game.getId(),
-                game.getTitle(),
-                game.getReleaseDate(),
-                DeveloperConverter.fromEntityToPublicDto(game.getDeveloper()),
-                game.getGenres().stream().map(GameGenreConverter::fromEntityToPublicDto).toList(),
-                game.getPlatforms().stream().map(PlatformConverter::fromEntityToPublicDto).toList(),
-                game.getPrice(),
-                game.getDescription(),
-                game.getReviews().size(),
-                game.getLikes().size(),
-                game.getMediaUrl(),
-                game.getImageUrl(),
+                gamePublicDto,
                 isLiked
         );
     }

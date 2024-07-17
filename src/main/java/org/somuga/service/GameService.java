@@ -25,9 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.somuga.util.message.Messages.*;
 
@@ -96,18 +94,20 @@ public class GameService implements IGameService {
     @Override
     public GamePublicDto create(GameCreateDto gameDto) throws GenreNotFoundException, DeveloperNotFoundException, PlatformNotFoundException {
         Game game = GameConverter.fromCreateDtoToEntity(gameDto);
-        Developer developer = developerService.findByDeveloperName(gameDto.developerName());
-        Set<GameGenre> genres = new HashSet<>();
-        Set<Platform> platforms = new HashSet<>();
-        for (String platformName : gameDto.platformsNames()) {
-            platforms.add(platformService.findByPlatformName(platformName));
+        Developer developer = developerService.findById(gameDto.developerId());
+
+        List<GameGenre> genres = new ArrayList<>();
+        List<Platform> platforms = new ArrayList<>();
+
+        for (Long platformId : gameDto.platformsIds()) {
+            platforms.add(platformService.findById(platformId));
         }
-        for (String genreName : gameDto.genres()) {
-            genres.add(genreService.findByGenre(genreName));
+        for (Long genreId : gameDto.genreIds()) {
+            genres.add(genreService.findById(genreId));
         }
+        genres.forEach(game::addGenre);
+        platforms.forEach(game::addPlatform);
         game.setDeveloper(developer);
-        game.setGenres(genres);
-        game.setPlatforms(platforms);
         game.setMediaType(MediaType.GAME);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         game.setMediaCreatorId(auth.getName());
@@ -121,19 +121,19 @@ public class GameService implements IGameService {
         if (!game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_UPDATE);
         }
-        Developer developer = developerService.findByDeveloperName(gameDto.developerName());
-        Set<GameGenre> genres = new HashSet<>();
-        Set<Platform> platforms = new HashSet<>();
-        for (String platformName : gameDto.platformsNames()) {
-            platforms.add(platformService.findByPlatformName(platformName));
+        Developer developer = developerService.findById(gameDto.developerId());
+        List<GameGenre> genres = new ArrayList<>();
+        List<Platform> platforms = new ArrayList<>();
+        for (Long platformId : gameDto.platformsIds()) {
+            platforms.add(platformService.findById(platformId));
         }
-        for (String genreName : gameDto.genres()) {
-            genres.add(genreService.findByGenre(genreName));
+        for (Long genreId : gameDto.genreIds()) {
+            genres.add(genreService.findById(genreId));
         }
-        removePlatformAndGenre(game);
+        removePlatformsAndGenres(game);
         game.setDeveloper(developer);
-        game.setGenres(genres);
-        game.setPlatforms(platforms);
+        genres.forEach(game::addGenre);
+        platforms.forEach(game::addPlatform);
         game.setTitle(gameDto.title());
         game.setDescription(gameDto.description());
         game.setReleaseDate(gameDto.releaseDate());
@@ -148,20 +148,19 @@ public class GameService implements IGameService {
         if (!game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
-        removePlatformAndGenre(game);
+        removePlatformsAndGenres(game);
         gameRepo.delete(game);
     }
 
-    private void removePlatformAndGenre(Game game) {
-        Set<Platform> platforms = new HashSet<>(game.getPlatforms());
-        Set<GameGenre> genres = new HashSet<>(game.getGenres());
+    private void removePlatformsAndGenres(Game game) {
+        List<Platform> platforms = List.copyOf(game.getPlatforms());
+        List<GameGenre> genres = List.copyOf(game.getGenres());
         for (Platform platform : platforms) {
-            platform.removeGame(game);
+            game.removePlatform(platform);
         }
         for (GameGenre genre : genres) {
-            genre.removeGame(game);
+            game.removeGenre(genre);
         }
-        gameRepo.save(game);
     }
 
     @Override
@@ -172,7 +171,7 @@ public class GameService implements IGameService {
     @Override
     public void adminDelete(Long id) throws GameNotFoundException {
         Game game = findById(id);
-        removePlatformAndGenre(game);
+        removePlatformsAndGenres(game);
         gameRepo.deleteById(id);
     }
 }

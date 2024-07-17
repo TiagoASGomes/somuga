@@ -20,4 +20,6 @@ public interface IPlatformService {
     PlatformPublicDto update(Long id, PlatformCreateDto platformDto) throws PlatformAlreadyExistsException, PlatformNotFoundException;
 
     void delete(Long id) throws PlatformNotFoundException;
+
+    Platform findById(Long id) throws PlatformNotFoundException;
 }

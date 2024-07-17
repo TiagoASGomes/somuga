@@ -77,7 +77,8 @@ public class GameGenreService implements IGameGenreService {
         }
     }
 
-    private GameGenre findById(Long id) throws GenreNotFoundException {
+    @Override
+    public GameGenre findById(Long id) throws GenreNotFoundException {
         return gameGenreRepo.findById(id).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND + id));
     }
 }

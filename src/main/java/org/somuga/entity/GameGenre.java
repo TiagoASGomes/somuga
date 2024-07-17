@@ -34,7 +34,6 @@ public class GameGenre {
     public void removeGame(Game game) {
         if (games != null) {
             games.remove(game);
-            game.removeGenre(this);
         }
     }
 }

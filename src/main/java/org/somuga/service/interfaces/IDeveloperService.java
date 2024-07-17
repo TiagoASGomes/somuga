@@ -21,4 +21,6 @@ public interface IDeveloperService {
     DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException;
 
     void delete(Long id) throws DeveloperNotFoundException;
+
+    Developer findById(Long id) throws DeveloperNotFoundException;
 }

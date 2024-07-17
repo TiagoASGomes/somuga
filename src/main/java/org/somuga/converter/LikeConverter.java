@@ -7,11 +7,16 @@ import org.somuga.entity.Like;
 import org.somuga.entity.Media;
 import org.somuga.entity.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LikeConverter {
 
+    private LikeConverter() {
+    }
+
     public static LikePublicDto fromEntityToPublicDto(Like like) {
+        if (like == null) return null;
         UserPublicDto user = UserConverter.fromEntityToPublicDto(like.getUser());
         MediaPublicDto media = MediaConverter.fromMediaEntityToPublicDto(like.getMedia());
         return new LikePublicDto(
@@ -20,7 +25,8 @@ public class LikeConverter {
                 media);
     }
 
-    public static List<LikePublicDto> fromEntityListToPublidDtoList(List<Like> likes) {
+    public static List<LikePublicDto> fromEntityListToPublicDtoList(List<Like> likes) {
+        if (likes == null) return new ArrayList<>();
         return likes.stream()
                 .map(LikeConverter::fromEntityToPublicDto)
                 .toList();

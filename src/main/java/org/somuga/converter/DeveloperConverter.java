@@ -28,7 +28,7 @@ public class DeveloperConverter {
     }
 
     public static Developer fromCreateDtoToEntity(DeveloperCreateDto developerDto) {
-        if (developerDto == null) return new Developer();
+        if (developerDto == null) return null;
         return Developer.builder()
                 .developerName(developerDto.developerName())
                 .socials(developerDto.socials())

@@ -16,11 +16,11 @@ public record GameCreateDto(
         @NotNull(message = INVALID_RELEASE_DATE)
         Date releaseDate,
         @NotNull(message = INVALID_DEVELOPER)
-        String developerName,
+        Long developerId,
         @NotNull(message = INVALID_GENRES)
-        List<String> genres,
+        List<Long> genreIds,
         @NotNull(message = INVALID_PLATFORMS)
-        List<String> platformsNames,
+        List<Long> platformsIds,
         @Min(value = 0, message = INVALID_PRICE)
         @Max(value = 1000, message = INVALID_PRICE)
         Double price,
