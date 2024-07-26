@@ -1,9 +1,11 @@
 package org.somuga.converter;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.somuga.dto.review.ReviewCreateDto;
 import org.somuga.dto.review.ReviewPublicDto;
+import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.Game;
 import org.somuga.entity.Review;
 import org.somuga.entity.User;
@@ -11,25 +13,46 @@ import org.somuga.enums.MediaType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest
 @ActiveProfiles("test")
 class ReviewConverterTest {
-    //TODO mock userConverter
+
+    private static MockedStatic<UserConverter> userConverterMockedStatic;
+
     private final User user = User.builder()
             .id("1")
             .userName("user")
             .build();
 
+    private final UserPublicDto userPublicDto = new UserPublicDto("1", "user", new Date());
+
     private final Game game = Game.builder()
             .id(1L)
-            .title("Game")
+            .title("game")
             .mediaType(MediaType.GAME)
             .build();
+
+    @BeforeAll
+    static void setUp() {
+        userConverterMockedStatic = mockStatic(UserConverter.class);
+    }
+    
+    @AfterAll
+    static void tearDownAll() {
+        userConverterMockedStatic.close();
+    }
+
+    @AfterEach
+    void tearDown() {
+        userConverterMockedStatic.reset();
+    }
 
     @Test
     @DisplayName("Test fromEntityToPublicDto should convert Review entity to ReviewPublicDto")
@@ -42,6 +65,8 @@ class ReviewConverterTest {
                 .writtenReview("Great movie")
                 .build();
 
+        userConverterMockedStatic.when(() -> UserConverter.fromEntityToPublicDto(user)).thenReturn(userPublicDto);
+
         ReviewPublicDto reviewPublicDto = ReviewConverter.fromEntityToPublicDto(review);
 
         assertEquals(review.getId(), reviewPublicDto.id());
@@ -49,12 +74,15 @@ class ReviewConverterTest {
         assertEquals(review.getMedia().getId(), reviewPublicDto.mediaId());
         assertEquals(review.getReviewScore(), reviewPublicDto.reviewScore());
         assertEquals(review.getWrittenReview(), reviewPublicDto.writtenReview());
+        userConverterMockedStatic.verify(() -> UserConverter.fromEntityToPublicDto(user));
+        userConverterMockedStatic.verifyNoMoreInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityToPublicDto should return null when Review entity is null")
     void fromEntityToPublicDtoNull() {
         assertNull(ReviewConverter.fromEntityToPublicDto(null));
+        userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -68,6 +96,7 @@ class ReviewConverterTest {
                 .build();
 
         assertNull(ReviewConverter.fromEntityToPublicDto(review));
+        userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -90,6 +119,8 @@ class ReviewConverterTest {
                         .build()
         );
 
+        userConverterMockedStatic.when(() -> UserConverter.fromEntityToPublicDto(user)).thenReturn(userPublicDto);
+
         List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(reviews);
 
         assertEquals(reviews.size(), reviewPublicDtos.size());
@@ -100,6 +131,8 @@ class ReviewConverterTest {
             assertEquals(reviews.get(i).getReviewScore(), reviewPublicDtos.get(i).reviewScore());
             assertEquals(reviews.get(i).getWrittenReview(), reviewPublicDtos.get(i).writtenReview());
         }
+        userConverterMockedStatic.verify(() -> UserConverter.fromEntityToPublicDto(user), Mockito.times(reviews.size()));
+        userConverterMockedStatic.verifyNoMoreInteractions();
     }
 
     @Test
@@ -107,6 +140,7 @@ class ReviewConverterTest {
     void fromEntityListToPublicDtoListEmpty() {
         List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(List.of());
         assertEquals(0, reviewPublicDtos.size());
+        userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -114,6 +148,7 @@ class ReviewConverterTest {
     void fromEntityListToPublicDtoListNull() {
         List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(null);
         assertEquals(0, reviewPublicDtos.size());
+        userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -128,11 +163,13 @@ class ReviewConverterTest {
         assertEquals(reviewCreateDto.reviewScore(), review.getReviewScore());
         assertEquals(reviewCreateDto.writtenReview(), review.getWrittenReview());
         assertNull(review.getId());
+        userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
     @DisplayName("Test fromCreateDtoToEntity should return null when ReviewCreateDto is null")
     void fromCreateDtoToEntityNull() {
         assertNull(ReviewConverter.fromCreateDtoToEntity(null, user, game));
+        userConverterMockedStatic.verifyNoInteractions();
     }
 }

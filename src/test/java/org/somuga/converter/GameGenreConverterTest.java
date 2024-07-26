@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ActiveProfiles("test")
 class GameGenreConverterTest {
 
-
     @Test
     @DisplayName("Test fromEntityToPublicDto should convert entity to public dto")
     void fromEntityToPublicDto() {

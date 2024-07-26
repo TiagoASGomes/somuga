@@ -1,10 +1,14 @@
 package org.somuga.converter;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.dto.game_genre.GameGenrePublicDto;
+import org.somuga.dto.platform.PlatformPublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.entity.Game;
 import org.somuga.entity.GameGenre;
@@ -12,6 +16,7 @@ import org.somuga.entity.Platform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,32 +25,64 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 class GameConverterTest {
-    //TODO mock Developer, GameGenre, Platform
+
+    private static MockedStatic<DeveloperConverter> developerConverterMockedStatic;
+    private static MockedStatic<GameGenreConverter> gameGenreConverterMockedStatic;
+    private static MockedStatic<PlatformConverter> platformConverterMockedStatic;
 
     private final Developer developer = Developer.builder()
             .id(1L)
             .developerName("Developer Name")
             .build();
+
+    private final DeveloperPublicDto developerPublicDto = new DeveloperPublicDto(
+            1L,
+            "Developer Name",
+            new ArrayList<>(0)
+    );
+
     private final List<GameGenre> genres = List.of(
             GameGenre.builder()
                     .id(1L)
                     .genre("Genre 1")
-                    .build(),
-            GameGenre.builder()
-                    .id(2L)
-                    .genre("Genre 2")
                     .build()
     );
+
+    private final List<GameGenrePublicDto> gameGenrePublicDtos = List.of(
+            new GameGenrePublicDto(1L, "Genre 1")
+    );
+
     private final List<Platform> platforms = List.of(
             Platform.builder()
                     .id(1L)
                     .platformName("Platform 1")
-                    .build(),
-            Platform.builder()
-                    .id(2L)
-                    .platformName("Platform 2")
                     .build()
     );
+
+    private final List<PlatformPublicDto> platformPublicDtos = List.of(
+            new PlatformPublicDto(1L, "Platform 1")
+    );
+
+    @BeforeAll
+    static void setUp() {
+        developerConverterMockedStatic = Mockito.mockStatic(DeveloperConverter.class);
+        gameGenreConverterMockedStatic = Mockito.mockStatic(GameGenreConverter.class);
+        platformConverterMockedStatic = Mockito.mockStatic(PlatformConverter.class);
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        developerConverterMockedStatic.close();
+        gameGenreConverterMockedStatic.close();
+        platformConverterMockedStatic.close();
+    }
+
+    @AfterEach
+    void init() {
+        developerConverterMockedStatic.reset();
+        gameGenreConverterMockedStatic.reset();
+        platformConverterMockedStatic.reset();
+    }
 
     @Test
     @DisplayName("Test fromEntityToPublicDto should convert entity to public dto")
@@ -63,6 +100,13 @@ class GameConverterTest {
                 .platforms(platforms)
                 .build();
 
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityToPublicDto(developer))
+                .thenReturn(developerPublicDto);
+        gameGenreConverterMockedStatic.when(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres))
+                .thenReturn(gameGenrePublicDtos);
+        platformConverterMockedStatic.when(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms))
+                .thenReturn(platformPublicDtos);
+
         GamePublicDto gamePublicDto = GameConverter.fromEntityToPublicDto(game);
 
         assertEquals(game.getId(), gamePublicDto.id());
@@ -72,20 +116,42 @@ class GameConverterTest {
         assertEquals(game.getDescription(), gamePublicDto.description());
         assertEquals(game.getMediaUrl(), gamePublicDto.mediaUrl());
         assertEquals(game.getImageUrl(), gamePublicDto.imageUrl());
+        assertEquals(game.getGenres().size(), gamePublicDto.genres().size());
+        assertEquals(game.getPlatforms().size(), gamePublicDto.platforms().size());
+
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer));
+        gameGenreConverterMockedStatic.verify(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres));
+        platformConverterMockedStatic.verify(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms));
+        developerConverterMockedStatic.verifyNoMoreInteractions();
+        gameGenreConverterMockedStatic.verifyNoMoreInteractions();
+        platformConverterMockedStatic.verifyNoMoreInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityToPublicDto should return null when entity is null")
     void fromEntityToPublicDtoReturnNull() {
         GamePublicDto gamePublicDto = GameConverter.fromEntityToPublicDto(null);
-        assertEquals(null, gamePublicDto);
+        assertNull(gamePublicDto);
+
+        developerConverterMockedStatic.verifyNoInteractions();
+        gameGenreConverterMockedStatic.verifyNoInteractions();
+        platformConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityToPublicDto should return empty entity when entity is empty")
     void fromEntityToPublicDtoReturnEmpty() {
         Game game = new Game();
+
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityToPublicDto(null))
+                .thenReturn(null);
+        gameGenreConverterMockedStatic.when(() -> GameGenreConverter.fromEntityListToPublicDtoList(null))
+                .thenReturn(new ArrayList<>(0));
+        platformConverterMockedStatic.when(() -> PlatformConverter.fromEntityListToPublicDtoList(null))
+                .thenReturn(new ArrayList<>(0));
+
         GamePublicDto gamePublicDto = GameConverter.fromEntityToPublicDto(game);
+
         assertNull(gamePublicDto.id());
         assertNull(gamePublicDto.title());
         assertNull(gamePublicDto.releaseDate());
@@ -95,6 +161,13 @@ class GameConverterTest {
         assertNull(gamePublicDto.imageUrl());
         assertEquals(0, gamePublicDto.genres().size());
         assertEquals(0, gamePublicDto.platforms().size());
+
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(null));
+        gameGenreConverterMockedStatic.verify(() -> GameGenreConverter.fromEntityListToPublicDtoList(null));
+        platformConverterMockedStatic.verify(() -> PlatformConverter.fromEntityListToPublicDtoList(null));
+        developerConverterMockedStatic.verifyNoMoreInteractions();
+        gameGenreConverterMockedStatic.verifyNoMoreInteractions();
+        platformConverterMockedStatic.verifyNoMoreInteractions();
     }
 
     @Test
@@ -115,24 +188,47 @@ class GameConverterTest {
 
         List<Game> games = List.of(game, game);
 
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityToPublicDto(developer))
+                .thenReturn(developerPublicDto);
+        gameGenreConverterMockedStatic.when(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres))
+                .thenReturn(gameGenrePublicDtos);
+        platformConverterMockedStatic.when(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms))
+                .thenReturn(platformPublicDtos);
+
         List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
 
         assertEquals(games.size(), gamePublicDtos.size());
+
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer), Mockito.times(games.size()));
+        gameGenreConverterMockedStatic.verify(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres), Mockito.times(games.size()));
+        platformConverterMockedStatic.verify(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms), Mockito.times(games.size()));
+        developerConverterMockedStatic.verifyNoMoreInteractions();
+        gameGenreConverterMockedStatic.verifyNoMoreInteractions();
+        platformConverterMockedStatic.verifyNoMoreInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when list of entities is empty")
     void fromEntityListToPublicDtoListReturnEmpty() {
         List<Game> games = List.of();
+
         List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
+
         assertEquals(0, gamePublicDtos.size());
+        developerConverterMockedStatic.verifyNoInteractions();
+        gameGenreConverterMockedStatic.verifyNoInteractions();
+        platformConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when list of entities is null")
     void fromEntityListToPublicDtoListReturnNull() {
         List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(null);
+
         assertEquals(0, gamePublicDtos.size());
+        developerConverterMockedStatic.verifyNoInteractions();
+        gameGenreConverterMockedStatic.verifyNoInteractions();
+        platformConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -161,13 +257,20 @@ class GameConverterTest {
         assertNull(game.getDeveloper());
         assertNull(game.getGenres());
         assertNull(game.getPlatforms());
+        developerConverterMockedStatic.verifyNoInteractions();
+        gameGenreConverterMockedStatic.verifyNoInteractions();
+        platformConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
     @DisplayName("Test fromCreateDtoToEntity should return null when create dto is null")
     void fromCreateDtoToEntityReturnEmpty() {
         Game game = GameConverter.fromCreateDtoToEntity(null);
+
         assertNull(game);
+        developerConverterMockedStatic.verifyNoInteractions();
+        gameGenreConverterMockedStatic.verifyNoInteractions();
+        platformConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
@@ -186,6 +289,13 @@ class GameConverterTest {
                 .platforms(platforms)
                 .build();
 
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityToPublicDto(developer))
+                .thenReturn(developerPublicDto);
+        gameGenreConverterMockedStatic.when(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres))
+                .thenReturn(gameGenrePublicDtos);
+        platformConverterMockedStatic.when(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms))
+                .thenReturn(platformPublicDtos);
+
         GameLikePublicDto gameLikePublicDto = GameConverter.fromEntityToPublicLikeDto(game, true);
 
         assertEquals(game.getId(), gameLikePublicDto.game().id());
@@ -200,5 +310,11 @@ class GameConverterTest {
         assertEquals(game.getPlatforms().size(), gameLikePublicDto.game().platforms().size());
         assertTrue(gameLikePublicDto.liked());
 
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer));
+        gameGenreConverterMockedStatic.verify(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres));
+        platformConverterMockedStatic.verify(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms));
+        developerConverterMockedStatic.verifyNoMoreInteractions();
+        gameGenreConverterMockedStatic.verifyNoMoreInteractions();
+        platformConverterMockedStatic.verifyNoMoreInteractions();
     }
 }
