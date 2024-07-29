@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.dto.game.GamePublicDto;
@@ -12,6 +13,7 @@ import org.somuga.entity.User;
 import org.somuga.enums.MediaType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class LikeConverterTest {

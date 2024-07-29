@@ -2,11 +2,13 @@ package org.somuga.converter;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class UserConverterTest {

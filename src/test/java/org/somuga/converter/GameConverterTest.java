@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.dto.developer.DeveloperPublicDto;
@@ -15,6 +16,7 @@ import org.somuga.entity.GameGenre;
 import org.somuga.entity.Platform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class GameConverterTest {

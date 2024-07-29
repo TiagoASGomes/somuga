@@ -2,17 +2,20 @@ package org.somuga.converter;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class DeveloperConverterTest {

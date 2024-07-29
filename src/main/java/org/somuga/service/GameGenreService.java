@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.GENRE_ALREADY_EXISTS;
+import static org.somuga.util.message.Messages.GENRE_NOT_FOUND;
 
 @Service
 public class GameGenreService implements IGameGenreService {
@@ -40,7 +41,7 @@ public class GameGenreService implements IGameGenreService {
 
     @Override
     public GameGenrePublicDto create(GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
-        if (checkDuplicateGenre(genreDto.genreName())) {
+        if (checkIfGenreExists(genreDto.genreName())) {
             throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
         }
         GameGenre genre = GameGenreConverter.fromCreateDtoToEntity(genreDto);
@@ -48,13 +49,8 @@ public class GameGenreService implements IGameGenreService {
     }
 
     @Override
-    public GameGenre findByGenre(String genre) throws GenreNotFoundException {
-        return gameGenreRepo.findByGenreIgnoreCase(genre).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND_NAME + genre));
-    }
-
-    @Override
     public GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreAlreadyExistsException, GenreNotFoundException {
-        if (checkDuplicateGenre(genreDto.genreName())) {
+        if (checkIfGenreExists(genreDto.genreName())) {
             throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
         }
         GameGenre genre = findById(id);
@@ -68,17 +64,12 @@ public class GameGenreService implements IGameGenreService {
         gameGenreRepo.deleteById(id);
     }
 
-    private boolean checkDuplicateGenre(String genre) {
-        try {
-            findByGenre(genre);
-            return true;
-        } catch (GenreNotFoundException ignored) {
-            return false;
-        }
-    }
-
     @Override
     public GameGenre findById(Long id) throws GenreNotFoundException {
         return gameGenreRepo.findById(id).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND + id));
+    }
+
+    private boolean checkIfGenreExists(String genre) {
+        return gameGenreRepo.findByGenreIgnoreCase(genre);
     }
 }

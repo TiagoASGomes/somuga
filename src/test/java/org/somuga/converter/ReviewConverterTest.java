@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.dto.review.ReviewCreateDto;
@@ -12,6 +13,7 @@ import org.somuga.entity.User;
 import org.somuga.enums.MediaType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mockStatic;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class ReviewConverterTest {
@@ -43,7 +46,7 @@ class ReviewConverterTest {
     static void setUp() {
         userConverterMockedStatic = mockStatic(UserConverter.class);
     }
-    
+
     @AfterAll
     static void tearDownAll() {
         userConverterMockedStatic.close();

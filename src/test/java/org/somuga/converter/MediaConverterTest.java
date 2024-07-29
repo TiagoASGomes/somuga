@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.junit.jupiter.api.*;
+import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.dto.movie.MoviePublicDto;
@@ -9,11 +10,13 @@ import org.somuga.entity.Movie;
 import org.somuga.enums.MediaType;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mockStatic;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class MediaConverterTest {

@@ -2,6 +2,7 @@ package org.somuga.converter;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.movie.MovieCreateDto;
@@ -14,12 +15,14 @@ import org.somuga.enums.MediaType;
 import org.somuga.enums.MovieRole;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 class MovieConverterTest {
