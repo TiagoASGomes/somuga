@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.DEVELOPER_ALREADY_EXISTS;
+import static org.somuga.util.message.Messages.DEVELOPER_NOT_FOUND;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -82,7 +83,7 @@ class DeveloperServiceTest {
     void getAllWithName() {
         List<Developer> developers = List.of(developer);
 
-        Mockito.when(developerRepository.findByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(developers);
+        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(developers);
         developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers)).thenReturn(List.of(responseDto));
 
         List<DeveloperPublicDto> developerPublicDtos = developerService.getAll("Test Developer");
@@ -92,7 +93,7 @@ class DeveloperServiceTest {
         assertEquals(developer.getDeveloperName(), developerPublicDtos.get(0).developerName());
         assertEquals(developer.getSocials(), developerPublicDtos.get(0).socials());
 
-        Mockito.verify(developerRepository).findByDeveloperNameContainingIgnoreCase("Test Developer");
+        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer");
         developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers));
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
@@ -101,7 +102,7 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test getAll method with name parameter, no matching developer found and expect to return an empty list")
     void getAllWithNameNoMatch() {
-        Mockito.when(developerRepository.findByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(List.of());
+        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(List.of());
         developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of())).thenReturn(List.of());
 
         List<DeveloperPublicDto> developerPublicDtos = developerService.getAll("Test Developer");
@@ -109,7 +110,7 @@ class DeveloperServiceTest {
         assertNotNull(developerPublicDtos);
         assertEquals(0, developerPublicDtos.size());
 
-        Mockito.verify(developerRepository).findByDeveloperNameContainingIgnoreCase("Test Developer");
+        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer");
         developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of()));
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
@@ -189,12 +190,13 @@ class DeveloperServiceTest {
 
     @Test
     @DisplayName("Test update method and expect to return a DeveloperPublicDto")
-    void update() throws DeveloperNotFoundException {
+    void update() throws Exception {
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2", List.of("Test Socials2"));
         DeveloperPublicDto updatedResponseDto = new DeveloperPublicDto(1L, "Test Developer2", List.of("Test Socials2"));
 
         Mockito.when(developerRepository.findById(1L)).thenReturn(Optional.of(developer));
         Mockito.when(developerRepository.save(developer)).thenReturn(developer);
+        Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer2")).thenReturn(Optional.empty());
         developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityToPublicDto(developer)).thenReturn(updatedResponseDto);
 
         DeveloperPublicDto developerPublicDto = developerService.update(1L, developerCreateDto);
@@ -206,6 +208,7 @@ class DeveloperServiceTest {
         Mockito.verify(developerRepository).findById(1L);
         Mockito.verify(developerRepository).save(developer);
         developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer));
+        Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer2");
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
     }
@@ -216,12 +219,35 @@ class DeveloperServiceTest {
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2", List.of("Test Socials2"));
 
         Mockito.when(developerRepository.findById(1L)).thenReturn(Optional.empty());
+        Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer2")).thenReturn(Optional.empty());
 
         String errorMessage = assertThrows(DeveloperNotFoundException.class, () -> developerService.update(1L, developerCreateDto)).getMessage();
 
         assertEquals(DEVELOPER_NOT_FOUND + 1, errorMessage);
 
         Mockito.verify(developerRepository).findById(1L);
+        Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer2");
+        Mockito.verifyNoMoreInteractions(developerRepository);
+        developerConverterMockedStatic.verifyNoInteractions();
+    }
+
+    @Test
+    @DisplayName("Test update method with existing developer name and expect to throw DuplicateFieldException")
+    void updateExistingDeveloperName() {
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer", List.of("Test Socials"));
+
+        Developer duplicateDeveloper = Developer.builder()
+                .id(2L)
+                .developerName("Test Developer")
+                .socials(List.of("Test Socials"))
+                .build();
+        Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.of(duplicateDeveloper));
+
+        String errorMessage = assertThrows(DuplicateFieldException.class, () -> developerService.update(1L, developerCreateDto)).getMessage();
+
+        assertEquals(DEVELOPER_ALREADY_EXISTS + developer.getDeveloperName(), errorMessage);
+
+        Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer");
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoInteractions();
     }
@@ -249,36 +275,6 @@ class DeveloperServiceTest {
         assertEquals(DEVELOPER_NOT_FOUND + 1, errorMessage);
 
         Mockito.verify(developerRepository).findById(1L);
-        Mockito.verifyNoMoreInteractions(developerRepository);
-        developerConverterMockedStatic.verifyNoInteractions();
-    }
-
-    @Test
-    @DisplayName("Test findByDeveloperName method and expect to return a Developer")
-    void findByDeveloperName() throws Exception {
-        Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.of(developer));
-
-        Developer foundDeveloper = developerService.findByDeveloperName("Test Developer");
-
-        assertEquals(developer.getId(), foundDeveloper.getId());
-        assertEquals(developer.getDeveloperName(), foundDeveloper.getDeveloperName());
-        assertEquals(developer.getSocials(), foundDeveloper.getSocials());
-
-        Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer");
-        Mockito.verifyNoMoreInteractions(developerRepository);
-        developerConverterMockedStatic.verifyNoInteractions();
-    }
-
-    @Test
-    @DisplayName("Test findByDeveloperName method with non-existing developer name and expect to throw DeveloperNotFoundException")
-    void findByDeveloperNameNonExisting() {
-        Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.empty());
-
-        String errorMessage = assertThrows(DeveloperNotFoundException.class, () -> developerService.findByDeveloperName("Test Developer")).getMessage();
-
-        assertEquals(DEVELOPER_NOT_FOUND_NAME + "Test Developer", errorMessage);
-
-        Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer");
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoInteractions();
     }

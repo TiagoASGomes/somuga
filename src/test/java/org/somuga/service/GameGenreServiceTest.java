@@ -132,7 +132,7 @@ class GameGenreServiceTest {
         GameGenreCreateDto createDto = new GameGenreCreateDto("Action");
 
         Mockito.when(gameGenreRepository.save(genre)).thenReturn(genre);
-        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Action")).thenReturn(false);
+        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Action")).thenReturn(Optional.empty());
         gameGenreConverter.when(() -> GameGenreConverter.fromCreateDtoToEntity(createDto)).thenReturn(genre);
         gameGenreConverter.when(() -> GameGenreConverter.fromEntityToPublicDto(genre)).thenReturn(genreDto);
 
@@ -153,7 +153,7 @@ class GameGenreServiceTest {
     void createWithExistingGenre() {
         GameGenreCreateDto createDto = new GameGenreCreateDto("Action");
 
-        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Action")).thenReturn(true);
+        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Action")).thenReturn(Optional.of(genre));
 
         String errorMessage = assertThrows(Exception.class, () -> gameGenreService.create(createDto)).getMessage();
 
@@ -170,7 +170,7 @@ class GameGenreServiceTest {
         GameGenreCreateDto createDto = new GameGenreCreateDto("Adventure");
 
         Mockito.when(gameGenreRepository.save(genre)).thenReturn(genre);
-        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Adventure")).thenReturn(false);
+        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Adventure")).thenReturn(Optional.empty());
         Mockito.when(gameGenreRepository.findById(1L)).thenReturn(Optional.of(genre));
         gameGenreConverter.when(() -> GameGenreConverter.fromEntityToPublicDto(genre)).thenReturn(genreDto);
 
@@ -191,7 +191,11 @@ class GameGenreServiceTest {
     void updateWithExistingGenre() {
         GameGenreCreateDto createDto = new GameGenreCreateDto("Adventure");
 
-        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Adventure")).thenReturn(true);
+        GameGenre genre2 = GameGenre.builder()
+                .id(2L)
+                .genre("Adventure")
+                .build();
+        Mockito.when(gameGenreRepository.findByGenreIgnoreCase("Adventure")).thenReturn(Optional.of(genre2));
 
         String errorMessage = assertThrows(Exception.class, () -> gameGenreService.update(1L, createDto)).getMessage();
 

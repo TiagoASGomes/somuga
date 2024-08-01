@@ -8,7 +8,6 @@ import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
-import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.repository.MovieCrewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.MOVIE_CREW_NOT_FOUND;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,9 +40,7 @@ class MovieCrewServiceTest {
     private final MovieCrew movieCrew = MovieCrew.builder()
             .id(1L)
             .fullName("John Doe")
-            .crewCreatorId("admin")
             .birthDate(new Date())
-            .crewCreatorId("admin")
             .build();
     private final MovieCrewPublicDto movieCrewPublicDto = new MovieCrewPublicDto(
             1L,
@@ -189,22 +186,6 @@ class MovieCrewServiceTest {
     }
 
     @Test
-    @DisplayName("Update movie crew member throws exception")
-    @WithMockUser(username = "user")
-    void updateThrowsException() {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("John Doe", new Date());
-
-        Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.of(movieCrew));
-
-        String errorMessage = assertThrows(InvalidPermissionException.class, () -> movieCrewService.update(1L, movieCrewCreateDto)).getMessage();
-
-        assertEquals(UNAUTHORIZED_UPDATE, errorMessage);
-        Mockito.verify(movieCrewRepository).findById(1L);
-        Mockito.verifyNoMoreInteractions(movieCrewRepository);
-        movieCrewConverter.verifyNoInteractions();
-    }
-
-    @Test
     @DisplayName("Delete movie crew member")
     @WithMockUser(username = "admin")
     void delete() throws Exception {
@@ -225,43 +206,6 @@ class MovieCrewServiceTest {
         Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.empty());
 
         String errorMessage = assertThrows(MovieCrewNotFoundException.class, () -> movieCrewService.delete(1L)).getMessage();
-
-        assertEquals(MOVIE_CREW_NOT_FOUND + 1L, errorMessage);
-        Mockito.verify(movieCrewRepository).findById(1L);
-        Mockito.verifyNoMoreInteractions(movieCrewRepository);
-    }
-
-    @Test
-    @DisplayName("Delete movie crew member throws permission exception")
-    @WithMockUser(username = "user")
-    void deleteThrowsPermissionException() {
-        Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.of(movieCrew));
-
-        String errorMessage = assertThrows(InvalidPermissionException.class, () -> movieCrewService.delete(1L)).getMessage();
-
-        assertEquals(UNAUTHORIZED_DELETE, errorMessage);
-        Mockito.verify(movieCrewRepository).findById(1L);
-        Mockito.verifyNoMoreInteractions(movieCrewRepository);
-    }
-
-    @Test
-    @DisplayName("Admin delete movie crew member")
-    void adminDelete() throws Exception {
-        Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.of(movieCrew));
-
-        movieCrewService.adminDelete(1L);
-
-        Mockito.verify(movieCrewRepository).findById(1L);
-        Mockito.verify(movieCrewRepository).deleteById(1L);
-        Mockito.verifyNoMoreInteractions(movieCrewRepository);
-    }
-
-    @Test
-    @DisplayName("Admin delete movie crew member throws exception")
-    void adminDeleteThrowsException() {
-        Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.empty());
-
-        String errorMessage = assertThrows(MovieCrewNotFoundException.class, () -> movieCrewService.adminDelete(1L)).getMessage();
 
         assertEquals(MOVIE_CREW_NOT_FOUND + 1L, errorMessage);
         Mockito.verify(movieCrewRepository).findById(1L);

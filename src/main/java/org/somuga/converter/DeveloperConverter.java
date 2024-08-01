@@ -13,6 +13,8 @@ public class DeveloperConverter {
 
     public static DeveloperPublicDto fromEntityToPublicDto(Developer developer) {
         if (developer == null) return null;
+        if (developer.getSocials() == null) developer.setSocials(List.of());
+
         return new DeveloperPublicDto(
                 developer.getId(),
                 developer.getDeveloperName(),

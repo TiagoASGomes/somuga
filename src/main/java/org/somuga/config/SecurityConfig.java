@@ -19,6 +19,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers(regexMatcher("/api/.*/admin.*")).hasAuthority("ADMIN")
                         .requestMatchers(regexMatcher("/api/.*/public.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/private.*")).authenticated()
                         .requestMatchers(regexMatcher("/swagger.*|/v3/api-docs.*")).permitAll()

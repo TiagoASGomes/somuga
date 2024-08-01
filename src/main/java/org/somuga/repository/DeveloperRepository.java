@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface DeveloperRepository extends JpaRepository<Developer, Long> {
 
-    List<Developer> findByDeveloperNameContainingIgnoreCase(String developerName);
+    List<Developer> findAllByDeveloperNameContainingIgnoreCase(String developerName);
 
     Optional<Developer> findByDeveloperNameIgnoreCase(String developerName);
 }

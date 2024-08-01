@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.somuga.util.message.Messages.GENRE_ALREADY_EXISTS;
 import static org.somuga.util.message.Messages.GENRE_NOT_FOUND;
@@ -41,7 +42,8 @@ public class GameGenreService implements IGameGenreService {
 
     @Override
     public GameGenrePublicDto create(GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
-        if (checkIfGenreExists(genreDto.genreName())) {
+        Optional<GameGenre> duplicateGenre = findByGenreName(genreDto.genreName());
+        if (duplicateGenre.isPresent()) {
             throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
         }
         GameGenre genre = GameGenreConverter.fromCreateDtoToEntity(genreDto);
@@ -50,7 +52,8 @@ public class GameGenreService implements IGameGenreService {
 
     @Override
     public GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreAlreadyExistsException, GenreNotFoundException {
-        if (checkIfGenreExists(genreDto.genreName())) {
+        Optional<GameGenre> duplicateGenre = findByGenreName(genreDto.genreName());
+        if (duplicateGenre.isPresent() && !duplicateGenre.get().getId().equals(id)) {
             throw new GenreAlreadyExistsException(GENRE_ALREADY_EXISTS + genreDto.genreName());
         }
         GameGenre genre = findById(id);
@@ -69,7 +72,7 @@ public class GameGenreService implements IGameGenreService {
         return gameGenreRepo.findById(id).orElseThrow(() -> new GenreNotFoundException(GENRE_NOT_FOUND + id));
     }
 
-    private boolean checkIfGenreExists(String genre) {
+    private Optional<GameGenre> findByGenreName(String genre) {
         return gameGenreRepo.findByGenreIgnoreCase(genre);
     }
 }

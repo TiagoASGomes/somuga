@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.DEVELOPER_ALREADY_EXISTS;
+import static org.somuga.util.message.Messages.DEVELOPER_NOT_FOUND;
 
 @Service
 public class DeveloperService implements IDeveloperService {
@@ -28,7 +30,7 @@ public class DeveloperService implements IDeveloperService {
     @Override
     public List<DeveloperPublicDto> getAll(String name) {
         if (name != null) {
-            return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findByDeveloperNameContainingIgnoreCase(name));
+            return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAllByDeveloperNameContainingIgnoreCase(name));
         }
         return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll());
     }
@@ -40,7 +42,8 @@ public class DeveloperService implements IDeveloperService {
 
     @Override
     public DeveloperPublicDto create(DeveloperCreateDto developerDto) throws DuplicateFieldException {
-        if (checkDuplicateDeveloperName(developerDto.developerName())) {
+        Optional<Developer> duplicateDeveloper = findByDeveloperName(developerDto.developerName());
+        if (duplicateDeveloper.isPresent()) {
             throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerDto.developerName());
         }
         Developer developer = DeveloperConverter.fromCreateDtoToEntity(developerDto);
@@ -48,7 +51,11 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
-    public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
+    public DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, DuplicateFieldException {
+        Optional<Developer> duplicateDeveloper = findByDeveloperName(developerDto.developerName());
+        if (duplicateDeveloper.isPresent() && !duplicateDeveloper.get().getId().equals(id)) {
+            throw new DuplicateFieldException(DEVELOPER_ALREADY_EXISTS + developerDto.developerName());
+        }
         Developer developer = findById(id);
         developer.setDeveloperName(developerDto.developerName());
         developer.setSocials(developerDto.socials());
@@ -62,21 +69,11 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
-    public Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException {
-        return developerRepo.findByDeveloperNameIgnoreCase(developerName).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND_NAME + developerName));
-    }
-
-    @Override
     public Developer findById(Long id) throws DeveloperNotFoundException {
         return developerRepo.findById(id).orElseThrow(() -> new DeveloperNotFoundException(DEVELOPER_NOT_FOUND + id));
     }
 
-    private boolean checkDuplicateDeveloperName(String developerName) {
-        try {
-            findByDeveloperName(developerName);
-            return true;
-        } catch (DeveloperNotFoundException ignored) {
-            return false;
-        }
+    private Optional<Developer> findByDeveloperName(String developerName) {
+        return developerRepo.findByDeveloperNameIgnoreCase(developerName);
     }
 }
