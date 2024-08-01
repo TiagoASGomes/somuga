@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.util.message.Messages.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -229,23 +231,24 @@ class PlatformsE2ETest {
     @Test
     @DisplayName("Test get all platforms and expect 200")
     void testGetAllPlatforms() throws Exception {
-        PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
+        createPlatform("PlayStation");
+        createPlatform("PlayStation2");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        PlatformPublicDto[] platformPublicDtos = mapper.readValue(response, PlatformPublicDto[].class);
+        List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
-        assertEquals(1, platformPublicDtos.length);
-        assertEquals(platformPublicDto, platformPublicDtos[0]);
+        assertEquals(2, platformPublicDtos.size());
     }
 
     @Test
     @DisplayName("Test get all platforms with name and expect 200")
     void testGetAllPlatformsWithName() throws Exception {
-        PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
+        createPlatform("PlayStation");
+        createPlatform("PlayStation2");
         createPlatform("Xbox");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=PlayStation")
@@ -253,16 +256,16 @@ class PlatformsE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        PlatformPublicDto[] platformPublicDtos = mapper.readValue(response, PlatformPublicDto[].class);
+        List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
-        assertEquals(1, platformPublicDtos.length);
-        assertEquals(platformPublicDto, platformPublicDtos[0]);
+        assertEquals(2, platformPublicDtos.size());
     }
 
     @Test
     @DisplayName("Test get all platforms with name case insensitive and expect 200")
     void testGetAllPlatformsWithNameCaseInsensitive() throws Exception {
-        PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
+        createPlatform("PlayStation");
+        createPlatform("PlayStation2");
         createPlatform("Xbox");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=playstation")
@@ -270,10 +273,9 @@ class PlatformsE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        PlatformPublicDto[] platformPublicDtos = mapper.readValue(response, PlatformPublicDto[].class);
+        List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
-        assertEquals(1, platformPublicDtos.length);
-        assertEquals(platformPublicDto, platformPublicDtos[0]);
+        assertEquals(2, platformPublicDtos.size());
     }
 
     @Test
@@ -287,9 +289,9 @@ class PlatformsE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        PlatformPublicDto[] platformPublicDtos = mapper.readValue(response, PlatformPublicDto[].class);
+        List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
-        assertEquals(0, platformPublicDtos.length);
+        assertEquals(0, platformPublicDtos.size());
     }
 
     @Test

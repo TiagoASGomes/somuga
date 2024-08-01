@@ -1,10 +1,7 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MediaType;
 
@@ -19,6 +16,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public abstract class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "media_id_generator")

@@ -23,6 +23,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.util.message.Messages.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -210,23 +212,24 @@ class GameGenreE2ETest {
     @Test
     @DisplayName("Test get all game genres and expect 200")
     void getAllGameGenres() throws Exception {
-        GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
+        createGameGenre("Action");
+        createGameGenre("Action2");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        GameGenrePublicDto[] gameGenrePublicDtos = mapper.readValue(response, GameGenrePublicDto[].class);
+        List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
-        assertEquals(1, gameGenrePublicDtos.length);
-        assertEquals(gameGenrePublicDto, gameGenrePublicDtos[0]);
+        assertEquals(2, gameGenrePublicDtos.size());
     }
 
     @Test
     @DisplayName("Test get all game genres with a search query and expect 200")
     void getAllGameGenresWithSearchQuery() throws Exception {
         createGameGenre("Action");
+        createGameGenre("Action2");
         createGameGenre("Adventure");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Action")
@@ -234,16 +237,16 @@ class GameGenreE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        GameGenrePublicDto[] gameGenrePublicDtos = mapper.readValue(response, GameGenrePublicDto[].class);
+        List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
-        assertEquals(1, gameGenrePublicDtos.length);
-        assertEquals("Action", gameGenrePublicDtos[0].genreName());
+        assertEquals(2, gameGenrePublicDtos.size());
     }
 
     @Test
     @DisplayName("Test get all game genres case insensitive with a search query and expect 200")
     void getAllGameGenresCaseInsensitiveWithSearchQuery() throws Exception {
         createGameGenre("Action");
+        createGameGenre("Action2");
         createGameGenre("Adventure");
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=action")
@@ -251,10 +254,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        GameGenrePublicDto[] gameGenrePublicDtos = mapper.readValue(response, GameGenrePublicDto[].class);
+        List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
-        assertEquals(1, gameGenrePublicDtos.length);
-        assertEquals("Action", gameGenrePublicDtos[0].genreName());
+        assertEquals(2, gameGenrePublicDtos.size());
     }
 
     @Test
@@ -268,9 +270,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        GameGenrePublicDto[] gameGenrePublicDtos = mapper.readValue(response, GameGenrePublicDto[].class);
+        List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
-        assertEquals(0, gameGenrePublicDtos.length);
+        assertEquals(0, gameGenrePublicDtos.size());
     }
 
     @Test

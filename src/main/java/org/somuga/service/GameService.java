@@ -138,6 +138,8 @@ public class GameService implements IGameService {
         game.setDescription(gameDto.description());
         game.setReleaseDate(gameDto.releaseDate());
         game.setPrice(gameDto.price());
+        game.setImageUrl(gameDto.imageUrl());
+        game.setMediaUrl(gameDto.mediaUrl());
         return GameConverter.fromEntityToPublicDto(gameRepo.save(game));
     }
 

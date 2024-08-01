@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class GameGenre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

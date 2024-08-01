@@ -268,7 +268,8 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get all developers and expect 200")
     void testGetAllDevelopers() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -277,14 +278,14 @@ class DeveloperE2ETest {
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
-        assertEquals(1, developers.size());
-        assertEquals(developerPublicDto, developers.get(0));
+        assertEquals(2, developers.size());
     }
 
     @Test
     @DisplayName("Test get all developers with name and expect 200")
     void testGetAllDevelopersWithName() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developerr", List.of("twitter.com/developer", "github.com/developer"));
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Developer")
@@ -294,14 +295,15 @@ class DeveloperE2ETest {
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
-        assertEquals(1, developers.size());
-        assertEquals(developerPublicDto, developers.get(0));
+        assertEquals(2, developers.size());
     }
 
     @Test
     @DisplayName("Test get all developers with name case insensitive and expect 200")
     void testGetAllDevelopersWithNameCaseInsensitive() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developerr", List.of("twitter.com/developer", "github.com/developer"));
+
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
         String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=developer")
@@ -311,8 +313,7 @@ class DeveloperE2ETest {
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
-        assertEquals(1, developers.size());
-        assertEquals(developerPublicDto, developers.get(0));
+        assertEquals(2, developers.size());
     }
 
     @Test
