@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,13 +27,8 @@ public class UserController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page) {
-        return new ResponseEntity<>(userService.getAll(page), HttpStatus.OK);
-    }
-
-    @GetMapping("/public/name/{name}")
-    public ResponseEntity<List<UserPublicDto>> getAllByName(Pageable page, @PathVariable String name) {
-        return new ResponseEntity<>(userService.getAllByName(page, name), HttpStatus.OK);
+    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {
+        return new ResponseEntity<>(userService.getAll(page, name), HttpStatus.OK);
     }
 
     @GetMapping("/public/{id}")
@@ -59,7 +53,6 @@ public class UserController {
     }
 
     @DeleteMapping("/admin/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> adminDelete(@PathVariable String id) throws UserNotFoundException {
         userService.adminDelete(id);
         return ResponseEntity.noContent().build();

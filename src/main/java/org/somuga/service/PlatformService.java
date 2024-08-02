@@ -12,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.PLATFORM_ALREADY_EXISTS;
+import static org.somuga.util.message.Messages.PLATFORM_NOT_FOUND;
 
 @Service
 public class PlatformService implements IPlatformService {
@@ -40,21 +42,19 @@ public class PlatformService implements IPlatformService {
 
     @Override
     public PlatformPublicDto create(PlatformCreateDto platformDto) throws PlatformAlreadyExistsException {
-        if (checkDuplicatePlatform(platformDto.platformName())) {
+        Optional<Platform> duplicatePlatform = findByPlatformName(platformDto.platformName());
+        if (duplicatePlatform.isPresent()) {
             throw new PlatformAlreadyExistsException(PLATFORM_ALREADY_EXISTS + platformDto.platformName());
         }
         Platform platform = PlatformConverter.fromCreateDtoToEntity(platformDto);
         return PlatformConverter.fromEntityToPublicDto(platformRepo.save(platform));
     }
 
-    @Override
-    public Platform findByPlatformName(String platformName) throws PlatformNotFoundException {
-        return platformRepo.findByPlatformNameIgnoreCase(platformName).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND_NAME + platformName));
-    }
 
     @Override
     public PlatformPublicDto update(Long id, PlatformCreateDto platformDto) throws PlatformAlreadyExistsException, PlatformNotFoundException {
-        if (checkDuplicatePlatform(platformDto.platformName())) {
+        Optional<Platform> duplicatePlatform = findByPlatformName(platformDto.platformName());
+        if (duplicatePlatform.isPresent() && !duplicatePlatform.get().getId().equals(id)) {
             throw new PlatformAlreadyExistsException(PLATFORM_ALREADY_EXISTS + platformDto.platformName());
         }
         Platform platform = findById(id);
@@ -68,16 +68,12 @@ public class PlatformService implements IPlatformService {
         platformRepo.deleteById(id);
     }
 
-    private boolean checkDuplicatePlatform(String platformName) {
-        try {
-            findByPlatformName(platformName);
-            return true;
-        } catch (PlatformNotFoundException ignored) {
-            return false;
-        }
+    @Override
+    public Platform findById(Long id) throws PlatformNotFoundException {
+        return platformRepo.findById(id).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND + id));
     }
 
-    private Platform findById(Long id) throws PlatformNotFoundException {
-        return platformRepo.findById(id).orElseThrow(() -> new PlatformNotFoundException(PLATFORM_NOT_FOUND + id));
+    private Optional<Platform> findByPlatformName(String platformName) {
+        return platformRepo.findByPlatformNameIgnoreCase(platformName);
     }
 }

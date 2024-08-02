@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Platform {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +35,6 @@ public class Platform {
     public void removeGame(Game game) {
         if (games != null) {
             games.remove(game);
-            game.removePlatform(this);
         }
     }
 }

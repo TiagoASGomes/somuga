@@ -1,13 +1,11 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "games")
@@ -16,36 +14,48 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(callSuper = true)
 public class Game extends Media {
 
     @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
     private Double price;
     @ManyToOne
     private Developer developer;
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "games")
-    private Set<GameGenre> genres;
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "games")
-    private Set<Platform> platforms;
+    @ManyToMany(cascade = CascadeType.REMOVE, mappedBy = "games", fetch = FetchType.EAGER)
+    private List<GameGenre> genres;
+    @ManyToMany(cascade = CascadeType.REMOVE, mappedBy = "games", fetch = FetchType.EAGER)
+    private List<Platform> platforms;
 
-//    public void setPlatforms(Set<Platform> platforms) {
-//        this.platforms = platforms;
-//        platforms.forEach(platform -> platform.addGame(this));
-//    }
-//
-//    public void setGenres(Set<GameGenre> genres) {
-//        this.genres = genres;
-//        genres.forEach(genre -> genre.addGame(this));
-//    }
+    public void addPlatform(Platform platform) {
+        if (platforms == null) {
+            platforms = new ArrayList<>();
+        }
+        platforms.add(platform);
+        platform.addGame(this);
+
+    }
+
+    public void addGenre(GameGenre genre) {
+        if (genres == null) {
+            genres = new ArrayList<>();
+        }
+        genres.add(genre);
+        genre.addGame(this);
+    }
 
     public void removePlatform(Platform platform) {
-        if (platforms != null) {
-            platforms.remove(platform);
+        if (platforms == null) {
+            return;
         }
+        platforms.remove(platform);
+        platform.removeGame(this);
     }
 
     public void removeGenre(GameGenre genre) {
-        if (genres != null) {
-            genres.remove(genre);
+        if (genres == null) {
+            return;
         }
+        genres.remove(genre);
+        genre.removeGame(this);
     }
 }

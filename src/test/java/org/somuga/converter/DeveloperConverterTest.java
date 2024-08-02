@@ -2,24 +2,26 @@ package org.somuga.converter;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration
 @ActiveProfiles("test")
 class DeveloperConverterTest {
 
     @Test
-    @DisplayName("fromEntityToPublicDto method should convert Developer entity to DeveloperPublicDto")
+    @DisplayName("Test fromEntityToPublicDto method should convert Developer to DeveloperPublicDto")
     void fromEntityToPublicDto() {
         Developer developer = Developer.builder()
                 .id(1L)
@@ -37,13 +39,12 @@ class DeveloperConverterTest {
     @Test
     @DisplayName("Test fromEntityToPublicDto method with null entity should return null")
     void fromEntityToPublicDtoWithNullEntity() {
-        Developer developer = null;
-        DeveloperPublicDto developerPublicDto = DeveloperConverter.fromEntityToPublicDto(developer);
+        DeveloperPublicDto developerPublicDto = DeveloperConverter.fromEntityToPublicDto(null);
         assertNull(developerPublicDto);
     }
 
     @Test
-    @DisplayName("fromEntityListToPublicDtoList method should convert List<Developer> to List<DeveloperPublicDto>")
+    @DisplayName("Test fromEntityListToPublicDtoList method should convert list of Developer to list of DeveloperPublicDto")
     void fromEntityListToPublicDtoList() {
         Developer developer1 = Developer.builder()
                 .id(1L)
@@ -80,13 +81,12 @@ class DeveloperConverterTest {
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList method with null list should return empty list")
     void fromEntityListToPublicDtoListWithNullList() {
-        List<Developer> developers = null;
-        List<DeveloperPublicDto> developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(developers);
+        List<DeveloperPublicDto> developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(null);
         assertNull(developerPublicDtos);
     }
 
     @Test
-    @DisplayName("fromCreateDtoToEntity method should convert DeveloperCreateDto to Developer entity")
+    @DisplayName("Test fromCreateDtoToEntity method should convert DeveloperCreateDto to Developer entity")
     void fromCreateDtoToEntity() {
         DeveloperCreateDto developerDto = new DeveloperCreateDto("Developer", List.of("social1", "social2"));
 
@@ -97,13 +97,10 @@ class DeveloperConverterTest {
     }
 
     @Test
-    @DisplayName("Test fromCreateDtoToEntity method with null DeveloperCreateDto should return empty Developer entity")
+    @DisplayName("Test fromCreateDtoToEntity method with null DeveloperCreateDto should return null")
     void fromCreateDtoToEntityWithNullDto() {
-        DeveloperCreateDto developerDto = null;
-        Developer developer = DeveloperConverter.fromCreateDtoToEntity(developerDto);
-        assertNotNull(developer);
-        assertNull(developer.getId());
-        assertNull(developer.getDeveloperName());
-        assertNull(developer.getSocials());
+        Developer developer = DeveloperConverter.fromCreateDtoToEntity(null);
+        assertNull(developer);
+
     }
 }

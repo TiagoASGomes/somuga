@@ -16,9 +16,9 @@ public interface IDeveloperService {
 
     DeveloperPublicDto create(DeveloperCreateDto developerDto) throws DuplicateFieldException;
 
-    Developer findByDeveloperName(String developerName) throws DeveloperNotFoundException;
-
-    DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException;
+    DeveloperPublicDto update(Long id, DeveloperCreateDto developerDto) throws DeveloperNotFoundException, DuplicateFieldException;
 
     void delete(Long id) throws DeveloperNotFoundException;
+
+    Developer findById(Long id) throws DeveloperNotFoundException;
 }

@@ -49,12 +49,12 @@ public class ReviewService implements IReviewService {
 
     @Override
     public List<ReviewPublicDto> getAllByUserId(String userId, Pageable page) {
-        return ReviewConverter.fromEntityListToPublidDtoList(reviewRepo.findByUserId(userId, page).toList());
+        return ReviewConverter.fromEntityListToPublicDtoList(reviewRepo.findByUserId(userId, page).toList());
     }
 
     @Override
     public List<ReviewPublicDto> getAllByMediaId(Long mediaId, Pageable page) {
-        return ReviewConverter.fromEntityListToPublidDtoList(reviewRepo.findByMediaId(mediaId, page).toList());
+        return ReviewConverter.fromEntityListToPublicDtoList(reviewRepo.findByMediaId(mediaId, page).toList());
     }
 
     @Override

@@ -9,7 +9,6 @@ import org.somuga.service.interfaces.IGameGenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,20 +34,17 @@ public class GameGenreController {
         return new ResponseEntity<>(gameGenreService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/private")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/admin")
     public ResponseEntity<GameGenrePublicDto> create(@Valid @RequestBody GameGenreCreateDto genreDto) throws GenreAlreadyExistsException {
         return new ResponseEntity<>(gameGenreService.create(genreDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/private/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping("/admin/{id}")
     public ResponseEntity<GameGenrePublicDto> update(@PathVariable Long id, @Valid @RequestBody GameGenreCreateDto genreDto) throws GenreNotFoundException, GenreAlreadyExistsException {
         return new ResponseEntity<>(gameGenreService.update(id, genreDto), HttpStatus.OK);
     }
 
-    @DeleteMapping("/private/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws GenreNotFoundException {
         gameGenreService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

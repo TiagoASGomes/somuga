@@ -42,18 +42,17 @@ public class LikeService implements ILikeService {
 
     @Override
     public List<LikePublicDto> getAllByUserId(String userId, Pageable page) {
-        return LikeConverter.fromEntityListToPublidDtoList(likeRepo.findByUserId(userId, page).toList());
+        return LikeConverter.fromEntityListToPublicDtoList(likeRepo.findByUserId(userId, page).toList());
     }
 
     @Override
     public List<LikePublicDto> getAllByMediaId(Long mediaId, Pageable page) {
-        return LikeConverter.fromEntityListToPublidDtoList(likeRepo.findByMediaId(mediaId, page).toList());
+        return LikeConverter.fromEntityListToPublicDtoList(likeRepo.findByMediaId(mediaId, page).toList());
     }
 
     @Override
     public LikePublicDto create(LikeCreateDto likeDto) throws UserNotFoundException, AlreadyLikedException, MediaNotFoundException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String userId = auth.getName();
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Like> duplicateLike = likeRepo.findByMediaIdAndUserId(likeDto.mediaId(), userId);
         if (duplicateLike.isPresent()) {
             throw new AlreadyLikedException(ALREADY_LIKED);

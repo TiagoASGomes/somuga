@@ -10,9 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface IUserService {
-    List<UserPublicDto> getAll(Pageable page);
-
-    List<UserPublicDto> getAllByName(Pageable page, String name);
+    List<UserPublicDto> getAll(Pageable page, String name);
 
     UserPublicDto getById(String id) throws UserNotFoundException;
 

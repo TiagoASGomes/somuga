@@ -9,7 +9,6 @@ import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,20 +34,17 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.getById(id), HttpStatus.OK);
     }
 
-    @PostMapping("/private")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/admin")
     public ResponseEntity<DeveloperPublicDto> create(@Valid @RequestBody DeveloperCreateDto developerDto) throws DuplicateFieldException {
         return new ResponseEntity<>(developerService.create(developerDto), HttpStatus.CREATED);
     }
 
-    @PutMapping("/private/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException {
+    @PutMapping("/admin/{id}")
+    public ResponseEntity<DeveloperPublicDto> update(@PathVariable Long id, @Valid @RequestBody DeveloperCreateDto developerDto) throws DeveloperNotFoundException, DuplicateFieldException {
         return new ResponseEntity<>(developerService.update(id, developerDto), HttpStatus.OK);
     }
 
-    @DeleteMapping("/private/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/admin/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws DeveloperNotFoundException {
         developerService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

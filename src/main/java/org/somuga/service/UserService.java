@@ -32,13 +32,11 @@ public class UserService implements IUserService {
 
 
     @Override
-    public List<UserPublicDto> getAll(Pageable page) {
-        return UserConverter.fromEntityListToPublicDtoList(userRepo.findByActiveTrue(page).toList());
-    }
-
-    @Override
-    public List<UserPublicDto> getAllByName(Pageable page, String name) {
-        return UserConverter.fromEntityListToPublicDtoList(userRepo.findByUserNameContaining(name, page).toList());
+    public List<UserPublicDto> getAll(Pageable page, String name) {
+        if (name != null) {
+            return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByUserNameContainingIgnoreCaseAndActiveTrue(name, page).toList());
+        }
+        return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByActiveTrue(page).toList());
     }
 
     @Override
@@ -55,7 +53,7 @@ public class UserService implements IUserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String id = auth.getName();
         Optional<User> duplicate = userRepo.findById(id);
-        if (duplicate.isPresent() && duplicate.get().isActive()) {
+        if (duplicate.isPresent()) {
             throw new DuplicateFieldException(DUPLICATE_USER + id);
         }
         User user = UserConverter.fromCreateDtoToEntity(userDto, id);
@@ -101,7 +99,7 @@ public class UserService implements IUserService {
     }
 
     private void checkDuplicateFields(String userName) throws DuplicateFieldException {
-        Optional<User> opt = userRepo.findByUserName(userName);
+        Optional<User> opt = userRepo.findByUserNameIgnoreCase(userName);
         if (opt.isPresent()) {
             throw new DuplicateFieldException(DUPLICATE_USERNAME + userName);
         }

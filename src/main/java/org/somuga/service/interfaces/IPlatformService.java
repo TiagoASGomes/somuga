@@ -15,9 +15,9 @@ public interface IPlatformService {
 
     PlatformPublicDto create(PlatformCreateDto platformDto) throws PlatformAlreadyExistsException;
 
-    Platform findByPlatformName(String platformName) throws PlatformNotFoundException;
-
     PlatformPublicDto update(Long id, PlatformCreateDto platformDto) throws PlatformAlreadyExistsException, PlatformNotFoundException;
 
     void delete(Long id) throws PlatformNotFoundException;
+
+    Platform findById(Long id) throws PlatformNotFoundException;
 }

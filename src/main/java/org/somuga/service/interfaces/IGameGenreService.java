@@ -15,9 +15,9 @@ public interface IGameGenreService {
 
     GameGenrePublicDto create(GameGenreCreateDto genreDto) throws GenreAlreadyExistsException;
 
-    GameGenre findByGenre(String genre) throws GenreNotFoundException;
-
     GameGenrePublicDto update(Long id, GameGenreCreateDto genreDto) throws GenreAlreadyExistsException, GenreNotFoundException;
 
     void delete(Long id) throws GenreNotFoundException;
+
+    GameGenre findById(Long id) throws GenreNotFoundException;
 }

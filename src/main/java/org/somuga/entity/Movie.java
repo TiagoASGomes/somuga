@@ -1,16 +1,13 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MovieRole;
 import org.somuga.util.id_class.MovieCrewRoleId;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity(name = "Movie")
 @Table(name = "movies")
@@ -19,6 +16,7 @@ import java.util.Objects;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(callSuper = true)
 public class Movie extends Media {
 
     @Column(name = "duration")
@@ -26,7 +24,8 @@ public class Movie extends Media {
 
     @OneToMany(mappedBy = "movie",
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     private List<MovieCrewRole> movieCrew;
 
     public void addMovieCrew(MovieCrew movieCrew, MovieRole movieRole, String characterName) {
@@ -37,6 +36,9 @@ public class Movie extends Media {
                 .characterName(characterName)
                 .id(new MovieCrewRoleId(this.getId(), movieCrew.getId()))
                 .build();
+        if (this.movieCrew == null) {
+            this.movieCrew = new ArrayList<>();
+        }
         this.movieCrew.add(movieCrewRole);
     }
 
@@ -46,18 +48,5 @@ public class Movie extends Media {
         }
         this.movieCrew.remove(movieCrew);
         movieCrew.getMovieCrew().removeRole(movieCrew);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Movie movie = (Movie) o;
-        return Objects.equals(duration, movie.duration) && Objects.equals(movieCrew, movie.movieCrew);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(duration, movieCrew);
     }
 }

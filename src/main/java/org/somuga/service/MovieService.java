@@ -88,7 +88,7 @@ public class MovieService implements IMovieService {
         for (int i = 0; i < crew.size(); i++) {
             MovieRoleCreateDto roleDto = movieDto.crew().get(i);
             if (!roleDto.movieRole().equals(MovieRole.ACTOR.toString())) {
-                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), "");
+                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole().toUpperCase()), "");
             } else {
                 movie.addMovieCrew(crew.get(i), MovieRole.ACTOR, roleDto.characterName());
             }
@@ -116,6 +116,8 @@ public class MovieService implements IMovieService {
         movie.setReleaseDate(movieDto.releaseDate());
         movie.setDuration(movieDto.duration());
         movie.setDescription(movieDto.description());
+        movie.setMediaUrl(movieDto.mediaUrl());
+        movie.setImageUrl(movieDto.imageUrl());
         List<MovieCrew> crew = new ArrayList<>();
         for (MovieRoleCreateDto roleDto : movieDto.crew()) {
             crew.add(crewService.findById(roleDto.movieCrewId()));
@@ -123,7 +125,7 @@ public class MovieService implements IMovieService {
         for (int i = 0; i < crew.size(); i++) {
             MovieRoleCreateDto roleDto = movieDto.crew().get(i);
             if (!roleDto.movieRole().equals(MovieRole.ACTOR.toString())) {
-                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole()), "");
+                movie.addMovieCrew(crew.get(i), MovieRole.valueOf(roleDto.movieRole().toUpperCase()), "");
             } else {
                 movie.addMovieCrew(crew.get(i), MovieRole.ACTOR, roleDto.characterName());
             }
@@ -161,16 +163,18 @@ public class MovieService implements IMovieService {
             if (roleDto.movieRole() == null) {
                 throw new InvalidCrewRoleException(INVALID_MOVIE_ROLE);
             }
-            if (roleDto.characterName().length() > 255) {
-                throw new InvalidCrewRoleException(INVALID_CHARACTER_NAME);
-            }
             try {
-                MovieRole.valueOf(roleDto.movieRole());
+                MovieRole.valueOf(roleDto.movieRole().toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new InvalidCrewRoleException(INVALID_MOVIE_ROLE);
             }
-            if (roleDto.movieRole().equals(MovieRole.ACTOR.toString()) && roleDto.characterName().isEmpty()) {
-                throw new InvalidCrewRoleException(CHARACTER_NAME_REQUIRED);
+            if (roleDto.movieRole().equals(MovieRole.ACTOR.toString())) {
+                if (roleDto.characterName() == null || roleDto.characterName().isBlank()) {
+                    throw new InvalidCrewRoleException(CHARACTER_NAME_REQUIRED);
+                }
+                if (roleDto.characterName().length() > 255) {
+                    throw new InvalidCrewRoleException(INVALID_CHARACTER_NAME);
+                }
             }
         }
     }
