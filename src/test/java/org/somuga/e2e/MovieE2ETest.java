@@ -40,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ContextConfiguration
 @ActiveProfiles("test")
-class MovieControllerTest {
+class MovieE2ETest {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     private final String USER_ID = "google-auth2|1234567890";
