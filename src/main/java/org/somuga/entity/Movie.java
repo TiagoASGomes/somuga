@@ -24,7 +24,8 @@ public class Movie extends Media {
 
     @OneToMany(mappedBy = "movie",
             cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
     private List<MovieCrewRole> movieCrew;
 
     public void addMovieCrew(MovieCrew movieCrew, MovieRole movieRole, String characterName) {
