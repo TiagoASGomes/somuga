@@ -69,12 +69,6 @@ class PlatformsE2ETest {
         return PlatformConverter.fromEntityToPublicDto(platformRepository.save(platform));
     }
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create platform and expect 201")
@@ -140,8 +134,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -160,8 +153,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -180,8 +172,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -202,8 +193,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.message());
 
         assertEquals(1, platformRepository.count());
     }
@@ -222,8 +212,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -319,7 +308,7 @@ class PlatformsE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        assertEquals(PLATFORM_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -399,8 +388,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + platformPublicDto.id(), "PUT");
+        assertTrue(error.message().contains(INVALID_PLATFORM_NAME));
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -424,8 +412,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + platformPublicDto.id(), "PUT");
+        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.message());
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -446,7 +433,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        assertEquals(PLATFORM_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -501,7 +488,7 @@ class PlatformsE2ETest {
                 .andReturn().getResponse().getContentAsString();
 
         Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        assertEquals(PLATFORM_NOT_FOUND + 1, error.message());
     }
 
 

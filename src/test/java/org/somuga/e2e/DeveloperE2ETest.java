@@ -73,12 +73,6 @@ class DeveloperE2ETest {
         return DeveloperConverter.fromEntityToPublicDto(developerRepository.save(developer));
     }
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer and expect 201")
@@ -149,8 +143,7 @@ class DeveloperE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, developerRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_DEVELOPER_NAME));
     }
 
     @Test
@@ -169,8 +162,7 @@ class DeveloperE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, developerRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_DEVELOPER_NAME));
     }
 
     @Test
@@ -189,8 +181,7 @@ class DeveloperE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, developerRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_DEVELOPER_NAME));
     }
 
     @Test
@@ -261,8 +252,7 @@ class DeveloperE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(1, developerRepository.count());
-        assertEquals(DEVELOPER_ALREADY_EXISTS + developer.developerName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertEquals(DEVELOPER_ALREADY_EXISTS + developer.developerName(), error.message());
     }
 
     @Test
@@ -357,8 +347,7 @@ class DeveloperE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(DEVELOPER_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, PUBLIC_API_PATH + "/1", "GET");
+        assertEquals(DEVELOPER_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -441,8 +430,7 @@ class DeveloperE2ETest {
         assertNotEquals(developerCreateDto.developerName(), developer.getDeveloperName());
 
         assertEquals(developerPublicDto.id(), developerRepository.findById(developerPublicDto.id()).get().getId());
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + developerPublicDto.id(), "PUT");
+        assertTrue(error.message().contains(INVALID_DEVELOPER_NAME));
     }
 
     @Test
@@ -466,8 +454,7 @@ class DeveloperE2ETest {
         assertNotNull(developer);
         assertNotEquals(developerCreateDto.developerName(), developer.getDeveloperName());
 
-        assertEquals(DEVELOPER_ALREADY_EXISTS + developerCreateDto.developerName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + developerPublicDto.id(), "PUT");
+        assertEquals(DEVELOPER_ALREADY_EXISTS + developerCreateDto.developerName(), error.message());
     }
 
     @Test
@@ -486,8 +473,7 @@ class DeveloperE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, developerRepository.count());
-        assertEquals(DEVELOPER_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, ADMIN_API_PATH + "/1", "PUT");
+        assertEquals(DEVELOPER_NOT_FOUND + 1, error.message());
     }
 
     @Test

@@ -229,14 +229,14 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_TITLE));
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertTrue(error.getMessage().contains(INVALID_DEVELOPER));
-        assertTrue(error.getMessage().contains(INVALID_GENRES));
-        assertTrue(error.getMessage().contains(INVALID_PLATFORMS));
-        assertTrue(error.getMessage().contains(INVALID_PRICE));
-        assertTrue(error.getMessage().contains(INVALID_DESCRIPTION));
-        assertTrue(error.getMessage().contains(INVALID_MEDIA_URL));
+        assertTrue(error.message().contains(INVALID_TITLE));
+        assertTrue(error.message().contains(INVALID_RELEASE_DATE));
+        assertTrue(error.message().contains(INVALID_DEVELOPER));
+        assertTrue(error.message().contains(INVALID_GENRES));
+        assertTrue(error.message().contains(INVALID_PLATFORMS));
+        assertTrue(error.message().contains(INVALID_PRICE));
+        assertTrue(error.message().contains(INVALID_DESCRIPTION));
+        assertTrue(error.message().contains(INVALID_MEDIA_URL));
     }
 
     @Test
@@ -266,7 +266,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(MAX_TITLE_CHARACTERS));
+        assertTrue(error.message().contains(MAX_TITLE_CHARACTERS));
     }
 
     @Test
@@ -296,7 +296,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(MAX_DESCRIPTION_CHARACTERS));
+        assertTrue(error.message().contains(MAX_DESCRIPTION_CHARACTERS));
     }
 
     @Test
@@ -326,7 +326,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_PRICE));
+        assertTrue(error.message().contains(INVALID_PRICE));
     }
 
     @Test
@@ -356,7 +356,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_PRICE));
+        assertTrue(error.message().contains(INVALID_PRICE));
     }
 
     @Test
@@ -385,7 +385,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_GENRES));
+        assertTrue(error.message().contains(INVALID_GENRES));
     }
 
     @Test
@@ -414,7 +414,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_PLATFORMS));
+        assertTrue(error.message().contains(INVALID_PLATFORMS));
     }
 
     @Test
@@ -443,7 +443,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(DEVELOPER_NOT_FOUND + "0", error.getMessage());
+        assertEquals(DEVELOPER_NOT_FOUND + "0", error.message());
     }
 
     @Test
@@ -472,7 +472,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(PLATFORM_NOT_FOUND + "0", error.getMessage());
+        assertEquals(PLATFORM_NOT_FOUND + "0", error.message());
     }
 
     @Test
@@ -501,7 +501,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(GENRE_NOT_FOUND + "0", error.getMessage());
+        assertEquals(GENRE_NOT_FOUND + "0", error.message());
     }
 
     @Test
@@ -722,7 +722,7 @@ class GameE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.getMessage());
+        assertEquals(GAME_NOT_FOUND + "0", error.message());
     }
 
     @Test
@@ -888,7 +888,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(1, gameRepository.count());
-        assertEquals(UNAUTHORIZED_UPDATE, error.getMessage());
+        assertEquals(UNAUTHORIZED_UPDATE, error.message());
 
         assertEquals(1, gameRepository.count());
         Game gameEntity = gameRepository.findById(game.getId()).orElse(null);
@@ -923,7 +923,7 @@ class GameE2ETest {
         Error error = mapper.readValue(response, Error.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(GAME_NOT_FOUND + "0", error.getMessage());
+        assertEquals(GAME_NOT_FOUND + "0", error.message());
     }
 
     @Test
@@ -997,7 +997,7 @@ class GameE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.getMessage());
+        assertEquals(GAME_NOT_FOUND + "0", error.message());
 
         assertEquals(0, gameRepository.count());
     }
@@ -1028,7 +1028,7 @@ class GameE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.getMessage());
+        assertEquals(GAME_NOT_FOUND + "0", error.message());
 
         assertEquals(0, gameRepository.count());
     }

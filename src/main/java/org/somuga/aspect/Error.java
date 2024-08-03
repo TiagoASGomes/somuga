@@ -1,20 +1,11 @@
 package org.somuga.aspect;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Date;
+@Schema(description = "Error response")
+public record Error(
+        @Schema(description = "The error message", example = "Error message")
+        String message
+) {
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class Error {
-    private String message;
-    private String path;
-    private int status;
-    private String method;
-    private Date timestamp;
 }

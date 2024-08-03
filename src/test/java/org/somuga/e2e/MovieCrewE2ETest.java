@@ -78,12 +78,6 @@ class MovieCrewE2ETest {
     }
 
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create movie crew and expect status 201")
@@ -151,8 +145,8 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME));
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(error.message().contains(INVALID_NAME));
+        assertTrue(error.message().contains(INVALID_BIRTH_DATE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -172,7 +166,7 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(error.message().contains(INVALID_BIRTH_DATE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -192,7 +186,7 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME_SIZE));
+        assertTrue(error.message().contains(INVALID_NAME_SIZE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -288,8 +282,7 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, PUBLIC_API_PATH + "/1", "GET");
+        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -371,8 +364,8 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME));
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(error.message().contains(INVALID_NAME));
+        assertTrue(error.message().contains(INVALID_BIRTH_DATE));
 
         MovieCrew movieCrew = movieCrewRepository.findById(movieCrewPublicDto.id()).orElse(null);
         assertNotNull(movieCrew);
@@ -396,8 +389,7 @@ class MovieCrewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, ADMIN_API_PATH + "/1", "PUT");
+        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.message());
     }
 
     @Test

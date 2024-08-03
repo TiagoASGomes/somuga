@@ -157,11 +157,7 @@ public class LikeE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(MEDIA_NOT_FOUND + 999999999L, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(MEDIA_NOT_FOUND + 999999999L, error.message());
     }
 
     @Test
@@ -180,11 +176,7 @@ public class LikeE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(ALREADY_LIKED, error.getMessage());
-        assertEquals(400, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(ALREADY_LIKED, error.message());
     }
 
     @Test
@@ -325,11 +317,7 @@ public class LikeE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(LIKE_NOT_FOUND + 9999999, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("DELETE", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(LIKE_NOT_FOUND + 9999999, error.message());
     }
 
 }

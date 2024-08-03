@@ -69,12 +69,6 @@ class GameGenreE2ETest {
         return GameGenreConverter.fromEntityToPublicDto(gameGenreRepository.save(gameGenre));
     }
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create a game genre and expect a 201 status code")
@@ -144,8 +138,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.message());
         assertEquals(1, gameGenreRepository.count());
     }
 
@@ -164,8 +157,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_GENRE_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -184,8 +176,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_GENRE_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -204,8 +195,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(INVALID_GENRE_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        assertTrue(error.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -300,7 +290,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.getMessage());
+        assertEquals(GENRE_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -372,8 +362,7 @@ class GameGenreE2ETest {
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
         assertNotNull(gameGenre);
 
-        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), "PUT");
+        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.message());
         assertNotEquals(gameGenreCreateDto.genreName(), gameGenre.getGenre());
     }
 
@@ -395,8 +384,7 @@ class GameGenreE2ETest {
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
         assertNotNull(gameGenre);
 
-        assertTrue(error.getMessage().contains(INVALID_GENRE_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), "PUT");
+        assertTrue(error.message().contains(INVALID_GENRE_NAME));
         assertNotEquals(gameGenreCreateDto.genreName(), gameGenre.getGenre());
     }
 
@@ -415,7 +403,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.getMessage());
+        assertEquals(GENRE_NOT_FOUND + 1, error.message());
     }
 
     @Test
@@ -471,7 +459,7 @@ class GameGenreE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.getMessage());
+        assertEquals(GENRE_NOT_FOUND + 1, error.message());
     }
 
 }

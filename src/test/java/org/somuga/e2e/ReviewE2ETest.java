@@ -158,11 +158,7 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(MEDIA_NOT_FOUND + 99999999L, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(MEDIA_NOT_FOUND + 99999999L, error.message());
     }
 
     @Test
@@ -180,13 +176,9 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertTrue(error.getMessage().contains(ID_GREATER_THAN_0));
-        assertTrue(error.getMessage().contains(MAX_REVIEW_CHARACTERS));
-        assertTrue(error.getMessage().contains(INVALID_SCORE));
-        assertEquals(400, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertTrue(error.message().contains(ID_GREATER_THAN_0));
+        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
+        assertTrue(error.message().contains(INVALID_SCORE));
     }
 
     @Test
@@ -211,11 +203,7 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(ALREADY_REVIEWED, error.getMessage());
-        assertEquals(400, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(ALREADY_REVIEWED, error.message());
     }
 
     @Test
@@ -245,11 +233,7 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("GET", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PUBLIC_API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
     }
 
     @Test
@@ -375,11 +359,7 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
-        assertEquals("PATCH", error.getMethod());
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertNotNull(error.getTimestamp());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
     }
 
     @Test
@@ -398,12 +378,8 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(PRIVATE_API_PATH + "/" + reviewDto.id(), error.getPath());
-        assertEquals("PATCH", error.getMethod());
-        assertTrue(error.getMessage().contains(INVALID_SCORE));
-        assertTrue(error.getMessage().contains(MAX_REVIEW_CHARACTERS));
-        assertEquals(400, error.getStatus());
-        assertNotNull(error.getTimestamp());
+        assertTrue(error.message().contains(INVALID_SCORE));
+        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
     }
 
     @Test
@@ -432,10 +408,6 @@ public class ReviewE2ETest {
 
         Error error = mapper.readValue(response, Error.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("DELETE", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
     }
 }
