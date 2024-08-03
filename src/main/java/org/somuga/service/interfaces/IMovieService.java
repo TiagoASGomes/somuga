@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface IMovieService {
 
-    List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewId);
+    List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewIds);
 
     MovieLikePublicDto getById(Long id) throws MovieNotFoundException;
 

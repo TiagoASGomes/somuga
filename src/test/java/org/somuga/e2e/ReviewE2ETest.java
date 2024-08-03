@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.ReviewConverter;
 import org.somuga.dto.review.ReviewCreateDto;
 import org.somuga.dto.review.ReviewPublicDto;
@@ -156,9 +156,9 @@ public class ReviewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MEDIA_NOT_FOUND + 99999999L, error.message());
+        assertEquals(MEDIA_NOT_FOUND + 99999999L, errorDto.message());
     }
 
     @Test
@@ -174,11 +174,11 @@ public class ReviewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.message().contains(ID_GREATER_THAN_0));
-        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
-        assertTrue(error.message().contains(INVALID_SCORE));
+        assertTrue(errorDto.message().contains(ID_GREATER_THAN_0));
+        assertTrue(errorDto.message().contains(MAX_REVIEW_CHARACTERS));
+        assertTrue(errorDto.message().contains(INVALID_SCORE));
     }
 
     @Test
@@ -201,9 +201,9 @@ public class ReviewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(ALREADY_REVIEWED, error.message());
+        assertEquals(ALREADY_REVIEWED, errorDto.message());
     }
 
     @Test
@@ -231,9 +231,9 @@ public class ReviewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
     }
 
     @Test
@@ -357,9 +357,9 @@ public class ReviewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
     }
 
     @Test
@@ -376,10 +376,10 @@ public class ReviewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.message().contains(INVALID_SCORE));
-        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
+        assertTrue(errorDto.message().contains(INVALID_SCORE));
+        assertTrue(errorDto.message().contains(MAX_REVIEW_CHARACTERS));
     }
 
     @Test
@@ -406,8 +406,8 @@ public class ReviewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, error.message());
+        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
     }
 }

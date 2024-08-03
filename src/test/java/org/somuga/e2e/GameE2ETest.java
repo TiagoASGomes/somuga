@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
@@ -226,17 +226,17 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(INVALID_TITLE));
-        assertTrue(error.message().contains(INVALID_RELEASE_DATE));
-        assertTrue(error.message().contains(INVALID_DEVELOPER));
-        assertTrue(error.message().contains(INVALID_GENRES));
-        assertTrue(error.message().contains(INVALID_PLATFORMS));
-        assertTrue(error.message().contains(INVALID_PRICE));
-        assertTrue(error.message().contains(INVALID_DESCRIPTION));
-        assertTrue(error.message().contains(INVALID_MEDIA_URL));
+        assertTrue(errorDto.message().contains(INVALID_TITLE));
+        assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
+        assertTrue(errorDto.message().contains(INVALID_DEVELOPER));
+        assertTrue(errorDto.message().contains(INVALID_GENRES));
+        assertTrue(errorDto.message().contains(INVALID_PLATFORMS));
+        assertTrue(errorDto.message().contains(INVALID_PRICE));
+        assertTrue(errorDto.message().contains(INVALID_DESCRIPTION));
+        assertTrue(errorDto.message().contains(INVALID_MEDIA_URL));
     }
 
     @Test
@@ -263,10 +263,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(MAX_TITLE_CHARACTERS));
+        assertTrue(errorDto.message().contains(MAX_TITLE_CHARACTERS));
     }
 
     @Test
@@ -293,10 +293,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(MAX_DESCRIPTION_CHARACTERS));
+        assertTrue(errorDto.message().contains(MAX_DESCRIPTION_CHARACTERS));
     }
 
     @Test
@@ -323,10 +323,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(INVALID_PRICE));
+        assertTrue(errorDto.message().contains(INVALID_PRICE));
     }
 
     @Test
@@ -353,10 +353,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(INVALID_PRICE));
+        assertTrue(errorDto.message().contains(INVALID_PRICE));
     }
 
     @Test
@@ -382,10 +382,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(INVALID_GENRES));
+        assertTrue(errorDto.message().contains(INVALID_GENRES));
     }
 
     @Test
@@ -411,10 +411,10 @@ class GameE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertTrue(error.message().contains(INVALID_PLATFORMS));
+        assertTrue(errorDto.message().contains(INVALID_PLATFORMS));
     }
 
     @Test
@@ -440,10 +440,10 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(DEVELOPER_NOT_FOUND + "0", error.message());
+        assertEquals(DEVELOPER_NOT_FOUND + "0", errorDto.message());
     }
 
     @Test
@@ -469,10 +469,10 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(PLATFORM_NOT_FOUND + "0", error.message());
+        assertEquals(PLATFORM_NOT_FOUND + "0", errorDto.message());
     }
 
     @Test
@@ -498,10 +498,10 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(GENRE_NOT_FOUND + "0", error.message());
+        assertEquals(GENRE_NOT_FOUND + "0", errorDto.message());
     }
 
     @Test
@@ -720,9 +720,9 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.message());
+        assertEquals(GAME_NOT_FOUND + "0", errorDto.message());
     }
 
     @Test
@@ -885,10 +885,10 @@ class GameE2ETest {
                 .andExpect(status().isForbidden())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, gameRepository.count());
-        assertEquals(UNAUTHORIZED_UPDATE, error.message());
+        assertEquals(UNAUTHORIZED_UPDATE, errorDto.message());
 
         assertEquals(1, gameRepository.count());
         Game gameEntity = gameRepository.findById(game.getId()).orElse(null);
@@ -920,10 +920,10 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, gameRepository.count());
-        assertEquals(GAME_NOT_FOUND + "0", error.message());
+        assertEquals(GAME_NOT_FOUND + "0", errorDto.message());
     }
 
     @Test
@@ -995,9 +995,9 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.message());
+        assertEquals(GAME_NOT_FOUND + "0", errorDto.message());
 
         assertEquals(0, gameRepository.count());
     }
@@ -1026,9 +1026,9 @@ class GameE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GAME_NOT_FOUND + "0", error.message());
+        assertEquals(GAME_NOT_FOUND + "0", errorDto.message());
 
         assertEquals(0, gameRepository.count());
     }

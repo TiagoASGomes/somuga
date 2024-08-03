@@ -48,9 +48,10 @@ public class SomugaExceptionHandler {
             GenreNotFoundException.class,
             PlatformNotFoundException.class,
             MovieCrewNotFoundException.class})
-    public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
-        logger.error(request.getRequestURI(), request.getMethod(), e.getMessage());
-        return new ResponseEntity<>(new Error(
+    public ResponseEntity<ErrorDto> handleNotFound(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
         ), HttpStatus.NOT_FOUND);
     }
@@ -64,15 +65,16 @@ public class SomugaExceptionHandler {
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             SQLIntegrityConstraintViolationException.class,})
-    public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
-        logger.error(request.getRequestURI(), request.getMethod(), e.getMessage());
-        return new ResponseEntity<>(new Error(
+    public ResponseEntity<ErrorDto> handleBadRequest(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
         ), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Error> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorDto> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
@@ -80,24 +82,27 @@ public class SomugaExceptionHandler {
         errors.forEach(error -> errorMessageBuilder.append(error).append(", "));
         errorMessageBuilder.delete(errorMessageBuilder.length() - 2, errorMessageBuilder.length()).append(".");
         String errorMessage = errorMessageBuilder.toString();
-        logger.error(request.getRequestURI(), request.getMethod(), errorMessage);
-        return new ResponseEntity<>(new Error(
+        String error = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + errorMessage;
+        logger.error(error);
+        return new ResponseEntity<>(new ErrorDto(
                 errorMessage
         ), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidPermissionException.class)
-    public ResponseEntity<Error> handleForbidden(Exception e, HttpServletRequest request) {
-        logger.error(request.getRequestURI(), request.getMethod(), e.getMessage());
-        return new ResponseEntity<>(new Error(
+    public ResponseEntity<ErrorDto> handleForbidden(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
         ), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Error> handleException(Exception e, HttpServletRequest request) {
-        logger.error(request.getRequestURI(), request.getMethod(), e.getMessage());
-        return new ResponseEntity<>(new Error(
+    public ResponseEntity<ErrorDto> handleException(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
         ), HttpStatus.INTERNAL_SERVER_ERROR);
     }

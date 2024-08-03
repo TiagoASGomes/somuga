@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.developer.DeveloperCreateDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -35,8 +35,7 @@ public class DeveloperController {
     }
 
     @Operation(summary = "Get all developers",
-            description = "Returns a list of developers. If the name parameter is provided, it will return developers containing the name.",
-            tags = {"Public", "Get"})
+            description = "Returns a list of developers. If the name parameter is provided, it will return developers containing the name.")
     @ApiResponse(responseCode = "200",
             description = "List of developers",
             content = {@Content(mediaType = "application/json",
@@ -47,7 +46,8 @@ public class DeveloperController {
         return new ResponseEntity<>(developerService.getAll(name), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get a developer by id")
+    @Operation(summary = "Get a developer by id",
+            description = "Returns a developer by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "The developer",
@@ -56,7 +56,7 @@ public class DeveloperController {
             @ApiResponse(responseCode = "404",
                     description = "Developer not found",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Error.class))
+                            schema = @Schema(implementation = ErrorDto.class))
             )})
     @Parameter(name = "id", description = "The developer id", example = "1", required = true)
     @GetMapping("/public/{id}")
@@ -65,8 +65,7 @@ public class DeveloperController {
     }
 
     @Operation(summary = "Create a developer",
-            description = "Create a developer with the provided data",
-            tags = {"Admin", "Post"})
+            description = "Create a developer with the provided data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "The created developer",
@@ -75,7 +74,7 @@ public class DeveloperController {
             @ApiResponse(responseCode = "400",
                     description = "Invalid data or developer name already exists",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Error.class))}),
+                            schema = @Schema(implementation = ErrorDto.class))}),
             @ApiResponse(responseCode = "401",
                     description = "Unauthenticated",
                     content = @Content),
@@ -89,8 +88,7 @@ public class DeveloperController {
     }
 
     @Operation(summary = "Update a developer",
-            description = "Update a developer with the provided data",
-            tags = {"Admin", "Put"})
+            description = "Update a developer with the provided data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "The updated developer",
@@ -99,11 +97,11 @@ public class DeveloperController {
             @ApiResponse(responseCode = "400",
                     description = "Invalid data or developer name already exists",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Error.class))}),
+                            schema = @Schema(implementation = ErrorDto.class))}),
             @ApiResponse(responseCode = "404",
                     description = "Developer to update not found",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Error.class))}),
+                            schema = @Schema(implementation = ErrorDto.class))}),
             @ApiResponse(responseCode = "401",
                     description = "Unauthenticated",
                     content = @Content),
@@ -118,8 +116,7 @@ public class DeveloperController {
     }
 
     @Operation(summary = "Delete a developer",
-            description = "Delete a developer by id",
-            tags = {"Admin", "Delete"})
+            description = "Delete a developer by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
                     description = "Developer deleted",
@@ -127,7 +124,7 @@ public class DeveloperController {
             @ApiResponse(responseCode = "404",
                     description = "Developer not found",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Error.class))}),
+                            schema = @Schema(implementation = ErrorDto.class))}),
             @ApiResponse(responseCode = "401",
                     description = "Unauthenticated",
                     content = @Content),

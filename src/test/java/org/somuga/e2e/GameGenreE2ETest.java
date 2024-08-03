@@ -5,7 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.GameGenreConverter;
 import org.somuga.dto.game_genre.GameGenreCreateDto;
 import org.somuga.dto.game_genre.GameGenrePublicDto;
@@ -136,9 +136,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.message());
+        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), errorDto.message());
         assertEquals(1, gameGenreRepository.count());
     }
 
@@ -155,9 +155,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.message().contains(INVALID_GENRE_NAME));
+        assertTrue(errorDto.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -174,9 +174,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.message().contains(INVALID_GENRE_NAME));
+        assertTrue(errorDto.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -193,9 +193,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.message().contains(INVALID_GENRE_NAME));
+        assertTrue(errorDto.message().contains(INVALID_GENRE_NAME));
         assertEquals(0, gameGenreRepository.count());
     }
 
@@ -288,9 +288,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.message());
+        assertEquals(GENRE_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -358,11 +358,11 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
         assertNotNull(gameGenre);
 
-        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), error.message());
+        assertEquals(GENRE_ALREADY_EXISTS + gameGenreCreateDto.genreName(), errorDto.message());
         assertNotEquals(gameGenreCreateDto.genreName(), gameGenre.getGenre());
     }
 
@@ -380,11 +380,11 @@ class GameGenreE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
         assertNotNull(gameGenre);
 
-        assertTrue(error.message().contains(INVALID_GENRE_NAME));
+        assertTrue(errorDto.message().contains(INVALID_GENRE_NAME));
         assertNotEquals(gameGenreCreateDto.genreName(), gameGenre.getGenre());
     }
 
@@ -401,9 +401,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.message());
+        assertEquals(GENRE_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -457,9 +457,9 @@ class GameGenreE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(GENRE_NOT_FOUND + 1, error.message());
+        assertEquals(GENRE_NOT_FOUND + 1, errorDto.message());
     }
 
 }
