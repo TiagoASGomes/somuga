@@ -41,7 +41,7 @@ public class MovieCrewController {
             content = {@Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = MovieCrewPublicDto.class)))})
     @Parameter(name = "name", description = "Name of the crew member", example = "John Doe")
-    @Parameter(name = "page", description = "Page number", example = "0")
+    @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Number of elements per page", example = "10")
     @GetMapping("/public")
     public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {

@@ -244,7 +244,7 @@ public class ReviewE2ETest {
             createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId()))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));
     }
@@ -257,10 +257,10 @@ public class ReviewE2ETest {
             createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=0&size=2"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=2&userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=1&size=2"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=2&userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -273,7 +273,7 @@ public class ReviewE2ETest {
             createReview(user, createGame(), 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + 99999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=user"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -288,7 +288,7 @@ public class ReviewE2ETest {
             createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId()))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + game.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(6)));
     }
@@ -301,10 +301,10 @@ public class ReviewE2ETest {
             createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId() + "?page=0&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&mediaId=" + game.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + game.getId() + "?page=1&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&mediaId=" + game.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
 
@@ -318,7 +318,7 @@ public class ReviewE2ETest {
             createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + 999999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + 99999))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }

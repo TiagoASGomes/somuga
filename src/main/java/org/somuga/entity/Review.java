@@ -20,8 +20,10 @@ public class Review {
     @Column(length = 1024, name = "written_review", nullable = false)
     private String writtenReview;
     @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
     @ManyToOne
+    @JoinColumn(name = "media_id", nullable = false)
     private Media media;
 
 }

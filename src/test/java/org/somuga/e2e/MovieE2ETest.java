@@ -797,7 +797,7 @@ class MovieE2ETest {
     void testDeleteMovieAsAdmin() throws Exception {
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + moviePublicDto.id())
+        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + moviePublicDto.id())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
@@ -809,7 +809,7 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test delete movie not found as admin and expect status 404")
     void testDeleteMovieNotFoundAsAdmin() throws Exception {
-        String response = mockMvc.perform(delete(ADMIN_API_PATH + "/1")
+        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/1")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
@@ -834,7 +834,7 @@ class MovieE2ETest {
                 .build();
         movieRepository.save(movie);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + movie.getId())
+        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + movie.getId())
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 

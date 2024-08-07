@@ -38,6 +38,10 @@ public class SomugaExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SomugaExceptionHandler.class);
 
+    private static String getErrorMessage(Exception e, HttpServletRequest request) {
+        return "Path: " + request.getRequestURI() + " Method: " + request.getMethod() + " Error: " + e.getMessage();
+    }
+
     @ExceptionHandler({UserNotFoundException.class,
             ReviewNotFoundException.class,
             GameNotFoundException.class,
@@ -49,7 +53,7 @@ public class SomugaExceptionHandler {
             PlatformNotFoundException.class,
             MovieCrewNotFoundException.class})
     public ResponseEntity<ErrorDto> handleNotFound(Exception e, HttpServletRequest request) {
-        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        String errorMessage = getErrorMessage(e, request);
         logger.error(errorMessage);
         return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
@@ -66,7 +70,7 @@ public class SomugaExceptionHandler {
             MethodArgumentTypeMismatchException.class,
             SQLIntegrityConstraintViolationException.class,})
     public ResponseEntity<ErrorDto> handleBadRequest(Exception e, HttpServletRequest request) {
-        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        String errorMessage = getErrorMessage(e, request);
         logger.error(errorMessage);
         return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
@@ -82,7 +86,7 @@ public class SomugaExceptionHandler {
         errors.forEach(error -> errorMessageBuilder.append(error).append(", "));
         errorMessageBuilder.delete(errorMessageBuilder.length() - 2, errorMessageBuilder.length()).append(".");
         String errorMessage = errorMessageBuilder.toString();
-        String error = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + errorMessage;
+        String error = "Path: " + request.getRequestURI() + " Method: " + request.getMethod() + " Error: " + errorMessage;
         logger.error(error);
         return new ResponseEntity<>(new ErrorDto(
                 errorMessage
@@ -91,7 +95,7 @@ public class SomugaExceptionHandler {
 
     @ExceptionHandler(InvalidPermissionException.class)
     public ResponseEntity<ErrorDto> handleForbidden(Exception e, HttpServletRequest request) {
-        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        String errorMessage = getErrorMessage(e, request);
         logger.error(errorMessage);
         return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()
@@ -100,7 +104,7 @@ public class SomugaExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleException(Exception e, HttpServletRequest request) {
-        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        String errorMessage = getErrorMessage(e, request);
         logger.error(errorMessage);
         return new ResponseEntity<>(new ErrorDto(
                 e.getMessage()

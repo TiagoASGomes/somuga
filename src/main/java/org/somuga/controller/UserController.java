@@ -43,7 +43,7 @@ public class UserController {
             content = {@Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = UserPublicDto.class)))})
     @Parameter(name = "name", description = "User name", example = "John")
-    @Parameter(name = "page", description = "Page number", example = "0")
+    @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Page size", example = "10")
     @GetMapping("/public")
     public ResponseEntity<List<UserPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {

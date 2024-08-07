@@ -138,7 +138,7 @@ public class MovieService implements IMovieService {
     public void delete(Long id) throws MovieNotFoundException, InvalidPermissionException {
         Movie movie = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!movie.getMediaCreatorId().equals(auth.getName())) {
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN")) && !movie.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
         movieRepo.deleteById(id);
@@ -147,12 +147,6 @@ public class MovieService implements IMovieService {
     @Override
     public Movie findById(Long id) throws MovieNotFoundException {
         return movieRepo.findById(id).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND + id));
-    }
-
-    @Override
-    public void adminDelete(Long id) throws MovieNotFoundException {
-        findById(id);
-        movieRepo.deleteById(id);
     }
 
     private void validateCrew(List<MovieRoleCreateDto> crew) throws InvalidCrewRoleException {

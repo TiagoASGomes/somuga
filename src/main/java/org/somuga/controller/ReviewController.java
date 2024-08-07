@@ -56,32 +56,21 @@ public class ReviewController {
         return new ResponseEntity<>(reviewService.getById(id), HttpStatus.OK);
     }
 
-    @Operation(summary = "Get all reviews by user ID",
-            description = "Returns a list of reviews by user ID")
+    @Operation(summary = "Get all reviews",
+            description = "Returns a list of reviews, can be filtered by user ID or media ID")
     @ApiResponse(responseCode = "200",
             description = "List of reviews",
             content = {@Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = ReviewPublicDto.class)))})
-    @Parameter(name = "userId", description = "User ID", example = "auth0|1234567890", required = true)
-    @Parameter(name = "page", description = "Page number", example = "0")
+    @Parameter(name = "userId", description = "User ID", example = "auth0|1234567890")
+    @Parameter(name = "mediaId", description = "Media ID", example = "1")
+    @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Number of elements per page", example = "10")
-    @GetMapping("/public/user/{userId}")
-    public ResponseEntity<List<ReviewPublicDto>> getAllByUserId(@PathVariable String userId, Pageable page) {
-        return new ResponseEntity<>(reviewService.getAllByUserId(userId, page), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Get all reviews by media ID",
-            description = "Returns a list of reviews by media ID")
-    @ApiResponse(responseCode = "200",
-            description = "List of reviews",
-            content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = ReviewPublicDto.class)))})
-    @Parameter(name = "mediaId", description = "Media ID", example = "1", required = true)
-    @Parameter(name = "page", description = "Page number", example = "0")
-    @Parameter(name = "size", description = "Number of elements per page", example = "10")
-    @GetMapping("/public/media/{mediaId}")
-    public ResponseEntity<List<ReviewPublicDto>> getAllByMediaId(@PathVariable Long mediaId, Pageable page) {
-        return new ResponseEntity<>(reviewService.getAllByMediaId(mediaId, page), HttpStatus.OK);
+    @GetMapping("/public")
+    public ResponseEntity<List<ReviewPublicDto>> getAll(Pageable page,
+                                                        @RequestParam(required = false) String userId,
+                                                        @RequestParam(required = false) Long mediaId) {
+        return new ResponseEntity<>(reviewService.getAll(userId, mediaId, page), HttpStatus.OK);
     }
 
     @Operation(summary = "Create a new review",
@@ -154,29 +143,6 @@ public class ReviewController {
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws ReviewNotFoundException, InvalidPermissionException {
         reviewService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Delete a review by admin",
-            description = "Deletes a review by admin")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Review deleted",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content),
-            @ApiResponse(responseCode = "403",
-                    description = "Not enough permissions",
-                    content = @Content),
-            @ApiResponse(responseCode = "404",
-                    description = "Review not found",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorDto.class))})})
-    @Parameter(name = "id", description = "Review ID", example = "1", required = true)
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws ReviewNotFoundException {
-        reviewService.adminDelete(id);
         return ResponseEntity.noContent().build();
     }
 
