@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.LikeConverter;
 import org.somuga.dto.like.LikeCreateDto;
 import org.somuga.dto.like.LikePublicDto;
@@ -155,13 +155,9 @@ public class LikeE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MEDIA_NOT_FOUND + 999999999L, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(MEDIA_NOT_FOUND + 999999999L, errorDto.message());
     }
 
     @Test
@@ -178,13 +174,9 @@ public class LikeE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(ALREADY_LIKED, error.getMessage());
-        assertEquals(400, error.getStatus());
-        assertEquals("POST", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH, error.getPath());
+        assertEquals(ALREADY_LIKED, errorDto.message());
     }
 
     @Test
@@ -323,13 +315,9 @@ public class LikeE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(LIKE_NOT_FOUND + 9999999, error.getMessage());
-        assertEquals(404, error.getStatus());
-        assertEquals("DELETE", error.getMethod());
-        assertNotNull(error.getTimestamp());
-        assertEquals(PRIVATE_API_PATH + "/" + 9999999, error.getPath());
+        assertEquals(LIKE_NOT_FOUND + 9999999, errorDto.message());
     }
 
 }

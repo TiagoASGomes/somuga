@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.UserConverter;
 import org.somuga.dto.user.UserCreateDto;
 import org.somuga.dto.user.UserPublicDto;
@@ -79,12 +79,6 @@ public class UserE2ETest {
         return UserConverter.fromEntityToPublicDto(userRepository.save(user));
     }
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user and expect status 201")
@@ -135,11 +129,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, userRepository.count());
-        assertEquals(DUPLICATE_USERNAME + USERNAME, error.getMessage());
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertEquals(DUPLICATE_USERNAME + USERNAME, errorDto.message());
     }
 
     @Test
@@ -156,11 +149,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, userRepository.count());
-        assertEquals(DUPLICATE_USER + USER_ID, error.getMessage());
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertEquals(DUPLICATE_USER + USER_ID, errorDto.message());
     }
 
     @Test
@@ -176,11 +168,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, userRepository.count());
-        assertTrue(error.getMessage().contains(INVALID_USERNAME));
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertTrue(errorDto.message().contains(INVALID_USERNAME));
     }
 
     @Test
@@ -196,11 +187,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, userRepository.count());
-        assertTrue(error.getMessage().contains(NON_EMPTY_USERNAME));
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertTrue(errorDto.message().contains(NON_EMPTY_USERNAME));
     }
 
     @Test
@@ -216,11 +206,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, userRepository.count());
-        assertTrue(error.getMessage().contains(NON_EMPTY_USERNAME));
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertTrue(errorDto.message().contains(NON_EMPTY_USERNAME));
     }
 
     @Test
@@ -237,11 +226,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, userRepository.count());
-        assertEquals(DUPLICATE_USER + USER_ID, error.getMessage());
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertEquals(DUPLICATE_USER + USER_ID, errorDto.message());
     }
 
     @Test
@@ -258,11 +246,10 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, userRepository.count());
-        assertEquals(DUPLICATE_USERNAME + USERNAME.toLowerCase(), error.getMessage());
-        assertErrors(error, 400, PRIVATE_API_PATH, "POST");
+        assertEquals(DUPLICATE_USERNAME + USERNAME.toLowerCase(), errorDto.message());
     }
 
     @Test
@@ -385,10 +372,9 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(USER_NOT_FOUND + "1", error.getMessage());
-        assertErrors(error, 404, PUBLIC_API_PATH + "/1", "GET");
+        assertEquals(USER_NOT_FOUND + "1", errorDto.message());
     }
 
     @Test
@@ -400,10 +386,9 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(USER_NOT_FOUND + "1", error.getMessage());
-        assertErrors(error, 404, PUBLIC_API_PATH + "/1", "GET");
+        assertEquals(USER_NOT_FOUND + "1", errorDto.message());
     }
 
     @Test
@@ -463,14 +448,14 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
         assertNotNull(dbUser);
 
         assertNotEquals(userCreateDto.userName(), dbUser.getUserName());
 
         assertEquals(2, userRepository.count());
-        assertEquals(DUPLICATE_USERNAME + "User2", error.getMessage());
+        assertEquals(DUPLICATE_USERNAME + "User2", errorDto.message());
     }
 
     @Test
@@ -488,14 +473,14 @@ public class UserE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
         assertNotNull(dbUser);
 
         assertNotEquals(userCreateDto.userName(), dbUser.getUserName());
 
         assertEquals(2, userRepository.count());
-        assertEquals(DUPLICATE_USERNAME + "user2", error.getMessage());
+        assertEquals(DUPLICATE_USERNAME + "user2", errorDto.message());
     }
 
     @Test
@@ -512,14 +497,14 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
         assertNotNull(dbUser);
 
         assertNotEquals(userCreateDto.userName(), dbUser.getUserName());
 
         assertEquals(1, userRepository.count());
-        assertEquals(USER_NOT_FOUND + USER_ID, error.getMessage());
+        assertEquals(USER_NOT_FOUND + USER_ID, errorDto.message());
     }
 
     @Test
@@ -535,10 +520,10 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, userRepository.count());
-        assertEquals(USER_NOT_FOUND + USER_ID, error.getMessage());
+        assertEquals(USER_NOT_FOUND + USER_ID, errorDto.message());
     }
 
     @Test
@@ -586,10 +571,10 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(1, userRepository.count());
-        assertEquals(USER_NOT_FOUND + USER_ID, error.getMessage());
+        assertEquals(USER_NOT_FOUND + USER_ID, errorDto.message());
     }
 
     @Test
@@ -602,10 +587,10 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertEquals(0, userRepository.count());
-        assertEquals(USER_NOT_FOUND + USER_ID, error.getMessage());
+        assertEquals(USER_NOT_FOUND + USER_ID, errorDto.message());
     }
 
     @Test
@@ -646,9 +631,9 @@ public class UserE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(USER_NOT_FOUND + "1", error.getMessage());
+        assertEquals(USER_NOT_FOUND + "1", errorDto.message());
     }
 
     @Test

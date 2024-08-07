@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -49,14 +48,11 @@ public class SomugaExceptionHandler {
             GenreNotFoundException.class,
             PlatformNotFoundException.class,
             MovieCrewNotFoundException.class})
-    public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
-        logger.error(e.getMessage());
-        return new ResponseEntity<>(new Error(
-                e.getMessage(),
-                request.getRequestURI(),
-                HttpStatus.NOT_FOUND.value(),
-                request.getMethod(),
-                new Date()
+    public ResponseEntity<ErrorDto> handleNotFound(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
+                e.getMessage()
         ), HttpStatus.NOT_FOUND);
     }
 
@@ -69,19 +65,16 @@ public class SomugaExceptionHandler {
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
             SQLIntegrityConstraintViolationException.class,})
-    public ResponseEntity<Error> handleBadRequest(Exception e, HttpServletRequest request) {
-        logger.error(e.getMessage());
-        return new ResponseEntity<>(new Error(
-                e.getMessage(),
-                request.getRequestURI(),
-                HttpStatus.BAD_REQUEST.value(),
-                request.getMethod(),
-                new Date()
+    public ResponseEntity<ErrorDto> handleBadRequest(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
+                e.getMessage()
         ), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Error> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorDto> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<String> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
@@ -89,37 +82,28 @@ public class SomugaExceptionHandler {
         errors.forEach(error -> errorMessageBuilder.append(error).append(", "));
         errorMessageBuilder.delete(errorMessageBuilder.length() - 2, errorMessageBuilder.length()).append(".");
         String errorMessage = errorMessageBuilder.toString();
-        logger.error(errorMessage);
-        return new ResponseEntity<>(new Error(
-                errorMessage,
-                request.getRequestURI(),
-                HttpStatus.BAD_REQUEST.value(),
-                request.getMethod(),
-                new Date()
+        String error = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + errorMessage;
+        logger.error(error);
+        return new ResponseEntity<>(new ErrorDto(
+                errorMessage
         ), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidPermissionException.class)
-    public ResponseEntity<Error> handleForbidden(Exception e, HttpServletRequest request) {
-        logger.error(e.getMessage());
-        return new ResponseEntity<>(new Error(
-                e.getMessage(),
-                request.getRequestURI(),
-                HttpStatus.FORBIDDEN.value(),
-                request.getMethod(),
-                new Date()
+    public ResponseEntity<ErrorDto> handleForbidden(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
+                e.getMessage()
         ), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Error> handleException(Exception e, HttpServletRequest request) {
-        logger.error(e.getMessage());
-        return new ResponseEntity<>(new Error(
-                e.getMessage(),
-                request.getRequestURI(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                request.getMethod(),
-                new Date()
+    public ResponseEntity<ErrorDto> handleException(Exception e, HttpServletRequest request) {
+        String errorMessage = "Path: " + request.getRequestURI() + "Method: " + request.getMethod() + "Error: " + e.getMessage();
+        logger.error(errorMessage);
+        return new ResponseEntity<>(new ErrorDto(
+                e.getMessage()
         ), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

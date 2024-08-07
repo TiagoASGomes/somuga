@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
@@ -116,7 +116,7 @@ class MovieE2ETest {
         return mapper.readValue(response, MoviePublicDto.class);
     }
 
-    public Error createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
+    public ErrorDto createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
         String response = mockMvc.perform(post(PRIVATE_API_PATH)
@@ -126,7 +126,7 @@ class MovieE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        return mapper.readValue(response, Error.class);
+        return mapper.readValue(response, ErrorDto.class);
     }
 
     public List<MovieRoleCreateDto> createAllRoles() {
@@ -198,15 +198,14 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with empty data and expect status 400")
     void testCreateMovieWithEmptyTitle() throws Exception {
-        Error error = createMovieBadRequest("", null, "", 0, List.of(), "", "");
+        ErrorDto errorDto = createMovieBadRequest("", null, "", 0, List.of(), "", "");
 
-        assertTrue(error.getMessage().contains(INVALID_TITLE));
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertTrue(error.getMessage().contains(INVALID_DESCRIPTION));
-        assertTrue(error.getMessage().contains(INVALID_DURATION));
-        assertTrue(error.getMessage().contains(INVALID_CREW_ROLE));
-        assertTrue(error.getMessage().contains(INVALID_MEDIA_URL));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_TITLE));
+        assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
+        assertTrue(errorDto.message().contains(INVALID_DESCRIPTION));
+        assertTrue(errorDto.message().contains(INVALID_DURATION));
+        assertTrue(errorDto.message().contains(INVALID_CREW_ROLE));
+        assertTrue(errorDto.message().contains(INVALID_MEDIA_URL));
         assertEquals(0, movieRepository.count());
     }
 
@@ -214,15 +213,14 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with null data and expect status 400")
     void testCreateMovieWithNullTitle() throws Exception {
-        Error error = createMovieBadRequest(null, null, null, null, null, null, null);
+        ErrorDto errorDto = createMovieBadRequest(null, null, null, null, null, null, null);
 
-        assertTrue(error.getMessage().contains(INVALID_TITLE));
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertTrue(error.getMessage().contains(INVALID_DESCRIPTION));
-        assertTrue(error.getMessage().contains(INVALID_DURATION));
-        assertTrue(error.getMessage().contains(INVALID_CREW_ROLE));
-        assertTrue(error.getMessage().contains(INVALID_MEDIA_URL));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_TITLE));
+        assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
+        assertTrue(errorDto.message().contains(INVALID_DESCRIPTION));
+        assertTrue(errorDto.message().contains(INVALID_DURATION));
+        assertTrue(errorDto.message().contains(INVALID_CREW_ROLE));
+        assertTrue(errorDto.message().contains(INVALID_MEDIA_URL));
         assertEquals(0, movieRepository.count());
     }
 
@@ -232,10 +230,9 @@ class MovieE2ETest {
     void testCreateMovieWithTitleExceeding255Characters() throws Exception {
         String title = "a".repeat(256);
 
-        Error error = createMovieBadRequest(title, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(title, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(MAX_TITLE_CHARACTERS));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(MAX_TITLE_CHARACTERS));
         assertEquals(0, movieRepository.count());
     }
 
@@ -244,10 +241,9 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie future date and expect status 400")
     void testCreateMovieWithFutureDate() throws Exception {
-        Error error = createMovieBadRequest(TITLE, new Date(System.currentTimeMillis() + 1000000), DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, new Date(System.currentTimeMillis() + 1000000), DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(INVALID_RELEASE_DATE));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
         assertEquals(0, movieRepository.count());
     }
 
@@ -257,10 +253,9 @@ class MovieE2ETest {
     void testCreateMovieWithDescriptionExceeding1000Characters() throws Exception {
         String description = "a".repeat(1001);
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, description, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, description, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(MAX_DESCRIPTION_CHARACTERS));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(MAX_DESCRIPTION_CHARACTERS));
         assertEquals(0, movieRepository.count());
     }
 
@@ -268,10 +263,9 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with duration under 0 and expect status 400")
     void testCreateMovieWithDurationUnder0() throws Exception {
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, 0, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, 0, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(INVALID_DURATION));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_DURATION));
         assertEquals(0, movieRepository.count());
     }
 
@@ -279,10 +273,9 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie with duration over 1440 and expect status 400")
     void testCreateMovieWithDurationAbove1440() throws Exception {
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, 1441, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, 1441, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(INVALID_DURATION));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_DURATION));
         assertEquals(0, movieRepository.count());
     }
 
@@ -292,10 +285,9 @@ class MovieE2ETest {
     void testCreateMovieWithCrewRoleIdUnder0() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(-1L, "ACTOR", "Character1"));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(ID_GREATER_THAN_0, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(ID_GREATER_THAN_0, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -305,10 +297,9 @@ class MovieE2ETest {
     void testCreateMovieWithCrewRoleIdNull() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(null, "ACTOR", "Character1"));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(ID_GREATER_THAN_0));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(ID_GREATER_THAN_0));
         assertEquals(0, movieRepository.count());
     }
 
@@ -318,10 +309,9 @@ class MovieE2ETest {
     void testCreateMovieWithCrewRoleNull() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, null, "Character1"));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(INVALID_MOVIE_ROLE, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(INVALID_MOVIE_ROLE, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -331,10 +321,9 @@ class MovieE2ETest {
     void testCreateMovieWithCrewRoleEmpty() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, "", "Character1"));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(INVALID_MOVIE_ROLE, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(INVALID_MOVIE_ROLE, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -344,10 +333,9 @@ class MovieE2ETest {
     void testCreateMovieWithInvalidCrewRole() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, "INVALID", "Character1"));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertTrue(error.getMessage().contains(INVALID_MOVIE_ROLE));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(INVALID_MOVIE_ROLE));
         assertEquals(0, movieRepository.count());
     }
 
@@ -357,10 +345,9 @@ class MovieE2ETest {
     void testCreateMovieWithCharacterNameExceeding255Characters() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, "ACTOR", "a".repeat(256)));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(INVALID_CHARACTER_NAME, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(INVALID_CHARACTER_NAME, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -370,10 +357,9 @@ class MovieE2ETest {
     void testCreateMovieWithActorEmptyCharacterName() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, "ACTOR", ""));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(CHARACTER_NAME_REQUIRED, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(CHARACTER_NAME_REQUIRED, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -383,10 +369,9 @@ class MovieE2ETest {
     void testCreateMovieWithActorNullCharacterName() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(1L, "ACTOR", null));
 
-        Error error = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(CHARACTER_NAME_REQUIRED, error.getMessage());
-        assertEquals(400, error.getStatus());
+        assertEquals(CHARACTER_NAME_REQUIRED, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -403,10 +388,9 @@ class MovieE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MOVIE_CREW_NOT_FOUND + 100, error.getMessage());
-        assertEquals(404, error.getStatus());
+        assertEquals(MOVIE_CREW_NOT_FOUND + 100, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -507,7 +491,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId())
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -544,7 +528,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, crewDtos, MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId() + "&title=" + TITLE)
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&title=" + TITLE)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -580,13 +564,12 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test get movie by id not found and expect status 404")
     void testGetMovieByIdNotFound() throws Exception {
-        Error error = mapper.readValue(mockMvc.perform(get(PUBLIC_API_PATH + "/1")
+        ErrorDto errorDto = mapper.readValue(mockMvc.perform(get(PUBLIC_API_PATH + "/1")
                         .with(csrf()))
                 .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString(), Error.class);
+                .andReturn().getResponse().getContentAsString(), ErrorDto.class);
 
-        assertTrue(error.getMessage().contains(MOVIE_NOT_FOUND));
-        assertEquals(404, error.getStatus());
+        assertTrue(errorDto.message().contains(MOVIE_NOT_FOUND));
     }
 
     @Test
@@ -689,13 +672,12 @@ class MovieE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         Movie movieEntity = movieRepository.findById(moviePublicDto.id()).orElse(null);
 
         assertEquals(TITLE, movieEntity.getTitle());
 
-        assertTrue(error.getMessage().contains(MAX_TITLE_CHARACTERS));
-        assertEquals(400, error.getStatus());
+        assertTrue(errorDto.message().contains(MAX_TITLE_CHARACTERS));
         assertEquals(1, movieRepository.count());
     }
 
@@ -725,14 +707,13 @@ class MovieE2ETest {
                 .andExpect(status().isForbidden())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         Movie movieEntity = movieRepository.findById(movie.getId()).orElse(null);
         assertNotNull(movieEntity);
 
         assertEquals(TITLE, movieEntity.getTitle());
 
-        assertEquals(UNAUTHORIZED_UPDATE, error.getMessage());
-        assertEquals(403, error.getStatus());
+        assertEquals(UNAUTHORIZED_UPDATE, errorDto.message());
     }
 
     @Test
@@ -782,11 +763,10 @@ class MovieE2ETest {
                 .andExpect(status().isForbidden())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(1, movieRepository.count());
 
-        assertEquals(UNAUTHORIZED_DELETE, error.getMessage());
-        assertEquals(403, error.getStatus());
+        assertEquals(UNAUTHORIZED_DELETE, errorDto.message());
     }
 
     @Test
@@ -806,10 +786,9 @@ class MovieE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MOVIE_NOT_FOUND + 1, error.getMessage());
-        assertEquals(404, error.getStatus());
+        assertEquals(MOVIE_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -835,10 +814,9 @@ class MovieE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MOVIE_NOT_FOUND + 1, error.getMessage());
-        assertEquals(404, error.getStatus());
+        assertEquals(MOVIE_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test

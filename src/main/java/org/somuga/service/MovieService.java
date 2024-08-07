@@ -42,8 +42,8 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewId) {
-        List<SearchCriteria> params = createSearchCriteria(title, crewId);
+    public List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewIds) {
+        List<SearchCriteria> params = createSearchCriteria(title, crewIds);
         MovieSpecificationBuilder builder = new MovieSpecificationBuilder();
         params.forEach(builder::with);
 
@@ -52,13 +52,13 @@ public class MovieService implements IMovieService {
         return MovieConverter.fromEntityListToPublicDtoList(movies);
     }
 
-    private List<SearchCriteria> createSearchCriteria(String title, List<Long> crewId) {
+    private List<SearchCriteria> createSearchCriteria(String title, List<Long> crewIds) {
         List<SearchCriteria> params = new ArrayList<>();
         if (title != null) {
             params.add(new SearchCriteria("title", title));
         }
-        if (crewId != null) {
-            for (Long id : crewId) {
+        if (crewIds != null) {
+            for (Long id : crewIds) {
                 params.add(new SearchCriteria("crewId", id.toString()));
             }
         }

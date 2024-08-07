@@ -19,10 +19,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(regexMatcher("/api/.*/admin.*")).hasAuthority("ADMIN")
                         .requestMatchers(regexMatcher("/api/.*/public.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/private.*")).authenticated()
                         .requestMatchers(regexMatcher("/swagger.*|/v3/api-docs.*")).permitAll()
+                        .requestMatchers(regexMatcher("/api/.*/admin.*")).hasAuthority("ADMIN")
                 )
                 .cors(withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2

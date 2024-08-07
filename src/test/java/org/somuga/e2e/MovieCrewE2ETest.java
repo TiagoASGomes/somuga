@@ -3,7 +3,7 @@ package org.somuga.e2e;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
@@ -78,12 +78,6 @@ class MovieCrewE2ETest {
     }
 
 
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
-    }
-
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create movie crew and expect status 201")
@@ -149,10 +143,10 @@ class MovieCrewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME));
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(errorDto.message().contains(INVALID_NAME));
+        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -170,9 +164,9 @@ class MovieCrewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -190,9 +184,9 @@ class MovieCrewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME_SIZE));
+        assertTrue(errorDto.message().contains(INVALID_NAME_SIZE));
 
         assertEquals(0, movieCrewRepository.count());
     }
@@ -286,10 +280,9 @@ class MovieCrewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, PUBLIC_API_PATH + "/1", "GET");
+        assertEquals(MOVIE_CREW_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -369,10 +362,10 @@ class MovieCrewE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(error.getMessage().contains(INVALID_NAME));
-        assertTrue(error.getMessage().contains(INVALID_BIRTH_DATE));
+        assertTrue(errorDto.message().contains(INVALID_NAME));
+        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
 
         MovieCrew movieCrew = movieCrewRepository.findById(movieCrewPublicDto.id()).orElse(null);
         assertNotNull(movieCrew);
@@ -394,10 +387,9 @@ class MovieCrewE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(MOVIE_CREW_NOT_FOUND + 1, error.getMessage());
-        assertErrors(error, 404, ADMIN_API_PATH + "/1", "PUT");
+        assertEquals(MOVIE_CREW_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test

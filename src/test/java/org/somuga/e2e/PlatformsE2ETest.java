@@ -5,7 +5,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.somuga.aspect.Error;
+import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.PlatformConverter;
 import org.somuga.dto.platform.PlatformCreateDto;
 import org.somuga.dto.platform.PlatformPublicDto;
@@ -67,12 +67,6 @@ class PlatformsE2ETest {
     public PlatformPublicDto createPlatform(String name) {
         Platform platform = Platform.builder().platformName(name).build();
         return PlatformConverter.fromEntityToPublicDto(platformRepository.save(platform));
-    }
-
-    private void assertErrors(Error error, int status, String path, String method) {
-        assertEquals(status, error.getStatus());
-        assertEquals(path, error.getPath());
-        assertEquals(method, error.getMethod());
     }
 
     @Test
@@ -139,9 +133,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -159,9 +152,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -179,9 +171,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -201,9 +192,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), errorDto.message());
 
         assertEquals(1, platformRepository.count());
     }
@@ -221,9 +211,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH, "POST");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
 
         assertEquals(0, platformRepository.count());
     }
@@ -317,9 +306,9 @@ class PlatformsE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        assertEquals(PLATFORM_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -398,9 +387,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertTrue(error.getMessage().contains(INVALID_PLATFORM_NAME));
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + platformPublicDto.id(), "PUT");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -423,9 +411,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), error.getMessage());
-        assertErrors(error, 400, ADMIN_API_PATH + "/" + platformPublicDto.id(), "PUT");
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), errorDto.message());
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -445,8 +432,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertEquals(PLATFORM_NOT_FOUND + 1, errorDto.message());
     }
 
     @Test
@@ -500,8 +487,8 @@ class PlatformsE2ETest {
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Error error = mapper.readValue(response, Error.class);
-        assertEquals(PLATFORM_NOT_FOUND + 1, error.getMessage());
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        assertEquals(PLATFORM_NOT_FOUND + 1, errorDto.message());
     }
 
 
