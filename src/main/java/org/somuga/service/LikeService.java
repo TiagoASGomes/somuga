@@ -41,13 +41,18 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public List<LikePublicDto> getAllByUserId(String userId, Pageable page) {
-        return LikeConverter.fromEntityListToPublicDtoList(likeRepo.findByUserId(userId, page).toList());
-    }
-
-    @Override
-    public List<LikePublicDto> getAllByMediaId(Long mediaId, Pageable page) {
-        return LikeConverter.fromEntityListToPublicDtoList(likeRepo.findByMediaId(mediaId, page).toList());
+    public List<LikePublicDto> getAll(String userId, Long mediaId, Pageable page) {
+        List<Like> likes;
+        if (userId == null && mediaId == null) {
+            likes = likeRepo.findAll(page).toList();
+        } else if (userId != null && mediaId == null) {
+            likes = likeRepo.findByUserId(userId, page).toList();
+        } else if (userId == null) {
+            likes = likeRepo.findByMediaId(mediaId, page).toList();
+        } else {
+            likes = likeRepo.findByUserIdAndMediaId(userId, mediaId, page).toList();
+        }
+        return LikeConverter.fromEntityListToPublicDtoList(likes);
     }
 
     @Override
@@ -67,7 +72,7 @@ public class LikeService implements ILikeService {
     public void delete(Long id) throws LikeNotFoundException, InvalidPermissionException {
         Like like = likeRepo.findById(id).orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + id));
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!like.getUser().getId().equals(auth.getName())) {
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN")) && !like.getUser().getId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
         likeRepo.deleteById(id);

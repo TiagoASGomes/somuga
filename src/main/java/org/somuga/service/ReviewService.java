@@ -12,6 +12,8 @@ import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.exception.review.AlreadyReviewedException;
 import org.somuga.exception.review.ReviewNotFoundException;
 import org.somuga.exception.user.UserNotFoundException;
+import org.somuga.filters.SearchCriteria;
+import org.somuga.filters.review.ReviewSpecificationBuilder;
 import org.somuga.repository.ReviewRepository;
 import org.somuga.service.interfaces.IMediaService;
 import org.somuga.service.interfaces.IReviewService;
@@ -22,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,13 +51,23 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<ReviewPublicDto> getAllByUserId(String userId, Pageable page) {
-        return ReviewConverter.fromEntityListToPublicDtoList(reviewRepo.findByUserId(userId, page).toList());
+    public List<ReviewPublicDto> getAll(String userId, Long mediaId, Pageable page) {
+        List<SearchCriteria> params = createSearchCriteria(userId, mediaId);
+        ReviewSpecificationBuilder builder = new ReviewSpecificationBuilder();
+        params.forEach(builder::with);
+        List<Review> reviews = reviewRepo.findAll(builder.build(), page).toList();
+        return ReviewConverter.fromEntityListToPublicDtoList(reviews);
     }
 
-    @Override
-    public List<ReviewPublicDto> getAllByMediaId(Long mediaId, Pageable page) {
-        return ReviewConverter.fromEntityListToPublicDtoList(reviewRepo.findByMediaId(mediaId, page).toList());
+    private List<SearchCriteria> createSearchCriteria(String userId, Long mediaId) {
+        List<SearchCriteria> params = new ArrayList<>();
+        if (userId != null) {
+            params.add(new SearchCriteria("userId", userId));
+        }
+        if (mediaId != null) {
+            params.add(new SearchCriteria("mediaId", String.valueOf(mediaId)));
+        }
+        return params;
     }
 
     @Override
@@ -87,15 +100,9 @@ public class ReviewService implements IReviewService {
     public void delete(Long id) throws ReviewNotFoundException, InvalidPermissionException {
         Review review = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!review.getUser().getId().equals(auth.getName())) {
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN")) && !review.getUser().getId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
-        reviewRepo.deleteById(id);
-    }
-
-    @Override
-    public void adminDelete(Long id) throws ReviewNotFoundException {
-        findById(id);
         reviewRepo.deleteById(id);
     }
 

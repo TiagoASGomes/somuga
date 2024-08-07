@@ -147,7 +147,7 @@ public class GameService implements IGameService {
     public void delete(Long id) throws GameNotFoundException, InvalidPermissionException {
         Game game = findById(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!game.getMediaCreatorId().equals(auth.getName())) {
+        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN")) && !game.getMediaCreatorId().equals(auth.getName())) {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
         removePlatformsAndGenres(game);
@@ -170,10 +170,4 @@ public class GameService implements IGameService {
         return gameRepo.findById(id).orElseThrow(() -> new GameNotFoundException(GAME_NOT_FOUND + id));
     }
 
-    @Override
-    public void adminDelete(Long id) throws GameNotFoundException {
-        Game game = findById(id);
-        removePlatformsAndGenres(game);
-        gameRepo.deleteById(id);
-    }
 }

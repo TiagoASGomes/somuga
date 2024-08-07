@@ -15,9 +15,7 @@ import java.util.List;
 public interface IReviewService {
     ReviewPublicDto getById(Long id) throws ReviewNotFoundException;
 
-    List<ReviewPublicDto> getAllByUserId(String userId, Pageable page);
-
-    List<ReviewPublicDto> getAllByMediaId(Long mediaId, Pageable page);
+    List<ReviewPublicDto> getAll(String userId, Long mediaId, Pageable page);
 
     ReviewPublicDto create(ReviewCreateDto review) throws UserNotFoundException, AlreadyReviewedException, MediaNotFoundException;
 
@@ -25,5 +23,4 @@ public interface IReviewService {
 
     void delete(Long id) throws ReviewNotFoundException, InvalidPermissionException;
 
-    void adminDelete(Long id) throws ReviewNotFoundException;
 }

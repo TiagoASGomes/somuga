@@ -502,28 +502,4 @@ class GameServiceTest {
         Mockito.verify(gameRepo).findById(1L);
         Mockito.verifyNoMoreInteractions(gameRepo);
     }
-
-    @Test
-    @DisplayName("Test adminDelete method")
-    void adminDelete() throws Exception {
-        Mockito.when(gameRepo.findById(1L)).thenReturn(Optional.of(game));
-
-        gameService.adminDelete(1L);
-
-        Mockito.verify(gameRepo).deleteById(1L);
-        Mockito.verify(gameRepo).findById(1L);
-        Mockito.verifyNoMoreInteractions(gameRepo);
-    }
-
-    @Test
-    @DisplayName("Test adminDelete method and expect game to not be found")
-    void adminDeleteNotFound() {
-        Mockito.when(gameRepo.findById(1L)).thenReturn(Optional.empty());
-
-        String errorMessage = assertThrows(Exception.class, () -> gameService.adminDelete(1L)).getMessage();
-
-        assertEquals(GAME_NOT_FOUND + 1L, errorMessage);
-        Mockito.verify(gameRepo).findById(1L);
-        Mockito.verifyNoMoreInteractions(gameRepo);
-    }
 }

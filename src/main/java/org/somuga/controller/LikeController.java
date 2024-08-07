@@ -39,32 +39,21 @@ public class LikeController {
         this.likeService = likeService;
     }
 
-    @Operation(summary = "Get all likes by user id",
-            description = "Returns a list of likes by user id.")
+    @Operation(summary = "Get all likes",
+            description = "Returns a list of likes, optionally filtered by user id or media id.")
     @ApiResponse(responseCode = "200",
             description = "List of likes",
             content = {@Content(mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = GameGenrePublicDto.class)))})
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
-    @Parameter(name = "page", description = "The page number to return", example = "0")
-    @Parameter(name = "userId", description = "The user id", example = "auth0|1234567890", required = true)
-    @GetMapping("/public/user/{userId}")
-    public ResponseEntity<List<LikePublicDto>> getAllByUserId(@PathVariable String userId, Pageable page) {
-        return new ResponseEntity<>(likeService.getAllByUserId(userId, page), HttpStatus.OK);
-    }
-
-    @Operation(summary = "Get all likes by media id",
-            description = "Returns a list of likes by media id.")
-    @ApiResponse(responseCode = "200",
-            description = "List of likes",
-            content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = GameGenrePublicDto.class)))})
-    @Parameter(name = "size", description = "The number of elements to return", example = "10")
-    @Parameter(name = "page", description = "The page number to return", example = "0")
-    @Parameter(name = "mediaId", description = "The media id", example = "1", required = true)
-    @GetMapping("/public/media/{mediaId}")
-    public ResponseEntity<List<LikePublicDto>> getAllByMediaId(@PathVariable Long mediaId, Pageable page) {
-        return new ResponseEntity<>(likeService.getAllByMediaId(mediaId, page), HttpStatus.OK);
+    @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
+    @Parameter(name = "userId", description = "The user id", example = "auth0|1234567890")
+    @Parameter(name = "mediaId", description = "The media id", example = "1")
+    @GetMapping("/public")
+    public ResponseEntity<List<LikePublicDto>> getAll(Pageable page,
+                                                      @RequestParam(required = false) String userId,
+                                                      @RequestParam(required = false) Long mediaId) {
+        return new ResponseEntity<>(likeService.getAll(userId, mediaId, page), HttpStatus.OK);
     }
 
     @Operation(summary = "Create a like",

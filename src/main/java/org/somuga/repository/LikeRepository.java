@@ -15,4 +15,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Page<Like> findByMediaId(Long mediaId, Pageable page);
 
     Optional<Like> findByMediaIdAndUserId(Long mediaId, String userId);
+
+    Page<Like> findByUserIdAndMediaId(String userId, Long mediaId, Pageable page);
 }

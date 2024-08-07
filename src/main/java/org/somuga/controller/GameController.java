@@ -51,7 +51,7 @@ public class GameController {
     @Parameter(name = "genre", description = "The genre to search for", example = "Sandbox")
     @Parameter(name = "developer", description = "The developer to search for", example = "Mojang")
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
-    @Parameter(name = "page", description = "The page number to return", example = "0")
+    @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @GetMapping("/public")
     public ResponseEntity<List<GamePublicDto>> getAll(Pageable page,
                                                       @RequestParam(required = false) String title,
@@ -150,29 +150,6 @@ public class GameController {
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws GameNotFoundException, InvalidPermissionException {
         gameService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Admin delete a game",
-            description = "Delete a game by id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Game deleted",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthenticated",
-                    content = @Content),
-            @ApiResponse(responseCode = "403",
-                    description = "Unauthorized",
-                    content = @Content),
-            @ApiResponse(responseCode = "404",
-                    description = "Game not found",
-                    content = @Content)
-    })
-    @Parameter(name = "id", description = "The game id", example = "1", required = true)
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws GameNotFoundException {
-        gameService.adminDelete(id);
         return ResponseEntity.noContent().build();
     }
 

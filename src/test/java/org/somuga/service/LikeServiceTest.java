@@ -22,15 +22,10 @@ import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,47 +77,6 @@ class LikeServiceTest {
         likeConverter.reset();
     }
 
-    @Test
-    @DisplayName("Test getAllByUserId should return a list of LikePublicDto")
-    void getAllByUserId() {
-        Pageable page = PageRequest.of(0, 10);
-        List<Like> likes = List.of(like);
-        Page<Like> likePage = new PageImpl<>(likes);
-        List<LikePublicDto> likePublicDtos = List.of(likePublicDto);
-
-        likeConverter.when(() -> LikeConverter.fromEntityListToPublicDtoList(likes)).thenReturn(likePublicDtos);
-        Mockito.when(likeRepository.findByUserId("user", page)).thenReturn(likePage);
-
-        List<LikePublicDto> result = likeService.getAllByUserId("user", page);
-
-        assertEquals(likePublicDtos, result);
-
-        likeConverter.verify(() -> LikeConverter.fromEntityListToPublicDtoList(likes));
-        likeConverter.verifyNoMoreInteractions();
-        Mockito.verify(likeRepository).findByUserId("user", page);
-        Mockito.verifyNoMoreInteractions(likeRepository);
-    }
-
-    @Test
-    @DisplayName("Test getAllByMediaId should return a list of LikePublicDto")
-    void getAllByMediaId() {
-        Pageable page = PageRequest.of(0, 10);
-        List<Like> likes = List.of(like);
-        Page<Like> likePage = new PageImpl<>(likes);
-        List<LikePublicDto> likePublicDtos = List.of(likePublicDto);
-
-        likeConverter.when(() -> LikeConverter.fromEntityListToPublicDtoList(likes)).thenReturn(likePublicDtos);
-        Mockito.when(likeRepository.findByMediaId(1L, page)).thenReturn(likePage);
-
-        List<LikePublicDto> result = likeService.getAllByMediaId(1L, page);
-
-        assertEquals(likePublicDtos, result);
-
-        likeConverter.verify(() -> LikeConverter.fromEntityListToPublicDtoList(likes));
-        likeConverter.verifyNoMoreInteractions();
-        Mockito.verify(likeRepository).findByMediaId(1L, page);
-        Mockito.verifyNoMoreInteractions(likeRepository);
-    }
 
     @Test
     @DisplayName("Test create should return a LikePublicDto")

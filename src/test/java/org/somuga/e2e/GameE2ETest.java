@@ -1008,7 +1008,7 @@ class GameE2ETest {
     void testDeleteGameAsAdmin() throws Exception {
         GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + game.id())
+        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.id())
                         .with(csrf())
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -1020,7 +1020,7 @@ class GameE2ETest {
     @WithMockUser(username = USER, authorities = "ADMIN")
     @DisplayName("Test delete game not found as admin and expect 404")
     void testDeleteGameNotFoundAsAdmin() throws Exception {
-        String response = mockMvc.perform(delete(ADMIN_API_PATH + "/0")
+        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/0")
                         .with(csrf())
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -1048,7 +1048,7 @@ class GameE2ETest {
                 .build();
         gameRepository.saveAndFlush(game);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + game.getId())
+        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.getId())
                         .with(csrf())
                         .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());

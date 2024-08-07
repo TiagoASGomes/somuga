@@ -199,7 +199,7 @@ public class LikeE2ETest {
             createLike(user, createGame());
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId()))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));
     }
@@ -212,10 +212,10 @@ public class LikeE2ETest {
             createLike(user, createGame());
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=0&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId() + "?page=1&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&userId=" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
     }
@@ -228,7 +228,7 @@ public class LikeE2ETest {
             createLike(user, createGame());
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + 99999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + 999999))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -243,7 +243,7 @@ public class LikeE2ETest {
             createLike(createUser(USER_ID + i, "Name" + i), media);
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + media.getId()))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + media.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(6)));
     }
@@ -256,10 +256,10 @@ public class LikeE2ETest {
             createLike(createUser(USER_ID + i, "Name" + i), media);
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + media.getId() + "?page=0&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&mediaId=" + media.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(4)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + media.getId() + "?page=1&size=4"))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&mediaId=" + media.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
 
@@ -273,7 +273,7 @@ public class LikeE2ETest {
             createLike(createUser(USER_ID + i, "Name" + i), media);
         }
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/media/" + 999999))
+        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + 999999))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -288,10 +288,7 @@ public class LikeE2ETest {
                         .with(csrf()))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get(PUBLIC_API_PATH + "/user/" + user.getId())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+        assertEquals(0, likeTestRepository.count());
     }
 
     @Test

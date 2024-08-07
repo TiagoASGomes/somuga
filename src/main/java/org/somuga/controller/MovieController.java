@@ -47,7 +47,7 @@ public class MovieController {
     @Parameter(name = "title", description = "The movie title to search for", example = "The Godfather")
     @Parameter(name = "crewIds", description = "A list of crew members ids to search for", example = "1,2,3")
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
-    @Parameter(name = "page", description = "The page number to return", example = "0")
+    @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @GetMapping("/public")
     public ResponseEntity<List<MoviePublicDto>> getAll(Pageable page,
                                                        @RequestParam(required = false) String title,
@@ -147,30 +147,6 @@ public class MovieController {
     @DeleteMapping("/private/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) throws MovieNotFoundException, InvalidPermissionException {
         movieService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Delete a movie",
-            description = "Deletes a movie by id.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "The movie was deleted",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthenticated",
-                    content = @Content),
-            @ApiResponse(responseCode = "403",
-                    description = "Invalid permission",
-                    content = @Content),
-            @ApiResponse(responseCode = "404",
-                    description = "Movie not found",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorDto.class))})
-    })
-    @Parameter(name = "id", description = "The movie id to delete", example = "1", required = true)
-    @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> adminDelete(@PathVariable Long id) throws MovieNotFoundException {
-        movieService.adminDelete(id);
         return ResponseEntity.noContent().build();
     }
 }

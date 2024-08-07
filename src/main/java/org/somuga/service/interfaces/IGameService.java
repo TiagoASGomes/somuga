@@ -26,7 +26,5 @@ public interface IGameService {
     void delete(Long id) throws GameNotFoundException, InvalidPermissionException;
 
     Media findById(Long id) throws GameNotFoundException;
-
-    void adminDelete(Long id) throws GameNotFoundException;
 }
 
