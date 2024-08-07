@@ -491,7 +491,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId())
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId())
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -528,7 +528,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, crewDtos, MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId() + "&title=" + TITLE)
+        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&title=" + TITLE)
                         .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
