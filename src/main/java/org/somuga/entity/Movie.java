@@ -1,7 +1,10 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MovieRole;
 import org.somuga.util.id_class.MovieCrewRoleId;
@@ -16,7 +19,6 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(callSuper = true)
 public class Movie extends Media {
 
     @Column(name = "duration")

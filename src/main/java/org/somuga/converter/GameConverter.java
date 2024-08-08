@@ -15,7 +15,6 @@ public class GameConverter {
 
     public static GamePublicDto fromEntityToPublicDto(Game game) {
         if (game == null) return null;
-        if (game.getReviews() == null) game.setReviews(new ArrayList<>());
         if (game.getLikes() == null) game.setLikes(new ArrayList<>());
         return new GamePublicDto(
                 game.getId(),
@@ -26,7 +25,7 @@ public class GameConverter {
                 PlatformConverter.fromEntityListToPublicDtoList(game.getPlatforms()),
                 game.getPrice(),
                 game.getDescription(),
-                game.getReviews().size(),
+                game.getAverageRating(),
                 game.getLikes().size(),
                 game.getMediaUrl(),
                 game.getImageUrl()
@@ -49,6 +48,7 @@ public class GameConverter {
                 .description(gameDto.description())
                 .mediaUrl(gameDto.mediaUrl())
                 .imageUrl(gameDto.imageUrl())
+                .averageRating(0)
                 .build();
     }
 

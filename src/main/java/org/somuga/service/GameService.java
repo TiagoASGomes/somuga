@@ -170,4 +170,10 @@ public class GameService implements IGameService {
         return gameRepo.findById(id).orElseThrow(() -> new GameNotFoundException(GAME_NOT_FOUND + id));
     }
 
+    @Override
+    public void updateAverageRating(Game game, Integer newRating) {
+        game.setAverageRating(newRating);
+        gameRepo.save(game);
+    }
+
 }

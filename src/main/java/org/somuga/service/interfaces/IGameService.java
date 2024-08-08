@@ -3,6 +3,7 @@ package org.somuga.service.interfaces;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.entity.Game;
 import org.somuga.entity.Media;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -26,5 +27,7 @@ public interface IGameService {
     void delete(Long id) throws GameNotFoundException, InvalidPermissionException;
 
     Media findById(Long id) throws GameNotFoundException;
+
+    void updateAverageRating(Game game, Integer newRating);
 }
 

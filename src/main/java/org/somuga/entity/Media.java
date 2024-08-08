@@ -1,7 +1,10 @@
 package org.somuga.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MediaType;
 
@@ -16,7 +19,6 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public abstract class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE, generator = "media_id_generator")
@@ -39,8 +41,10 @@ public abstract class Media {
     private String imageUrl;
     @Column(name = "media_url", nullable = false)
     private String mediaUrl;
-    @Column(name = "media_creator_id", nullable = false)
+    @Column(name = "media_creator_id", nullable = false, updatable = false)
     private String mediaCreatorId;
+    @Column(name = "average_rating", nullable = false)
+    private Integer averageRating;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)

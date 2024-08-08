@@ -81,7 +81,9 @@ public class ReviewService implements IReviewService {
         User user = userService.findById(userId);
         Media media = mediaService.findById(reviewDto.mediaId());
         Review review = ReviewConverter.fromCreateDtoToEntity(reviewDto, user, media);
-        return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));
+        reviewRepo.save(review);
+        mediaService.updateAverageRating(media, reviewDto.reviewScore());
+        return ReviewConverter.fromEntityToPublicDto(review);
     }
 
     @Override

@@ -10,7 +10,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

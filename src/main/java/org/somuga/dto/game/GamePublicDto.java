@@ -27,8 +27,8 @@ public record GamePublicDto(
         Double price,
         @Schema(description = "Game description", example = "Minecraft is a sandbox video game developed by Mojang Studios.")
         String description,
-        @Schema(description = "Number of game reviews", example = "100")
-        int reviews,
+        @Schema(description = "Game average rating", example = "8")
+        int averageRating,
         @Schema(description = "Number of game likes", example = "1000")
         int likes,
         @Schema(description = "A link the game official website", example = "https://www.minecraft.net")
