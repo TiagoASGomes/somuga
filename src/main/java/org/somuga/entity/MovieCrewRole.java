@@ -12,7 +12,6 @@ import org.somuga.util.id_class.MovieCrewRoleId;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class MovieCrewRole {
 
     @EmbeddedId

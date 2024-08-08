@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Developer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

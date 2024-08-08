@@ -19,9 +19,6 @@ public class MovieConverter {
 
     public static MoviePublicDto fromEntityToPublicDto(Movie movie) {
         if (movie == null) return null;
-        if (movie.getReviews() == null) {
-            movie.setReviews(new ArrayList<>());
-        }
         if (movie.getLikes() == null) {
             movie.setLikes(new ArrayList<>());
         }
@@ -35,7 +32,7 @@ public class MovieConverter {
                 movie.getMediaUrl(),
                 movie.getImageUrl(),
                 movie.getLikes().size(),
-                movie.getReviews().size()
+                movie.getAverageRating()
         );
     }
 
@@ -55,6 +52,7 @@ public class MovieConverter {
                 .duration(movieDto.duration())
                 .mediaUrl(movieDto.mediaUrl())
                 .imageUrl(movieDto.imageUrl())
+                .averageRating(0)
                 .build();
     }
 

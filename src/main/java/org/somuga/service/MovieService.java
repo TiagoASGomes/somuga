@@ -149,6 +149,12 @@ public class MovieService implements IMovieService {
         return movieRepo.findById(id).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND + id));
     }
 
+    @Override
+    public void updateAverageRating(Movie media, Integer newRating) {
+        media.setAverageRating(newRating);
+        movieRepo.save(media);
+    }
+
     private void validateCrew(List<MovieRoleCreateDto> crew) throws InvalidCrewRoleException {
         for (MovieRoleCreateDto roleDto : crew) {
             if (roleDto.movieCrewId() == null || roleDto.movieCrewId() <= 0) {

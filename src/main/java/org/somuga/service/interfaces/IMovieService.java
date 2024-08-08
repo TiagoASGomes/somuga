@@ -25,4 +25,6 @@ public interface IMovieService {
     void delete(Long id) throws MovieNotFoundException, InvalidPermissionException;
 
     Movie findById(Long id) throws MovieNotFoundException;
+
+    void updateAverageRating(Movie media, Integer newRating);
 }
