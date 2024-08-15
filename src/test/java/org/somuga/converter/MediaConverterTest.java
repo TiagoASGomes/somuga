@@ -52,7 +52,7 @@ class MediaConverterTest {
                 .mediaType(MediaType.GAME)
                 .build();
 
-        GamePublicDto responseDto = new GamePublicDto(1L, "Game Title", null, null, null, null, null, "Game Description", 0, 0, null, null);
+        GamePublicDto responseDto = new GamePublicDto(1L, "Game Title", null, null, null, null, null, "Game Description", 0.0, 0, null, null);
 
         gameConverterMockedStatic.when(() -> GameConverter.fromEntityToPublicDto(game)).thenReturn(responseDto);
 
@@ -76,7 +76,7 @@ class MediaConverterTest {
                 .mediaType(MediaType.MOVIE)
                 .build();
 
-        MoviePublicDto responseDto = new MoviePublicDto(1L, "Movie Title", null, "Movie Description", null, null, null, null, 0, 0);
+        MoviePublicDto responseDto = new MoviePublicDto(1L, "Movie Title", null, "Movie Description", null, null, null, null, 0, 0.0);
 
         movieConverterMockedStatic.when(() -> MovieConverter.fromEntityToPublicDto(movie)).thenReturn(responseDto);
 

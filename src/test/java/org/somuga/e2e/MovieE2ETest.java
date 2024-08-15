@@ -287,7 +287,7 @@ class MovieE2ETest {
 
         ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(ID_GREATER_THAN_0, errorDto.message());
+        assertEquals(INVALID_ID, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -299,7 +299,7 @@ class MovieE2ETest {
 
         ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertTrue(errorDto.message().contains(ID_GREATER_THAN_0));
+        assertTrue(errorDto.message().contains(INVALID_ID));
         assertEquals(0, movieRepository.count());
     }
 

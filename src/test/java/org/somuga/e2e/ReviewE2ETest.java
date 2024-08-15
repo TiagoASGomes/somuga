@@ -18,7 +18,6 @@ import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,14 +27,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
+import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -51,9 +49,9 @@ public class ReviewE2ETest {
     private Game game;
     private User user;
     @Autowired
-    private UserRepository userTestRepository;
+    private UserRepository userRepository;
     @Autowired
-    private ReviewRepository reviewTestRepository;
+    private ReviewRepository reviewRepository;
     @Autowired
     private GameRepository gameRepository;
     @Autowired
@@ -69,8 +67,8 @@ public class ReviewE2ETest {
 
     @AfterEach
     public void cleanUp() {
-        reviewTestRepository.deleteAll();
-        userTestRepository.deleteAll();
+        reviewRepository.deleteAll();
+        userRepository.deleteAll();
         gameRepository.deleteAll();
     }
 
@@ -94,6 +92,7 @@ public class ReviewE2ETest {
                 .mediaCreatorId(USER_ID)
                 .imageUrl("https://example.com")
                 .price(0.0)
+                .averageRating(0.0)
                 .build();
         return gameRepository.save(game);
     }
@@ -105,7 +104,7 @@ public class ReviewE2ETest {
                 .joinDate(new Date())
                 .active(true)
                 .build();
-        return userTestRepository.save(user);
+        return userRepository.save(user);
     }
 
     public ReviewPublicDto createReview(User user, Media media, int score, String review) {
@@ -115,7 +114,22 @@ public class ReviewE2ETest {
                 .reviewScore(score)
                 .writtenReview(review)
                 .build();
-        return ReviewConverter.fromEntityToPublicDto(reviewTestRepository.save(reviewEntity));
+        return ReviewConverter.fromEntityToPublicDto(reviewRepository.save(reviewEntity));
+    }
+
+    private void assertReviewEquals(ReviewPublicDto review, String userId, Long mediaId, int score, String reviewText) {
+        Review reviewEntity = reviewRepository.findById(review.id()).orElse(null);
+
+        assertNotNull(reviewEntity);
+        assertEquals(reviewEntity.getId(), review.id());
+        assertEquals(userId, review.user().id());
+        assertEquals(userId, reviewEntity.getUser().getId());
+        assertEquals(mediaId, review.mediaId());
+        assertEquals(mediaId, reviewEntity.getMedia().getId());
+        assertEquals(score, review.reviewScore());
+        assertEquals(score, reviewEntity.getReviewScore());
+        assertEquals(reviewText, review.writtenReview());
+        assertEquals(reviewText, reviewEntity.getWrittenReview());
     }
 
     @Test
@@ -124,290 +138,630 @@ public class ReviewE2ETest {
     void testCreateGameReview() throws Exception {
         ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "My Review");
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto), mockMvc);
 
         ReviewPublicDto review = mapper.readValue(response, ReviewPublicDto.class);
 
-        assertNotNull(review.id());
-        assertEquals(USER_ID, review.user().id());
-        assertEquals(reviewDto.mediaId(), review.mediaId());
-        assertEquals(user.getUserName(), review.user().userName());
-        assertEquals(5, review.reviewScore());
-        assertEquals("My Review", review.writtenReview());
-    }
-
-
-    @Test
-    @WithMockUser(username = USER_ID)
-    @DisplayName("Test create review with incorrect id and expect status 404 and message")
-    void testCreateReviewIncorrectId() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(99999999L, 5, "My Review");
-
-
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
-
-        assertEquals(MEDIA_NOT_FOUND + 99999999L, errorDto.message());
+        assertEquals(1, reviewRepository.count());
+        assertReviewEquals(review, USER_ID, reviewDto.mediaId(), reviewDto.reviewScore(), reviewDto.writtenReview());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test create review with incorrect validation and expect status 400 and message")
-    void testCreateLikeValidation() throws Exception {
-        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId() * -1, (int) (game.getId() * 11), "A".repeat(1100));
+    @DisplayName("Test create game review null review and expect status 200")
+    void testCreateGameReviewNullReview() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, null);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto), mockMvc);
 
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        ReviewPublicDto review = mapper.readValue(response, ReviewPublicDto.class);
 
-        assertTrue(errorDto.message().contains(ID_GREATER_THAN_0));
-        assertTrue(errorDto.message().contains(MAX_REVIEW_CHARACTERS));
-        assertTrue(errorDto.message().contains(INVALID_SCORE));
+        assertEquals(1, reviewRepository.count());
+        assertReviewEquals(review, USER_ID, reviewDto.mediaId(), reviewDto.reviewScore(), null);
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test create duplicate review and expect status 400 and message")
-    void testCreateReviewDuplicate() throws Exception {
+    @DisplayName("Test create game review with review over 1024 characters and expect status 400")
+    void testCreateGameReviewOver1024Characters() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "a".repeat(1025));
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with score 0 and expect status 400")
+    void testCreateGameReviewScore0() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 0, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with score 11 and expect status 400")
+    void testCreateGameReviewScore11() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 11, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with score null and expect status 400")
+    void testCreateGameReviewScoreNull() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), null, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with mediaId null and expect status 400")
+    void testCreateGameReviewMediaIdNull() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(null, 5, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_ID));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with mediaId 0 and expect status 400")
+    void testCreateGameReviewMediaId0() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(0L, 5, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_ID));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review empty body and expect status 400")
+    void testCreateGameReviewEmptyBody() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(null, null, null);
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertTrue(error.message().contains(INVALID_ID));
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with user already reviewed and expect status 400")
+    void testCreateGameReviewAlreadyReviewed() throws Exception {
+        createReview(user, game, 5, "My Review");
+
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 7, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        Review review = reviewRepository.findByMediaIdAndUserId(game.getId(), USER_ID).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertEquals(1, reviewRepository.count());
+        assertEquals(ALREADY_REVIEWED, error.message());
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test create game review with media not found and expect status 404")
+    void testCreateGameReviewMediaNotFound() throws Exception {
+        long id = game.getId() + 1;
+        ReviewCreateDto reviewDto = new ReviewCreateDto(id, 5, "My Review");
+
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(0, reviewRepository.count());
+        assertEquals(MEDIA_NOT_FOUND + id, error.message());
+    }
+
+    @Test
+    @WithMockUser(username = "new-user")
+    @DisplayName("Test create game review with user not found and expect status 404")
+    void testCreateGameReviewUserNotFound() throws Exception {
         ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "My Review");
 
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(reviewDto), mockMvc);
 
-        mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewDto)))
-                .andExpect(status().isCreated());
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(reviewDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
-
-        assertEquals(ALREADY_REVIEWED, errorDto.message());
+        assertEquals(0, reviewRepository.count());
+        assertEquals(USER_NOT_FOUND + "new-user", error.message());
     }
 
     @Test
-    @DisplayName("Test get review by id and expect status 200 and review")
+    @DisplayName("Test create game review and expect correct average rating")
+    void testCreateGameReviewAverageRating() throws Exception {
+        ReviewCreateDto reviewDto1 = new ReviewCreateDto(game.getId(), 7, "My Review");
+        ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
+        ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
+
+        createUser("user2", "user2");
+        createUser("user3", "user3");
+
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto3), mockMvc, user("user3"));
+
+        Game updatedGame = gameRepository.findById(game.getId()).orElse(null);
+        assertNotNull(updatedGame);
+
+        Double averageRating = (7.0 + 1.0 + 2.0) / 3.0;
+        averageRating = Math.round(averageRating * 10.0) / 10.0;
+        assertEquals(averageRating, updatedGame.getAverageRating());
+    }
+
+    @Test
+    @DisplayName("Test create review unauthenticated and expect status 401")
+    void testCreateGameReviewUnauthenticated() throws Exception {
+        ReviewCreateDto reviewDto = new ReviewCreateDto(game.getId(), 5, "My Review");
+
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        assertEquals(0, reviewRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test get all reviews and expect status 200")
+    void testGetAllReviews() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        createReview(user, game, 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(reviewRepository.count(), reviews.size());
+    }
+
+    @Test
+    @DisplayName("Test get all reviews paged and expect status 200")
+    void testGetAllReviewsPaged() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        createReview(user, game, 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(1, reviews.size());
+    }
+
+    @Test
+    @DisplayName("Test get all reviews with userId and expect status 200")
+    void testGetAllReviewsWithUserId() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        long game2Id = createGame().getId();
+        createReview(user, game, 5, "My Review");
+        createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID, status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(2, reviews.size());
+        assertTrue(reviews.stream().allMatch(review -> review.user().id().equals(USER_ID)));
+    }
+
+    @Test
+    @DisplayName("Test get all reviews with userId paged and expect status 200")
+    void testGetAllReviewsWithUserIdPaged() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        long game2Id = createGame().getId();
+        createReview(user, game, 5, "My Review");
+        createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID + "&page=0&size=1", status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(1, reviews.size());
+        assertTrue(reviews.stream().allMatch(review -> review.user().id().equals(USER_ID)));
+    }
+
+    @Test
+    @DisplayName("Test get all reviews with mediaId and expect status 200")
+    void testGetAllReviewsWithMediaId() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        long game2Id = createGame().getId();
+        createReview(user, game, 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+        createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?mediaId=" + game.getId(), status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(2, reviews.size());
+        assertTrue(reviews.stream().allMatch(review -> review.mediaId().equals(game.getId())));
+    }
+
+    @Test
+    @DisplayName("Test get all reviews with mediaId paged and expect status 200")
+    void testGetAllReviewsWithMediaIdPaged() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        long game2Id = createGame().getId();
+        createReview(user, game, 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+        createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?mediaId=" + game.getId() + "&page=0&size=1", status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(1, reviews.size());
+        assertTrue(reviews.stream().allMatch(review -> review.mediaId().equals(game.getId())));
+    }
+
+    @Test
+    @DisplayName("Test get all reviews with userId and mediaId and expect status 200")
+    void testGetAllReviewsWithUserIdAndMediaId() throws Exception {
+        String user2Id = createUser("user2", "user2").getId();
+        long game2Id = createGame().getId();
+        createReview(user, game, 5, "My Review");
+        createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
+        createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
+
+        String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID + "&mediaId=" + game.getId(), status().isOk(), mockMvc);
+
+        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+
+        assertEquals(1, reviews.size());
+        assertEquals(USER_ID, reviews.get(0).user().id());
+        assertEquals(game.getId(), reviews.get(0).mediaId());
+    }
+
+    @Test
+    @DisplayName("Test get review by ID and expect status 200")
     void testGetReviewById() throws Exception {
-        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
+        long review = createReview(user, game, 5, "My Review").id();
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + reviewDto.id()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + review, status().isOk(), mockMvc);
 
-        ReviewPublicDto review = mapper.readValue(response, ReviewPublicDto.class);
+        ReviewPublicDto reviewResponse = mapper.readValue(response, ReviewPublicDto.class);
 
-        assertEquals(reviewDto.id(), review.id());
-        assertEquals(user.getId(), review.user().id());
-        assertEquals(game.getId(), review.mediaId());
-        assertEquals(5, review.reviewScore());
-        assertEquals("My Review", review.writtenReview());
+        assertReviewEquals(reviewResponse, USER_ID, game.getId(), 5, "My Review");
     }
 
     @Test
-    @DisplayName("Test get review by id with no review and expect status 404 and message")
+    @DisplayName("Test get review by ID not found and expect status 404")
     void testGetReviewByIdNotFound() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + 9999999))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        long review = createReview(user, game, 5, "My Review").id();
 
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        String response = getRequest(PUBLIC_API_PATH + "/" + (review + 1), status().isNotFound(), mockMvc);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
-    }
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
 
-    @Test
-    @DisplayName("Test get all reviews from user and expect status 200 and list with reviews")
-    void testGetAllReviewsFromUser() throws Exception {
-        User user = createUser(USER_ID, "UserName2");
-        for (int i = 0; i < 3; i++) {
-            createReview(user, createGame(), 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + user.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
-    }
-
-    @Test
-    @DisplayName("Test get all reviews from user paged and expect status 200 and list with reviews and pages")
-    void testGetAllReviewsFromUserPaged() throws Exception {
-        User user = createUser(USER_ID, "UserName2");
-        for (int i = 0; i < 3; i++) {
-            createReview(user, createGame(), 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=2&userId=" + user.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=2&userId=" + user.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
-    }
-
-    @Test
-    @DisplayName("Test get all reviews from user with no reviews and expect status 200 and empty list")
-    void testGetAllReviewsFromUserWithNoUserReviews() throws Exception {
-        User user = createUser(USER_ID, "UserName2");
-        for (int i = 0; i < 3; i++) {
-            createReview(user, createGame(), 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?userId=user"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
-
-    }
-
-
-    @Test
-    @DisplayName("Test get all reviews from media and expect status 200 and list with reviews")
-    void testGetAllReviewsFromMedia() throws Exception {
-        Game game = createGame();
-        for (int i = 0; i < 6; i++) {
-            createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + game.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(6)));
-    }
-
-    @Test
-    @DisplayName("Test get all reviews from media paged and expect status 200 and list with reviews and pages")
-    void testGetAllReviewsFromMediaPaged() throws Exception {
-        Game game = createGame();
-        for (int i = 0; i < 6; i++) {
-            createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&mediaId=" + game.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(4)));
-        mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&mediaId=" + game.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
-
-    }
-
-    @Test
-    @DisplayName("Test get all reviews from media with no reviews and expect status 200 and empty list")
-    void testGetAllReviewsFromMediaWithNoMediaReviews() throws Exception {
-        Game game = createGame();
-        for (int i = 0; i < 6; i++) {
-            createReview(createUser(USER_ID, "Name" + i), game, 5, "My Review");
-        }
-
-        mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + 99999))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+        assertEquals(REVIEW_NOT_FOUND + (review + 1), error.message());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test update review and expect status 200 and updated review")
+    @DisplayName("Test update review and expect status 200")
     void testUpdateReview() throws Exception {
-        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
-        ReviewUpdateDto updateDto = new ReviewUpdateDto(6, "New Review");
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "My Updated Review");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + reviewDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isOk(), mapper.writeValueAsString(reviewDto), mockMvc);
 
         ReviewPublicDto review = mapper.readValue(response, ReviewPublicDto.class);
 
-        assertEquals(reviewDto.id(), review.id());
-        assertEquals(6, review.reviewScore());
-        assertEquals("New Review", review.writtenReview());
+        assertEquals(1, reviewRepository.count());
+        assertReviewEquals(review, USER_ID, game.getId(), reviewDto.reviewScore(), reviewDto.writtenReview());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test update review with no review and expect status 404 and message")
+    @DisplayName("Test update review null review and expect status 200")
+    void testUpdateReviewNullReview() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, null);
+
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isOk(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ReviewPublicDto review = mapper.readValue(response, ReviewPublicDto.class);
+
+        assertReviewEquals(review, USER_ID, game.getId(), reviewDto.reviewScore(), null);
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test update review with review over 1024 characters and expect status 400")
+    void testUpdateReviewOver1024Characters() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "a".repeat(1025));
+
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertTrue(error.message().contains(MAX_REVIEW_CHARACTERS));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test update review with score 0 and expect status 400")
+    void testUpdateReviewScore0() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(0, "My Review");
+
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test update review with score 11 and expect status 400")
+    void testUpdateReviewScore11() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(11, "My Review");
+
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test update review with score null and expect status 400")
+    void testUpdateReviewScoreNull() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(null, "My Review");
+
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isBadRequest(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertTrue(error.message().contains(INVALID_SCORE));
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test update review with review not found and expect status 404")
     void testUpdateReviewNotFound() throws Exception {
-        ReviewUpdateDto updateDto = new ReviewUpdateDto(6, "New Review");
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "My Updated Review");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + 9999999)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = patchRequest(PRIVATE_API_PATH + "/" + (reviewId + 1), status().isNotFound(), mapper.writeValueAsString(reviewDto), mockMvc);
 
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertEquals(REVIEW_NOT_FOUND + (reviewId + 1), error.message());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test update review with validation errors and expect status 400 and message")
-    void testUpdateReviewValidation() throws Exception {
-        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
-        ReviewUpdateDto updateDto = new ReviewUpdateDto((int) (game.getId() * 20), "A".repeat(1100));
+    @DisplayName("Test update review with user not matching and expect status 403")
+    void testUpdateReviewUserNotMatching() throws Exception {
+        User user2 = createUser("user2", "user2");
+        long reviewId = createReview(user2, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "My Updated Review");
 
-        String response = mockMvc.perform(patch(PRIVATE_API_PATH + "/" + reviewDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isForbidden(), mapper.writeValueAsString(reviewDto), mockMvc);
 
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
 
-        assertTrue(errorDto.message().contains(INVALID_SCORE));
-        assertTrue(errorDto.message().contains(MAX_REVIEW_CHARACTERS));
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+
+        assertEquals(UNAUTHORIZED_UPDATE, error.message());
+    }
+
+    @Test
+    @DisplayName("Test update review unathenticated and expect status 401")
+    void testUpdateReviewUnauthenticated() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+        ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "My Updated Review");
+
+        patchRequest(PRIVATE_API_PATH + "/" + reviewId, status().isUnauthorized(), mapper.writeValueAsString(reviewDto), mockMvc);
+
+        Review review = reviewRepository.findById(reviewId).orElse(null);
+        assertNotNull(review);
+        assertEquals(5, review.getReviewScore());
+    }
+
+    @Test
+    @DisplayName("Test update review and expect correct game avg rating")
+    void testUpdateReviewAverageRating() throws Exception {
+        ReviewCreateDto reviewDto1 = new ReviewCreateDto(game.getId(), 7, "My Review");
+        ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
+        ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
+
+        createUser("user2", "user2");
+        createUser("user3", "user3");
+
+        String response = postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto3), mockMvc, user("user3"));
+
+        Long reviewId = mapper.readValue(response, ReviewPublicDto.class).id();
+
+        ReviewUpdateDto reviewUpdateDto = new ReviewUpdateDto(10, "My Updated Review");
+
+        patchRequestWithUser(PRIVATE_API_PATH + "/" + reviewId, status().isOk(), mapper.writeValueAsString(reviewUpdateDto), mockMvc, user(USER_ID));
+
+        Game updatedGame = gameRepository.findById(game.getId()).orElse(null);
+        assertNotNull(updatedGame);
+
+        Double averageRating = (10.0 + 1.0 + 2.0) / 3.0;
+        averageRating = Math.round(averageRating * 10.0) / 10.0;
+
+        assertEquals(averageRating, updatedGame.getAverageRating());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test delete review and expect status 200 and deleted review")
+    @DisplayName("Test delete review and expect status 204")
     void testDeleteReview() throws Exception {
-        ReviewPublicDto reviewDto = createReview(user, game, 5, "My Review");
+        long reviewId = createReview(user, game, 5, "My Review").id();
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + reviewDto.id())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isNoContent(), mockMvc);
 
-        assertEquals(0, reviewTestRepository.count());
-
+        assertEquals(0, reviewRepository.count());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
-    @DisplayName("Test delete review with no review and expect status 404 and message")
+    @DisplayName("Test delete review not found and expect status 404")
     void testDeleteReviewNotFound() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
 
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/" + 9999999)
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/" + (reviewId + 1), status().isNotFound(), mockMvc);
 
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
 
-        assertEquals(REVIEW_NOT_FOUND + 9999999, errorDto.message());
+        assertEquals(1, reviewRepository.count());
+        assertEquals(REVIEW_NOT_FOUND + (reviewId + 1), error.message());
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test delete review with user not matching and expect status 403")
+    void testDeleteReviewUserNotMatching() throws Exception {
+        User user2 = createUser("user2", "user2");
+        long reviewId = createReview(user2, game, 5, "My Review").id();
+
+        String response = deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isForbidden(), mockMvc);
+
+        ErrorDto error = mapper.readValue(response, ErrorDto.class);
+
+        assertEquals(1, reviewRepository.count());
+        assertEquals(UNAUTHORIZED_DELETE, error.message());
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID, authorities = "ADMIN")
+    @DisplayName("Test delete review from another user with admin and expect status 204")
+    void testDeleteReviewAdmin() throws Exception {
+        User user2 = createUser("user2", "user2");
+        long reviewId = createReview(user2, game, 5, "My Review").id();
+
+        deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isNoContent(), mockMvc);
+
+        assertEquals(0, reviewRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test delete review unauthenticated and expect status 401")
+    void testDeleteReviewUnauthenticated() throws Exception {
+        long reviewId = createReview(user, game, 5, "My Review").id();
+
+        deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isUnauthorized(), mockMvc);
+
+        assertEquals(1, reviewRepository.count());
+    }
+
+    @Test
+    @DisplayName("Test delete review and expect correct game avg rating")
+    void testDeleteReviewAverageRating() throws Exception {
+        ReviewCreateDto reviewDto1 = new ReviewCreateDto(game.getId(), 7, "My Review");
+        ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
+        ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
+
+        createUser("user2", "user2");
+        createUser("user3", "user3");
+
+        String response = postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));
+        postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto3), mockMvc, user("user3"));
+
+        Long reviewId = mapper.readValue(response, ReviewPublicDto.class).id();
+
+        deleteRequestWithUser(PRIVATE_API_PATH + "/" + reviewId, status().isNoContent(), mockMvc, user(USER_ID));
+
+        Game updatedGame = gameRepository.findById(game.getId()).orElse(null);
+        assertNotNull(updatedGame);
+
+        Double averageRating = (1.0 + 2.0) / 2.0;
+        averageRating = Math.round(averageRating * 10.0) / 10.0;
+
+        assertEquals(averageRating, updatedGame.getAverageRating());
+    }
+
+    @Test
+    @WithMockUser(username = USER_ID)
+    @DisplayName("Test delete last review and expect correct game avg rating")
+    void testDeleteLastReviewAverageRating() throws Exception {
+        ReviewCreateDto reviewDto1 = new ReviewCreateDto(game.getId(), 7, "My Review");
+
+        String response = postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
+
+        Long reviewId = mapper.readValue(response, ReviewPublicDto.class).id();
+
+        deleteRequestWithUser(PRIVATE_API_PATH + "/" + reviewId, status().isNoContent(), mockMvc, user(USER_ID));
+
+        Game updatedGame = gameRepository.findById(game.getId()).orElse(null);
+        assertNotNull(updatedGame);
+
+        assertEquals(0.0, updatedGame.getAverageRating());
     }
 }

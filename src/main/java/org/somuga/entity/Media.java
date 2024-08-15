@@ -43,8 +43,8 @@ public abstract class Media {
     private String mediaUrl;
     @Column(name = "media_creator_id", nullable = false, updatable = false)
     private String mediaCreatorId;
-    @Column(name = "average_rating", nullable = false)
-    private Integer averageRating;
+    @Column(name = "average_rating", nullable = false, columnDefinition = "DECIMAL(10,1)")
+    private Double averageRating;
     @OneToMany(mappedBy = "media",
             cascade = CascadeType.ALL,
             orphanRemoval = true)

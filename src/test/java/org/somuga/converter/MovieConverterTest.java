@@ -66,7 +66,6 @@ class MovieConverterTest {
         assertEquals(movie.getMediaUrl(), moviePublicDto.mediaUrl());
         assertEquals(movie.getImageUrl(), moviePublicDto.imageUrl());
         assertEquals(movie.getLikes().size(), moviePublicDto.likes());
-        assertEquals(movie.getReviews().size(), moviePublicDto.reviews());
         assertEquals(1, moviePublicDto.crew().size());
         assertEquals(1L, moviePublicDto.crew().get(0).id());
     }

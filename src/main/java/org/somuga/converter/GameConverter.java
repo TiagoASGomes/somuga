@@ -48,7 +48,7 @@ public class GameConverter {
                 .description(gameDto.description())
                 .mediaUrl(gameDto.mediaUrl())
                 .imageUrl(gameDto.imageUrl())
-                .averageRating(0)
+                .averageRating(0.0)
                 .build();
     }
 

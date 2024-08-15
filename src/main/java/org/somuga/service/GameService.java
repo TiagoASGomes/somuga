@@ -171,7 +171,7 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public void updateAverageRating(Game game, Integer newRating) {
+    public void updateAverageRating(Game game, Double newRating) {
         game.setAverageRating(newRating);
         gameRepo.save(game);
     }

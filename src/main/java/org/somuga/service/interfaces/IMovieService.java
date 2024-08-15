@@ -26,5 +26,5 @@ public interface IMovieService {
 
     Movie findById(Long id) throws MovieNotFoundException;
 
-    void updateAverageRating(Movie media, Integer newRating);
+    void updateAverageRating(Movie media, Double newRating);
 }

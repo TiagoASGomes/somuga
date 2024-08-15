@@ -27,7 +27,7 @@ public record MoviePublicDto(
         String imageUrl,
         @Schema(description = "Amount of movie likes", example = "100")
         int likes,
-        @Schema(description = "Movie average rating", example = "8")
-        int averageRating
+        @Schema(description = "Movie average rating", example = "8.7")
+        Double averageRating
 ) implements MediaPublicDto {
 }

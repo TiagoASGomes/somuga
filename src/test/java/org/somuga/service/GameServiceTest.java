@@ -74,7 +74,7 @@ class GameServiceTest {
             PlatformConverter.fromEntityListToPublicDtoList(List.of(platform)),
             10.1,
             "description",
-            0,
+            0.0,
             0,
             "image",
             "media"
@@ -379,7 +379,7 @@ class GameServiceTest {
                 PlatformConverter.fromEntityListToPublicDtoList(List.of(platform)),
                 10.1,
                 "description",
-                0,
+                0.0,
                 0,
                 "image",
                 "media"

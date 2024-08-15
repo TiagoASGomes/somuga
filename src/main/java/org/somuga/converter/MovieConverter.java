@@ -52,7 +52,7 @@ public class MovieConverter {
                 .duration(movieDto.duration())
                 .mediaUrl(movieDto.mediaUrl())
                 .imageUrl(movieDto.imageUrl())
-                .averageRating(0)
+                .averageRating(0.0)
                 .build();
     }
 
