@@ -82,7 +82,7 @@ public class ReviewService implements IReviewService {
         Media media = mediaService.findById(reviewDto.mediaId());
         Review review = ReviewConverter.fromCreateDtoToEntity(reviewDto, user, media);
         reviewRepo.save(review);
-        mediaService.updateAverageRating(media, reviewDto.reviewScore());
+        mediaService.updateAvgRating(review.getMedia());
         return ReviewConverter.fromEntityToPublicDto(review);
     }
 
@@ -95,7 +95,9 @@ public class ReviewService implements IReviewService {
         }
         review.setReviewScore(reviewDto.reviewScore());
         review.setWrittenReview(reviewDto.writtenReview());
-        return ReviewConverter.fromEntityToPublicDto(reviewRepo.save(review));
+        reviewRepo.save(review);
+        mediaService.updateAvgRating(review.getMedia());
+        return ReviewConverter.fromEntityToPublicDto(review);
     }
 
     @Override
@@ -106,6 +108,7 @@ public class ReviewService implements IReviewService {
             throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
         }
         reviewRepo.deleteById(id);
+        mediaService.updateAvgRating(review.getMedia());
     }
 
     private Review findById(Long id) throws ReviewNotFoundException {

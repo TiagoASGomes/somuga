@@ -6,5 +6,5 @@ import org.somuga.exception.media.MediaNotFoundException;
 public interface IMediaService {
     Media findById(Long id) throws MediaNotFoundException;
 
-    void updateAverageRating(Media media, Integer rating);
+    void updateAvgRating(Media media);
 }

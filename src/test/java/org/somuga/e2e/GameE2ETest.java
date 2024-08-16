@@ -7,6 +7,8 @@ import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.dto.game_genre.GameGenrePublicDto;
+import org.somuga.dto.platform.PlatformPublicDto;
 import org.somuga.entity.*;
 import org.somuga.enums.MediaType;
 import org.somuga.repository.*;
@@ -25,10 +27,9 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -40,7 +41,6 @@ class GameE2ETest {
     private final String USER = "google-auth2|1234567890";
     private final String PUBLIC_API_PATH = "/api/v1/game/public";
     private final String PRIVATE_API_PATH = "/api/v1/game/private";
-    private final String ADMIN_API_PATH = "/api/v1/game/admin";
     private final String title = "Cyberpunk 2077";
     private final String description = "A futuristic game";
     private final Date releaseDate = new Date();
@@ -119,12 +119,7 @@ class GameE2ETest {
 
     private GamePublicDto createGame(GameCreateDto gameDto) throws Exception {
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(gameDto), mockMvc);
 
         return mapper.readValue(response, GamePublicDto.class);
     }
@@ -147,6 +142,35 @@ class GameE2ETest {
         userRepository.save(user);
     }
 
+    private void assertGame(GamePublicDto game, Game gameEntity, String title, String description, Date releaseDate, double price, String mediaUrl, String imageUrl, Long developer, List<Long> platforms, List<Long> genres, String mediaCreatorId, MediaType mediaType) {
+        assertEquals(title, game.title());
+        assertEquals(title, gameEntity.getTitle());
+        assertEquals(description, game.description());
+        assertEquals(description, gameEntity.getDescription());
+        assertEquals(releaseDate, game.releaseDate());
+        assertEquals(releaseDate, gameEntity.getReleaseDate());
+        assertEquals(price, game.price());
+        assertEquals(price, gameEntity.getPrice());
+        assertEquals(mediaUrl, game.mediaUrl());
+        assertEquals(mediaUrl, gameEntity.getMediaUrl());
+        assertEquals(imageUrl, game.imageUrl());
+        assertEquals(imageUrl, gameEntity.getImageUrl());
+        assertEquals(developer, game.developer().id());
+        assertEquals(developer, gameEntity.getDeveloper().getId());
+        assertEquals(platforms.size(), game.platforms().size());
+        assertEquals(platforms.size(), gameEntity.getPlatforms().size());
+        assertTrue(game.platforms().stream().map(PlatformPublicDto::id).allMatch(platforms::contains));
+        assertTrue(gameEntity.getPlatforms().stream().map(Platform::getId).allMatch(platforms::contains));
+        assertEquals(genres.size(), game.genres().size());
+        assertEquals(genres.size(), gameEntity.getGenres().size());
+        assertTrue(game.genres().stream().map(GameGenrePublicDto::id).allMatch(genres::contains));
+        assertTrue(gameEntity.getGenres().stream().map(GameGenre::getId).allMatch(genres::contains));
+        assertEquals(mediaCreatorId, gameEntity.getMediaCreatorId());
+        assertEquals(mediaType, gameEntity.getMediaType());
+        assertEquals(mediaType, gameEntity.getMediaType());
+        assertEquals(mediaCreatorId, gameEntity.getMediaCreatorId());
+    }
+
 
     @Test
     @WithMockUser(username = USER)
@@ -164,12 +188,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         GamePublicDto game = mapper.readValue(response, GamePublicDto.class);
 
@@ -177,18 +196,7 @@ class GameE2ETest {
         Game gameEntity = gameRepository.findById(game.id()).orElse(null);
         assertNotNull(gameEntity);
 
-        assertEquals(title, game.title(), gameEntity.getTitle());
-        assertEquals(description, game.description(), gameEntity.getDescription());
-        assertEquals(releaseDate, game.releaseDate());
-        assertEquals(game.releaseDate(), gameEntity.getReleaseDate());
-        assertEquals(price, game.price(), gameEntity.getPrice());
-        assertEquals(mediaUrl, game.mediaUrl(), gameEntity.getMediaUrl());
-        assertEquals(imageUrl, game.imageUrl(), gameEntity.getImageUrl());
-        assertEquals(developer, game.developer().id(), gameEntity.getDeveloper().getId());
-        assertEquals(platforms.size(), game.platforms().size(), gameEntity.getPlatforms().size());
-        assertEquals(genres.size(), game.genres().size(), gameEntity.getGenres().size());
-        assertEquals(MediaType.GAME, gameEntity.getMediaType());
-        assertEquals(USER, gameEntity.getMediaCreatorId());
+        assertGame(game, gameEntity, title, description, releaseDate, price, mediaUrl, imageUrl, developer, platforms, genres, USER, MediaType.GAME);
     }
 
     @Test
@@ -206,37 +214,9 @@ class GameE2ETest {
                 imageUrl
         );
 
-        mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isUnauthorized());
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         assertEquals(0, gameRepository.count());
-    }
-
-    @Test
-    @WithMockUser(username = USER)
-    @DisplayName("Test create game with empty body and expect 400")
-    void testCreateGameEmptyBody() throws Exception {
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
-
-        assertEquals(0, gameRepository.count());
-        assertTrue(errorDto.message().contains(INVALID_TITLE));
-        assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
-        assertTrue(errorDto.message().contains(INVALID_DEVELOPER));
-        assertTrue(errorDto.message().contains(INVALID_GENRES));
-        assertTrue(errorDto.message().contains(INVALID_PLATFORMS));
-        assertTrue(errorDto.message().contains(INVALID_PRICE));
-        assertTrue(errorDto.message().contains(INVALID_DESCRIPTION));
-        assertTrue(errorDto.message().contains(INVALID_MEDIA_URL));
     }
 
     @Test
@@ -256,12 +236,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -286,12 +261,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -316,12 +286,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -346,12 +311,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -375,12 +335,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -404,12 +359,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -433,12 +383,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -462,12 +407,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -491,12 +431,7 @@ class GameE2ETest {
                 imageUrl
         );
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(gameCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -511,11 +446,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -529,11 +460,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=1")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -548,11 +475,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?title=The Witcher")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?title=The Witcher", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -567,11 +490,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, platforms.subList(0, 1), 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?platform=PS4")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?platform=PS4", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -587,11 +506,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, List.of(platforms.get(0), platform3), 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?platform=XBOX&platform=PC")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?platform=PC&platform=XBOX", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -607,11 +522,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres.subList(0, 1), platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?genre=RPG")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?genre=RPG", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -627,11 +538,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer, List.of(genres.get(0), genre3), platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?genre=Adventure&genre=Action")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?genre=Adventure&genre=Action", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -647,11 +554,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
         createGame(new GameCreateDto("The Witcher 2", new Date(), developer2, genres, platforms, 59.99, "A fantasy game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?developer=CD Projekt Red")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?developer=CD Projekt Red", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -671,11 +574,7 @@ class GameE2ETest {
         createGame(new GameCreateDto("Different", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
         GamePublicDto game = createGame(new GameCreateDto("Game 4", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?title=Game&developer=CD Projekt Red&platform=PC&genre=Action")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?title=Game&developer=CD Projekt Red&platform=PC&genre=Action", status().isOk(), mockMvc);
 
         List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
 
@@ -689,11 +588,7 @@ class GameE2ETest {
     void testGetGameById() throws Exception {
         GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + game.id(), status().isOk(), mockMvc);
 
         GameLikePublicDto gameResponse = mapper.readValue(response, GameLikePublicDto.class);
 
@@ -714,11 +609,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get game by id not found and expect 404")
     void testGetGameByIdNotFound() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/0", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -733,11 +624,7 @@ class GameE2ETest {
         createUser(USER);
         createLike(game.id(), USER);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + game.id(), status().isOk(), mockMvc);
 
         GameLikePublicDto gameResponse = mapper.readValue(response, GameLikePublicDto.class);
 
@@ -762,11 +649,7 @@ class GameE2ETest {
         createUser("anotherUser");
         createLike(game.id(), "anotherUser");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + game.id(), status().isOk(), mockMvc);
 
         GameLikePublicDto gameResponse = mapper.readValue(response, GameLikePublicDto.class);
 
@@ -808,31 +691,14 @@ class GameE2ETest {
         Long platformCount = platformRepository.count();
         Long genreCount = gameGenreRepository.count();
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameUpdate)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/" + game.id(), status().isOk(), mapper.writeValueAsString(gameUpdate), mockMvc);
 
         GamePublicDto gameResponse = mapper.readValue(response, GamePublicDto.class);
         Game gameEntity = gameRepository.findById(game.id()).orElse(null);
         assertEquals(1, gameRepository.count());
         assertNotNull(gameEntity);
 
-        assertEquals(game.id(), gameResponse.id(), gameEntity.getId());
-        assertEquals(gameUpdate.title(), gameResponse.title(), gameEntity.getTitle());
-        assertEquals(gameUpdate.description(), gameResponse.description(), gameEntity.getDescription());
-        assertEquals(gameUpdate.releaseDate(), gameResponse.releaseDate());
-        assertEquals(gameUpdate.releaseDate(), gameEntity.getReleaseDate());
-        assertEquals(gameUpdate.price(), gameResponse.price(), gameEntity.getPrice());
-        assertEquals(gameUpdate.mediaUrl(), gameResponse.mediaUrl(), gameEntity.getMediaUrl());
-        assertEquals(gameUpdate.imageUrl(), gameResponse.imageUrl(), gameEntity.getImageUrl());
-        assertEquals(gameUpdate.developerId(), gameResponse.developer().id(), gameEntity.getDeveloper().getId());
-        assertEquals(gameUpdate.platformsIds().size(), gameResponse.platforms().size(), gameEntity.getPlatforms().size());
-        assertEquals(gameUpdate.genreIds().size(), gameResponse.genres().size(), gameEntity.getGenres().size());
-        assertEquals(MediaType.GAME, gameEntity.getMediaType());
-        assertEquals(USER, gameEntity.getMediaCreatorId());
+        assertGame(gameResponse, gameEntity, "Updated", "Updated description", gameUpdate.releaseDate(), 49.99, "https://updated.com", "https://updated.com", newDeveloperId, List.of(newPlatformId), List.of(newGenreId), USER, MediaType.GAME);
 
         assertEquals(developerCount, developerRepository.count());
         assertEquals(platformCount, platformRepository.count());
@@ -842,11 +708,7 @@ class GameE2ETest {
     @Test
     @DisplayName("Test update game unauthenticated and expect 401")
     void testUpdateGameUnauthenticated() throws Exception {
-        mockMvc.perform(put(PRIVATE_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
+        putRequest(PRIVATE_API_PATH + "/0", status().isUnauthorized(), "", mockMvc);
 
         assertEquals(0, gameRepository.count());
     }
@@ -863,6 +725,7 @@ class GameE2ETest {
                 .releaseDate(new Date())
                 .price(price)
                 .mediaUrl(mediaUrl)
+                .averageRating(0.0)
                 .build();
         gameRepository.saveAndFlush(game);
 
@@ -878,12 +741,7 @@ class GameE2ETest {
                 "https://updated.com"
         );
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + game.getId())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameUpdate)))
-                .andExpect(status().isForbidden())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/" + game.getId(), status().isForbidden(), mapper.writeValueAsString(gameUpdate), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -913,12 +771,7 @@ class GameE2ETest {
                 "https://updated.com"
         );
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameUpdate)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/0", status().isNotFound(), mapper.writeValueAsString(gameUpdate), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -932,34 +785,9 @@ class GameE2ETest {
     void testDeleteGame() throws Exception {
         GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + game.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, gameRepository.count());
-    }
-
-    @Test
-    @DisplayName("Test delete game unauthenticated and expect 401")
-    void testDeleteGameUnauthenticated() throws Exception {
-        Game game = Game.builder()
-                .title(title)
-                .mediaCreatorId(USER)
-                .mediaType(MediaType.GAME)
-                .description(description)
-                .releaseDate(new Date())
-                .price(price)
-                .mediaUrl(mediaUrl)
-                .build();
-        gameRepository.saveAndFlush(game);
-
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.getId())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
-
-        assertEquals(1, gameRepository.count());
     }
 
     @Test
@@ -974,13 +802,11 @@ class GameE2ETest {
                 .releaseDate(new Date())
                 .price(price)
                 .mediaUrl(mediaUrl)
+                .averageRating(0.0)
                 .build();
         gameRepository.saveAndFlush(game);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.getId())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        deleteRequest(PRIVATE_API_PATH + "/" + game.getId(), status().isForbidden(), mockMvc);
 
         assertEquals(1, gameRepository.count());
     }
@@ -989,11 +815,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test delete game not found and expect 404")
     void testDeleteGameNotFound() throws Exception {
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/0", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -1008,10 +830,7 @@ class GameE2ETest {
     void testDeleteGameAsAdmin() throws Exception {
         GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + game.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, gameRepository.count());
     }
@@ -1020,11 +839,7 @@ class GameE2ETest {
     @WithMockUser(username = USER, authorities = "ADMIN")
     @DisplayName("Test delete game not found as admin and expect 404")
     void testDeleteGameNotFoundAsAdmin() throws Exception {
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/0", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -1045,38 +860,19 @@ class GameE2ETest {
                 .releaseDate(new Date())
                 .price(price)
                 .mediaUrl(mediaUrl)
+                .averageRating(0.0)
                 .build();
         gameRepository.saveAndFlush(game);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + game.getId())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + game.getId(), status().isNoContent(), mockMvc);
 
         assertEquals(0, gameRepository.count());
     }
 
     @Test
-    @WithMockUser(username = USER)
-    @DisplayName("Test admin delete unauthorized and expect 403")
-    void testAdminDeleteUnauthorized() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, 59.99, "A futuristic game", "https://media.com", "https://image.com"));
-
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + game.id())
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
-
-        assertEquals(1, gameRepository.count());
-    }
-
-    @Test
     @DisplayName("Test admin delete unauthenticated and expect 401")
     void testAdminDeleteUnauthenticated() throws Exception {
-        mockMvc.perform(delete(ADMIN_API_PATH + "/0")
-                        .with(csrf())
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(PRIVATE_API_PATH + "/0", status().isUnauthorized(), mockMvc);
     }
 
 }

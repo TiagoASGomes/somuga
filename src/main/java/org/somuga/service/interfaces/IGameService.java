@@ -28,6 +28,6 @@ public interface IGameService {
 
     Media findById(Long id) throws GameNotFoundException;
 
-    void updateAverageRating(Game game, Integer newRating);
+    void updateAverageRating(Game game, Double newRating);
 }
 

@@ -3,6 +3,7 @@ package org.somuga.service;
 import org.somuga.entity.Game;
 import org.somuga.entity.Media;
 import org.somuga.entity.Movie;
+import org.somuga.entity.Review;
 import org.somuga.enums.MediaType;
 import org.somuga.exception.media.MediaNotFoundException;
 import org.somuga.service.interfaces.IGameService;
@@ -38,13 +39,17 @@ public class MediaService implements IMediaService {
         throw new MediaNotFoundException(MEDIA_NOT_FOUND + id);
     }
 
+
     @Override
-    public void updateAverageRating(Media media, Integer rating) {
-        int newRating = media.getAverageRating() + (rating - media.getAverageRating()) / media.getReviews().size();
+    public void updateAvgRating(Media media) {
+        double averageRating = media.getReviews().stream()
+                .mapToDouble(Review::getReviewScore)
+                .average()
+                .orElse(0.0);
         if (media.getMediaType().equals(MediaType.GAME)) {
-            gameService.updateAverageRating((Game) media, newRating);
+            gameService.updateAverageRating((Game) media, averageRating);
         } else {
-            movieService.updateAverageRating((Movie) media, newRating);
+            movieService.updateAverageRating((Movie) media, averageRating);
         }
     }
 }

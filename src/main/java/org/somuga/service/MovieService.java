@@ -150,7 +150,7 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public void updateAverageRating(Movie media, Integer newRating) {
+    public void updateAverageRating(Movie media, Double newRating) {
         media.setAverageRating(newRating);
         movieRepo.save(media);
     }
@@ -158,7 +158,7 @@ public class MovieService implements IMovieService {
     private void validateCrew(List<MovieRoleCreateDto> crew) throws InvalidCrewRoleException {
         for (MovieRoleCreateDto roleDto : crew) {
             if (roleDto.movieCrewId() == null || roleDto.movieCrewId() <= 0) {
-                throw new InvalidCrewRoleException(ID_GREATER_THAN_0);
+                throw new InvalidCrewRoleException(INVALID_ID);
             }
             if (roleDto.movieRole() == null) {
                 throw new InvalidCrewRoleException(INVALID_MOVIE_ROLE);

@@ -16,7 +16,7 @@ public class Review {
     private Long id;
     @Column(name = "review_score", nullable = false)
     private Integer reviewScore;
-    @Column(length = 1024, name = "written_review", nullable = false)
+    @Column(length = 1024, name = "written_review")
     private String writtenReview;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

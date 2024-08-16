@@ -14,7 +14,6 @@ import org.somuga.repository.PlatformRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,10 +25,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -75,12 +73,7 @@ class PlatformsE2ETest {
     void testCreatePlatform() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("PlayStation");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         PlatformPublicDto platformPublicDto = mapper.readValue(response, PlatformPublicDto.class);
 
@@ -97,11 +90,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithoutAuthorization() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("PlayStation");
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isForbidden());
+        postRequest(ADMIN_API_PATH, status().isForbidden(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         assertEquals(0, platformRepository.count());
     }
@@ -111,11 +100,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithoutAuthentication() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("PlayStation");
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isUnauthorized());
+        postRequest(ADMIN_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         assertEquals(0, platformRepository.count());
     }
@@ -126,12 +111,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithInvalidData() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
@@ -145,12 +125,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithInvalidName() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("PlayStation 5!");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
@@ -164,12 +139,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithLongName() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("ABCDEF".repeat(10));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
@@ -185,12 +155,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("PlayStation");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), errorDto.message());
@@ -204,12 +169,7 @@ class PlatformsE2ETest {
     void testCreatePlatformWithNullName() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto(null);
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
@@ -223,10 +183,7 @@ class PlatformsE2ETest {
         createPlatform("PlayStation");
         createPlatform("PlayStation2");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
@@ -240,10 +197,7 @@ class PlatformsE2ETest {
         createPlatform("PlayStation2");
         createPlatform("Xbox");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=PlayStation")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=PlayStation", status().isOk(), mockMvc);
 
         List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
@@ -257,10 +211,7 @@ class PlatformsE2ETest {
         createPlatform("PlayStation2");
         createPlatform("Xbox");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=playstation")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=playstation", status().isOk(), mockMvc);
 
         List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
@@ -273,10 +224,7 @@ class PlatformsE2ETest {
         createPlatform("PlayStation");
         createPlatform("Xbox");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Switch")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=PlayStation2", status().isOk(), mockMvc);
 
         List<PlatformPublicDto> platformPublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, PlatformPublicDto.class));
 
@@ -288,10 +236,7 @@ class PlatformsE2ETest {
     void testGetPlatformById() throws Exception {
         PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + platformPublicDto.id())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + platformPublicDto.id(), status().isOk(), mockMvc);
 
         PlatformPublicDto platformPublicDtoResponse = mapper.readValue(response, PlatformPublicDto.class);
 
@@ -301,10 +246,7 @@ class PlatformsE2ETest {
     @Test
     @DisplayName("Test get platform by non-existing id and expect 404")
     void testGetPlatformByNonExistingId() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -319,12 +261,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isOk(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         PlatformPublicDto platformPublicDtoResponse = mapper.readValue(response, PlatformPublicDto.class);
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
@@ -343,11 +280,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox");
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isForbidden());
+        putRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isForbidden(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -361,11 +294,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox");
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isUnauthorized());
+        putRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isUnauthorized(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         Platform platform = platformRepository.findById(platformPublicDto.id()).orElse(null);
         assertNotNull(platform);
@@ -380,12 +309,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox 5!");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertTrue(errorDto.message().contains(INVALID_PLATFORM_NAME));
@@ -404,12 +328,7 @@ class PlatformsE2ETest {
 
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(PLATFORM_ALREADY_EXISTS + platformCreateDto.platformName(), errorDto.message());
@@ -425,12 +344,7 @@ class PlatformsE2ETest {
     void testUpdatePlatformNotFound() throws Exception {
         PlatformCreateDto platformCreateDto = new PlatformCreateDto("Xbox");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(platformCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mapper.writeValueAsString(platformCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(PLATFORM_NOT_FOUND + 1, errorDto.message());
@@ -442,10 +356,7 @@ class PlatformsE2ETest {
     void testDeletePlatform() throws Exception {
         PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, platformRepository.count());
     }
@@ -456,10 +367,7 @@ class PlatformsE2ETest {
     void testDeletePlatformWithoutAuthorization() throws Exception {
         PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        deleteRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isForbidden(), mockMvc);
 
         assertEquals(1, platformRepository.count());
     }
@@ -469,10 +377,7 @@ class PlatformsE2ETest {
     void testDeletePlatformWithoutAuthentication() throws Exception {
         PlatformPublicDto platformPublicDto = createPlatform("PlayStation");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + platformPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(ADMIN_API_PATH + "/" + platformPublicDto.id(), status().isUnauthorized(), mockMvc);
 
         assertEquals(1, platformRepository.count());
     }
@@ -481,11 +386,7 @@ class PlatformsE2ETest {
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test delete platform not found and expect 404")
     void testDeletePlatformNotFound() throws Exception {
-        String response = mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(PLATFORM_NOT_FOUND + 1, errorDto.message());

@@ -18,7 +18,6 @@ import org.somuga.testUtils.LikeGameDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,10 +31,11 @@ import java.util.Date;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.somuga.testUtils.Utils.deleteRequest;
+import static org.somuga.testUtils.Utils.postRequest;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -96,6 +96,7 @@ public class LikeE2ETest {
                 .mediaCreatorId(USER_ID)
                 .imageUrl("https://example.com")
                 .price(0.0)
+                .averageRating(0.0)
                 .build();
         return gameRepository.save(game);
     }
@@ -124,12 +125,7 @@ public class LikeE2ETest {
     void testCreateGameLike() throws Exception {
         LikeCreateDto likeDto = new LikeCreateDto(game.getId());
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(likeDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(likeDto), mockMvc);
 
         LikeGameDto like = mapper.readValue(response, LikeGameDto.class);
 
@@ -148,12 +144,7 @@ public class LikeE2ETest {
         LikeCreateDto likeDto = new LikeCreateDto(999999999L);
 
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(likeDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(likeDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -167,12 +158,7 @@ public class LikeE2ETest {
         LikeCreateDto likeDto = new LikeCreateDto(game.getId());
         createLike(user, game);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(likeDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(likeDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -184,11 +170,7 @@ public class LikeE2ETest {
     void testCreateLikeUnauthorized() throws Exception {
         LikeCreateDto likeDto = new LikeCreateDto(game.getId());
 
-        mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(likeDto)))
-                .andExpect(status().isUnauthorized());
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(likeDto), mockMvc);
     }
 
     @Test
@@ -284,9 +266,7 @@ public class LikeE2ETest {
     void testDeleteLike() throws Exception {
         LikePublicDto like = createLike(user, game);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + like.id())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + like.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, likeTestRepository.count());
     }
@@ -296,9 +276,7 @@ public class LikeE2ETest {
     void testDeleteLikeUnauthorized() throws Exception {
         LikePublicDto like = createLike(user, game);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + like.id())
-                        .with(csrf()))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(PRIVATE_API_PATH + "/" + like.id(), status().isUnauthorized(), mockMvc);
     }
 
 
@@ -307,10 +285,7 @@ public class LikeE2ETest {
     @DisplayName("Test delete like with no like and expect status 404 and message")
     void testDeleteLikeNotFound() throws Exception {
 
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/" + 9999999)
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/" + 9999999, status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 

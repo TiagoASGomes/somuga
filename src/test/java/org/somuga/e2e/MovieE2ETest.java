@@ -16,7 +16,6 @@ import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,10 +29,11 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -46,7 +46,6 @@ class MovieE2ETest {
     private final String USER_ID = "google-auth2|1234567890";
     private final String PRIVATE_API_PATH = "/api/v1/movie/private";
     private final String PUBLIC_API_PATH = "/api/v1/movie/public";
-    private final String ADMIN_API_PATH = "/api/v1/movie/admin";
     private final List<MovieCrew> crew = new ArrayList<>();
     private final String TITLE = "Title";
     private final Date RELEASE_DATE = new Date();
@@ -106,12 +105,7 @@ class MovieE2ETest {
     public MoviePublicDto createMovie(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         return mapper.readValue(response, MoviePublicDto.class);
     }
@@ -119,12 +113,7 @@ class MovieE2ETest {
     public ErrorDto createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         return mapper.readValue(response, ErrorDto.class);
     }
@@ -185,11 +174,9 @@ class MovieE2ETest {
     @Test
     @DisplayName("Test create a movie unauthorized and expect status 401")
     void testCreateMovieUnauthorized() throws Exception {
-        mockMvc.perform(post(PRIVATE_API_PATH)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(new MovieCreateDto(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL)))
-        ).andExpect(status().isUnauthorized());
+        MovieCreateDto movieCreateDto = new MovieCreateDto(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
+
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         assertEquals(0, movieRepository.count());
     }
@@ -287,7 +274,7 @@ class MovieE2ETest {
 
         ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertEquals(ID_GREATER_THAN_0, errorDto.message());
+        assertEquals(INVALID_ID, errorDto.message());
         assertEquals(0, movieRepository.count());
     }
 
@@ -299,7 +286,7 @@ class MovieE2ETest {
 
         ErrorDto errorDto = createMovieBadRequest(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        assertTrue(errorDto.message().contains(ID_GREATER_THAN_0));
+        assertTrue(errorDto.message().contains(INVALID_ID));
         assertEquals(0, movieRepository.count());
     }
 
@@ -380,13 +367,9 @@ class MovieE2ETest {
     @DisplayName("Test create a movie crew id not found and expect status 404")
     void testCreateMovieCrewIdNotFound() throws Exception {
         List<MovieRoleCreateDto> movieRoleCreateDtos = List.of(new MovieRoleCreateDto(100L, "ACTOR", "Character1"));
+        MovieCreateDto movieCreateDto = new MovieCreateDto(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new MovieCreateDto(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, movieRoleCreateDtos, MEDIA_URL, IMAGE_URL))))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -402,10 +385,7 @@ class MovieE2ETest {
         createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -419,10 +399,7 @@ class MovieE2ETest {
         createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=1")
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -437,10 +414,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?title=" + TITLE)
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE, status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -455,10 +429,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?title=" + TITLE.toLowerCase())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE.toLowerCase(), status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -473,10 +444,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?title=" + TITLE + "&page=0&size=1")
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE + "&page=0&size=1", status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -491,10 +459,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId(), status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -509,10 +474,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId() + "&page=0&size=1")
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId() + "&page=0&size=1", status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -528,10 +490,7 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, crewDtos, MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&title=" + TITLE)
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&title=" + TITLE, status().isOk(), mockMvc);
 
         List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
 
@@ -545,10 +504,7 @@ class MovieE2ETest {
     void testGetMovieById() throws Exception {
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + moviePublicDto.id(), status().isOk(), mockMvc);
 
         MovieLikePublicDto movieDto = mapper.readValue(response, MovieLikePublicDto.class);
 
@@ -564,10 +520,9 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test get movie by id not found and expect status 404")
     void testGetMovieByIdNotFound() throws Exception {
-        ErrorDto errorDto = mapper.readValue(mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString(), ErrorDto.class);
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
+
+        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertTrue(errorDto.message().contains(MOVIE_NOT_FOUND));
     }
@@ -580,10 +535,7 @@ class MovieE2ETest {
         createUser(USER_ID);
         createLike(moviePublicDto.id(), USER_ID);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + moviePublicDto.id(), status().isOk(), mockMvc);
 
         MovieLikePublicDto movieDto = mapper.readValue(response, MovieLikePublicDto.class);
 
@@ -598,10 +550,7 @@ class MovieE2ETest {
         createUser("AnotherUser");
         createLike(moviePublicDto.id(), "AnotherUser");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + moviePublicDto.id(), status().isOk(), mockMvc);
 
         MovieLikePublicDto movieDto = mapper.readValue(response, MovieLikePublicDto.class);
 
@@ -624,12 +573,7 @@ class MovieE2ETest {
 
         MovieCreateDto movieCreateDto = new MovieCreateDto(newTitle, newReleaseDate, newDescription, newDuration, crew.subList(2, 4), newMediaUrl, newImageUrl);
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/" + moviePublicDto.id(), status().isOk(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         MoviePublicDto updatedMovie = mapper.readValue(response, MoviePublicDto.class);
         Movie movieEntity = movieRepository.findById(updatedMovie.id()).orElse(null);
@@ -664,13 +608,7 @@ class MovieE2ETest {
         MovieCreateDto movieCreateDto = new MovieCreateDto("a".repeat(256), RELEASE_DATE, DESCRIPTION, DURATION, crew, MEDIA_URL, IMAGE_URL);
 
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)
-                        ))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/" + moviePublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         Movie movieEntity = movieRepository.findById(moviePublicDto.id()).orElse(null);
@@ -693,19 +631,14 @@ class MovieE2ETest {
                 .mediaUrl(MEDIA_URL)
                 .imageUrl(IMAGE_URL)
                 .mediaCreatorId("AnotherUser")
+                .averageRating(0.0)
                 .build();
         movieRepository.save(movie);
 
         MovieCreateDto movieCreateDto = new MovieCreateDto("NewTitle", RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH + "/" + movie.getId())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)
-                        ))
-                .andExpect(status().isForbidden())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH + "/" + movie.getId(), status().isForbidden(), mapper.writeValueAsString(movieCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         Movie movieEntity = movieRepository.findById(movie.getId()).orElse(null);
@@ -721,12 +654,7 @@ class MovieE2ETest {
     void testUpdateMovieUnauthenticated() throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto("NewTitle", RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        mockMvc.perform(put(PRIVATE_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(movieCreateDto)
-                        ))
-                .andExpect(status().isUnauthorized());
+        putRequest(PRIVATE_API_PATH + "/1", status().isUnauthorized(), mapper.writeValueAsString(movieCreateDto), mockMvc);
     }
 
     @Test
@@ -735,9 +663,7 @@ class MovieE2ETest {
     void testDeleteMovie() throws Exception {
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + moviePublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, movieRepository.count());
         assertEquals(crew.size(), movieCrewRepository.count());
@@ -755,13 +681,11 @@ class MovieE2ETest {
                 .mediaUrl(MEDIA_URL)
                 .imageUrl(IMAGE_URL)
                 .mediaCreatorId("AnotherUser")
+                .averageRating(0.0)
                 .build();
         movieRepository.save(movie);
 
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/" + movie.getId())
-                        .with(csrf()))
-                .andExpect(status().isForbidden())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/" + movie.getId(), status().isForbidden(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         assertEquals(1, movieRepository.count());
@@ -781,10 +705,7 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete movie not found and expect status 404")
     void testDeleteMovieNotFound() throws Exception {
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/1")
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -797,9 +718,7 @@ class MovieE2ETest {
     void testDeleteMovieAsAdmin() throws Exception {
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + moviePublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, movieRepository.count());
         assertEquals(crew.size(), movieCrewRepository.count());
@@ -809,10 +728,7 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test delete movie not found as admin and expect status 404")
     void testDeleteMovieNotFoundAsAdmin() throws Exception {
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH + "/1")
-                        .with(csrf()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -831,28 +747,14 @@ class MovieE2ETest {
                 .mediaUrl(MEDIA_URL)
                 .imageUrl(IMAGE_URL)
                 .mediaCreatorId("AnotherUser")
+                .averageRating(0.0)
                 .build();
         movieRepository.save(movie);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + movie.getId())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + movie.getId(), status().isNoContent(), mockMvc);
 
         assertEquals(0, movieRepository.count());
         assertEquals(crew.size(), movieCrewRepository.count());
-    }
-
-    @Test
-    @WithMockUser(username = USER_ID)
-    @DisplayName("Test delete movie unauthorized and expect status 403")
-    void testDeleteMovieUnauthorized() throws Exception {
-        MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
-
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isForbidden());
-
-        assertEquals(1, movieRepository.count());
     }
 
     @Test
@@ -863,9 +765,7 @@ class MovieE2ETest {
         createUser(USER_ID);
         createLike(moviePublicDto.id(), USER_ID);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH + "/" + moviePublicDto.id())
-                        .with(csrf()))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH + "/" + moviePublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, movieRepository.count());
         assertEquals(0, likeRepository.count());

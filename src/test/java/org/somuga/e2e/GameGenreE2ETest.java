@@ -14,7 +14,6 @@ import org.somuga.repository.GameGenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,10 +25,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -75,12 +73,7 @@ class GameGenreE2ETest {
     void createGameGenre() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         GameGenrePublicDto gameGenrePublicDto = mapper.readValue(response, GameGenrePublicDto.class);
 
@@ -98,11 +91,7 @@ class GameGenreE2ETest {
     void createGameGenreWithoutAuthorization() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action");
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isForbidden());
+        postRequest(ADMIN_API_PATH, status().isForbidden(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         assertEquals(0, gameGenreRepository.count());
     }
@@ -112,11 +101,7 @@ class GameGenreE2ETest {
     void createGameGenreWithoutAuthentication() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action");
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isUnauthorized());
+        postRequest(ADMIN_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         assertEquals(0, gameGenreRepository.count());
     }
@@ -129,12 +114,7 @@ class GameGenreE2ETest {
 
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -148,12 +128,7 @@ class GameGenreE2ETest {
     void createGameGenreWithEmptyGenreName() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -167,12 +142,7 @@ class GameGenreE2ETest {
     void createGameGenreWithInvalidGenreName() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action!");
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -186,12 +156,7 @@ class GameGenreE2ETest {
     void createGameGenreWithLongGenreName() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("ABCDEF".repeat(10));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -205,10 +170,7 @@ class GameGenreE2ETest {
         createGameGenre("Action");
         createGameGenre("Action2");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
@@ -222,10 +184,7 @@ class GameGenreE2ETest {
         createGameGenre("Action2");
         createGameGenre("Adventure");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Action")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=Action", status().isOk(), mockMvc);
 
         List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
@@ -239,10 +198,7 @@ class GameGenreE2ETest {
         createGameGenre("Action2");
         createGameGenre("Adventure");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=action")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=action", status().isOk(), mockMvc);
 
         List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
@@ -255,10 +211,7 @@ class GameGenreE2ETest {
         createGameGenre("Action");
         createGameGenre("Adventure");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Shooter")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=Shooter", status().isOk(), mockMvc);
 
         List<GameGenrePublicDto> gameGenrePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GameGenrePublicDto.class));
 
@@ -270,10 +223,7 @@ class GameGenreE2ETest {
     void getGameGenreById() throws Exception {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + gameGenrePublicDto.id())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + gameGenrePublicDto.id(), status().isOk(), mockMvc);
 
         GameGenrePublicDto gameGenrePublicDtoResponse = mapper.readValue(response, GameGenrePublicDto.class);
 
@@ -283,10 +233,7 @@ class GameGenreE2ETest {
     @Test
     @DisplayName("Test get a game genre by id that does not exist and expect 404")
     void getGameGenreByIdThatDoesNotExist() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -300,12 +247,7 @@ class GameGenreE2ETest {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Adventure");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isOk(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         GameGenrePublicDto gameGenrePublicDtoResponse = mapper.readValue(response, GameGenrePublicDto.class);
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
@@ -323,11 +265,7 @@ class GameGenreE2ETest {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Adventure");
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isForbidden());
+        putRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isForbidden(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
     }
 
     @Test
@@ -336,11 +274,7 @@ class GameGenreE2ETest {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Adventure");
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isUnauthorized());
+        putRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isUnauthorized(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
     }
 
     @Test
@@ -351,12 +285,7 @@ class GameGenreE2ETest {
         createGameGenre("Adventure");
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Adventure");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
@@ -373,12 +302,7 @@ class GameGenreE2ETest {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action!");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         GameGenre gameGenre = gameGenreRepository.findById(gameGenrePublicDto.id()).orElse(null);
@@ -394,12 +318,7 @@ class GameGenreE2ETest {
     void updateGameGenreNotFound() throws Exception {
         GameGenreCreateDto gameGenreCreateDto = new GameGenreCreateDto("Action");
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(gameGenreCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mapper.writeValueAsString(gameGenreCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -412,10 +331,7 @@ class GameGenreE2ETest {
     void deleteGameGenre() throws Exception {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, gameGenreRepository.count());
     }
@@ -426,10 +342,7 @@ class GameGenreE2ETest {
     void deleteGameGenreWithoutAuthorization() throws Exception {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        deleteRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isForbidden(), mockMvc);
 
         assertEquals(1, gameGenreRepository.count());
     }
@@ -439,10 +352,7 @@ class GameGenreE2ETest {
     void deleteGameGenreWithoutAuthentication() throws Exception {
         GameGenrePublicDto gameGenrePublicDto = createGameGenre("Action");
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + gameGenrePublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(ADMIN_API_PATH + "/" + gameGenrePublicDto.id(), status().isUnauthorized(), mockMvc);
 
         assertEquals(1, gameGenreRepository.count());
     }
@@ -451,11 +361,7 @@ class GameGenreE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test delete a game genre not found and expect a 404 status code")
     void deleteGameGenreNotFound() throws Exception {
-        String response = mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 

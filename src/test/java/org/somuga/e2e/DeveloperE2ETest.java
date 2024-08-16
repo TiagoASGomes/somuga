@@ -14,7 +14,6 @@ import org.somuga.repository.DeveloperRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,10 +25,9 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -79,12 +77,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperAuthorized() throws Exception {
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
 
@@ -104,11 +97,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperUnauthorized() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isForbidden());
+        postRequest(ADMIN_API_PATH, status().isForbidden(), mapper.writeValueAsString(developer), mockMvc);
 
         assertEquals(0, developerRepository.count());
     }
@@ -118,11 +107,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperUnauthenticated() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isUnauthorized());
+        postRequest(ADMIN_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(developer), mockMvc);
 
         assertEquals(0, developerRepository.count());
     }
@@ -133,12 +118,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperInvalidDeveloperName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -152,12 +132,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperEmptyDeveloperName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -171,12 +146,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperExceedingDeveloperName() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("ABCDEF".repeat(50), List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -190,12 +160,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperNoSocials() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of());
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developer), mockMvc);
 
         DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
 
@@ -215,12 +180,7 @@ class DeveloperE2ETest {
     void testCreateDeveloperNullSocials() throws Exception {
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", null);
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developer), mockMvc);
 
         DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
 
@@ -242,12 +202,7 @@ class DeveloperE2ETest {
 
         DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(post(ADMIN_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developer)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -261,10 +216,7 @@ class DeveloperE2ETest {
         createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
@@ -278,10 +230,7 @@ class DeveloperE2ETest {
         createDeveloper("Developerr", List.of("twitter.com/developer", "github.com/developer"));
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=Developer")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=Developer", status().isOk(), mockMvc);
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
@@ -296,10 +245,7 @@ class DeveloperE2ETest {
 
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=developer")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=developer", status().isOk(), mockMvc);
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
@@ -312,10 +258,7 @@ class DeveloperE2ETest {
         createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=NonExistent")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=NonExistent", status().isOk(), mockMvc);
 
         List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
 
@@ -327,10 +270,7 @@ class DeveloperE2ETest {
     void testGetDeveloperById() throws Exception {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/" + developerPublicDto.id())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/" + developerPublicDto.id(), status().isOk(), mockMvc);
 
         DeveloperPublicDto developer = mapper.readValue(response, DeveloperPublicDto.class);
 
@@ -340,10 +280,7 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get developer by id not found and expect 404")
     void testGetDeveloperByIdNotFound() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -357,12 +294,7 @@ class DeveloperE2ETest {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isOk(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         DeveloperPublicDto developerDto = mapper.readValue(response, DeveloperPublicDto.class);
 
@@ -381,11 +313,7 @@ class DeveloperE2ETest {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isForbidden());
+        putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isForbidden(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         Developer developer = developerRepository.findById(developerPublicDto.id()).orElse(null);
         assertNotNull(developer);
@@ -398,11 +326,7 @@ class DeveloperE2ETest {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(put(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isUnauthorized());
+        putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isUnauthorized(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         Developer developer = developerRepository.findById(developerPublicDto.id()).orElse(null);
         assertNotNull(developer);
@@ -416,12 +340,7 @@ class DeveloperE2ETest {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -429,7 +348,7 @@ class DeveloperE2ETest {
         assertNotNull(developer);
         assertNotEquals(developerCreateDto.developerName(), developer.getDeveloperName());
 
-        assertEquals(developerPublicDto.id(), developerRepository.findById(developerPublicDto.id()).get().getId());
+        assertEquals(developerPublicDto.id(), developer.getId());
         assertTrue(errorDto.message().contains(INVALID_DEVELOPER_NAME));
     }
 
@@ -441,12 +360,7 @@ class DeveloperE2ETest {
         createDeveloper("Developer2", List.of("twitter.com/developer", "github.com/developer"));
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer2", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -463,12 +377,7 @@ class DeveloperE2ETest {
     void testUpdateDeveloperNotFound() throws Exception {
         DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        String response = mockMvc.perform(put(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(developerCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -482,10 +391,7 @@ class DeveloperE2ETest {
     void testDeleteDeveloper() throws Exception {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isNoContent(), mockMvc);
 
         assertEquals(0, developerRepository.count());
     }
@@ -496,10 +402,7 @@ class DeveloperE2ETest {
     void testDeleteDeveloperUnauthorized() throws Exception {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isForbidden(), mockMvc);
 
         assertEquals(1, developerRepository.count());
     }
@@ -509,10 +412,7 @@ class DeveloperE2ETest {
     void testDeleteDeveloperUnauthenticated() throws Exception {
         DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/" + developerPublicDto.id())
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isUnauthorized(), mockMvc);
 
         assertEquals(1, developerRepository.count());
     }
@@ -521,10 +421,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test delete developer not found and expect 404")
     void testDeleteDeveloperNotFound() throws Exception {
-        mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        deleteRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mockMvc);
     }
 
 }
