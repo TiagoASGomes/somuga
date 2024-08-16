@@ -39,7 +39,7 @@ public class SomugaExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(SomugaExceptionHandler.class);
 
     private static String getErrorMessage(Exception e, HttpServletRequest request) {
-        return "Path: " + request.getRequestURI() + " Method: " + request.getMethod() + " Error: " + e.getMessage();
+        return "Path: " + request.getRequestURI() + "| Method: " + request.getMethod() + "| Error: " + e.getClass() + "| Message: " + e.getMessage();
     }
 
     @ExceptionHandler({UserNotFoundException.class,

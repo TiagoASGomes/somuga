@@ -12,7 +12,6 @@ import org.somuga.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -25,10 +24,9 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -85,12 +83,7 @@ public class UserE2ETest {
     void testCreate() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
 
@@ -106,11 +99,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test create user without authentication and expect status 401")
     void testCreateWithoutAuthentication() throws Exception {
-        mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(new UserCreateDto(USERNAME))))
-                .andExpect(status().isUnauthorized());
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(new UserCreateDto(USERNAME)), mockMvc);
 
         assertEquals(0, userRepository.count());
     }
@@ -122,12 +111,7 @@ public class UserE2ETest {
         createUser("different", USERNAME, true);
         UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -142,12 +126,7 @@ public class UserE2ETest {
         createUser(USER_ID, USERNAME, true);
         UserCreateDto userCreateDto = new UserCreateDto("different");
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -161,12 +140,7 @@ public class UserE2ETest {
     void testCreateWithInvalidUsername() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto("ABCDEF".repeat(5));
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -180,12 +154,7 @@ public class UserE2ETest {
     void testCreateWithEmptyUsername() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto("");
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -199,12 +168,7 @@ public class UserE2ETest {
     void testCreateWithNullUsername() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto(null);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -219,12 +183,7 @@ public class UserE2ETest {
         createUser(USER_ID, USERNAME, false);
         UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -239,12 +198,7 @@ public class UserE2ETest {
         createUser("different", USERNAME, true);
         UserCreateDto userCreateDto = new UserCreateDto(USERNAME.toLowerCase());
 
-        String response = mockMvc.perform(post(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -257,11 +211,7 @@ public class UserE2ETest {
     void testGetAll() throws Exception {
         UserPublicDto userPublicDto = createUser("1", "User1", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
 
@@ -276,11 +226,7 @@ public class UserE2ETest {
         createUser("1", "User1", false);
         createUser("2", "User2", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
         List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
 
@@ -296,11 +242,7 @@ public class UserE2ETest {
         createUser("2", "User2", true);
         createUser("3", "Different", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=User")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=User", status().isOk(), mockMvc);
 
         List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
 
@@ -314,11 +256,7 @@ public class UserE2ETest {
         createUser("2", "User2", true);
         createUser("3", "Different", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=user")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=user", status().isOk(), mockMvc);
 
         List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
 
@@ -331,11 +269,7 @@ public class UserE2ETest {
         createUser("1", "User1", false);
         createUser("2", "User2", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "?name=User")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "?name=User", status().isOk(), mockMvc);
 
         List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
 
@@ -349,11 +283,7 @@ public class UserE2ETest {
     void testGetById() throws Exception {
         UserPublicDto userPublicDto = createUser("1", "User1", true);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isOk(), mockMvc);
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
 
@@ -366,11 +296,7 @@ public class UserE2ETest {
     void testGetByIdWithInactiveUser() throws Exception {
         createUser("1", "User1", false);
 
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -380,11 +306,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test get by id with non existing user and expect status 404")
     void testGetByIdWithNonExistingUser() throws Exception {
-        String response = mockMvc.perform(get(PUBLIC_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -398,12 +320,7 @@ public class UserE2ETest {
         createUser(USER_ID, "User1", true);
         UserCreateDto userCreateDto = new UserCreateDto("User2");
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH, status().isOk(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         UserPublicDto user = mapper.readValue(response, UserPublicDto.class);
 
@@ -422,11 +339,7 @@ public class UserE2ETest {
         createUser(USER_ID, "User1", true);
         UserCreateDto userCreateDto = new UserCreateDto("User2");
 
-        mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isUnauthorized());
+        putRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         User dbUser = userRepository.findById(USER_ID).orElse(null);
         assertNotNull(dbUser);
@@ -441,12 +354,7 @@ public class UserE2ETest {
         createUser("different", "User2", true);
         UserCreateDto userCreateDto = new UserCreateDto("User2");
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
@@ -466,12 +374,7 @@ public class UserE2ETest {
         createUser("different", "User2", true);
         UserCreateDto userCreateDto = new UserCreateDto("user2");
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
@@ -490,12 +393,7 @@ public class UserE2ETest {
         createUser(USER_ID, "User1", false);
         UserCreateDto userCreateDto = new UserCreateDto("User2");
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
         User dbUser = userRepository.findById(USER_ID).orElse(null);
@@ -513,12 +411,7 @@ public class UserE2ETest {
     void testUpdateUsernameWithoutUserCreation() throws Exception {
         UserCreateDto userCreateDto = new UserCreateDto("User2");
 
-        String response = mockMvc.perform(put(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(userCreateDto)))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = putRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -532,10 +425,7 @@ public class UserE2ETest {
     void testDelete() throws Exception {
         createUser(USER_ID, "User1", true);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(PRIVATE_API_PATH, status().isNoContent(), mockMvc);
 
         assertEquals(1, userRepository.count());
         User dbUser = userRepository.findById(USER_ID).orElse(null);
@@ -548,10 +438,7 @@ public class UserE2ETest {
     void testDeleteWithoutAuthentication() throws Exception {
         createUser(USER_ID, "User1", true);
 
-        mockMvc.perform(delete(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(PRIVATE_API_PATH, status().isUnauthorized(), mockMvc);
 
         assertEquals(1, userRepository.count());
         User dbUser = userRepository.findById(USER_ID).orElse(null);
@@ -565,11 +452,7 @@ public class UserE2ETest {
     void testDeleteWithInactiveUser() throws Exception {
         createUser(USER_ID, "User1", false);
 
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH, status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -581,11 +464,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete user with non existing user and expect status 404")
     void testDeleteWithNonExistingUser() throws Exception {
-        String response = mockMvc.perform(delete(PRIVATE_API_PATH)
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(PRIVATE_API_PATH, status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -599,10 +478,7 @@ public class UserE2ETest {
     void testAdminDelete() throws Exception {
         createUser("1", "User1", true);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(ADMIN_API_PATH + "/1", status().isNoContent(), mockMvc);
 
         assertEquals(0, userRepository.count());
     }
@@ -613,10 +489,7 @@ public class UserE2ETest {
     void testAdminDeleteWithInactiveUser() throws Exception {
         createUser("1", "User1", false);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        deleteRequest(ADMIN_API_PATH + "/1", status().isNoContent(), mockMvc);
 
         assertEquals(0, userRepository.count());
     }
@@ -625,11 +498,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test admin delete user with non existing user and expect status 404")
     void testAdminDeleteWithNonExistingUser() throws Exception {
-        String response = mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
+        String response = deleteRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
@@ -642,10 +511,7 @@ public class UserE2ETest {
     void testAdminDeleteWithoutAuthorization() throws Exception {
         createUser("1", "User1", true);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden());
+        deleteRequest(ADMIN_API_PATH + "/1", status().isForbidden(), mockMvc);
 
         assertEquals(1, userRepository.count());
     }
@@ -655,10 +521,7 @@ public class UserE2ETest {
     void testAdminDeleteWithoutAuthentication() throws Exception {
         createUser("1", "User1", true);
 
-        mockMvc.perform(delete(ADMIN_API_PATH + "/1")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        deleteRequest(ADMIN_API_PATH + "/1", status().isUnauthorized(), mockMvc);
 
         assertEquals(1, userRepository.count());
     }
