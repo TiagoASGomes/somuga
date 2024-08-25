@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.somuga.service.interfaces.IMovieCrewService;
@@ -19,8 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/movie/crew")
@@ -39,12 +37,12 @@ public class MovieCrewController {
     @ApiResponse(responseCode = "200",
             description = "List of movie crew",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = MovieCrewPublicDto.class)))})
+                    schema = @Schema(implementation = MovieCrewListDto.class))})
     @Parameter(name = "name", description = "Name of the crew member", example = "John Doe")
     @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Number of elements per page", example = "10")
     @GetMapping("/public")
-    public ResponseEntity<List<MovieCrewPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {
+    public ResponseEntity<MovieCrewListDto> getAll(Pageable page, @RequestParam(required = false) String name) {
         return new ResponseEntity<>(movieCrewService.getAll(page, name), HttpStatus.OK);
     }
 

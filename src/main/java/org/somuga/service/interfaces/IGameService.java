@@ -2,6 +2,7 @@ package org.somuga.service.interfaces;
 
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Game;
 import org.somuga.entity.Media;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public interface IGameService {
 
-    List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer);
+    GameListDto getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer);
 
     GameLikePublicDto getById(Long id) throws GameNotFoundException;
 

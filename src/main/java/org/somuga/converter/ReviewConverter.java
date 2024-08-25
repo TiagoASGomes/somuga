@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewListDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.Media;
@@ -27,11 +28,12 @@ public class ReviewConverter {
                 review.getWrittenReview());
     }
 
-    public static List<ReviewPublicDto> fromEntityListToPublicDtoList(List<Review> reviews) {
-        if (reviews == null) return new ArrayList<>();
-        return reviews.stream()
+    public static ReviewListDto fromEntityListToPublicDtoList(List<Review> reviews, Long count) {
+        if (reviews == null) return new ReviewListDto(new ArrayList<>(), 0L);
+        List<ReviewPublicDto> reviewPublicDtos = reviews.stream()
                 .map(ReviewConverter::fromEntityToPublicDto)
                 .toList();
+        return new ReviewListDto(reviewPublicDtos, count);
     }
 
     public static Review fromCreateDtoToEntity(ReviewCreateDto reviewDto, User user, Media media) {

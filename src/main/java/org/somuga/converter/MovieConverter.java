@@ -4,6 +4,7 @@ import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrewRole;
@@ -36,11 +37,12 @@ public class MovieConverter {
         );
     }
 
-    public static List<MoviePublicDto> fromEntityListToPublicDtoList(List<Movie> movies) {
-        if (movies == null) return new ArrayList<>();
-        return movies.stream()
+    public static MovieListDto fromEntityListToPublicDtoList(List<Movie> movies, Long count) {
+        if (movies == null) return new MovieListDto(new ArrayList<>(), 0L);
+        List<MoviePublicDto> moviePublicDtos = movies.stream()
                 .map(MovieConverter::fromEntityToPublicDto)
                 .toList();
+        return new MovieListDto(moviePublicDtos, count);
     }
 
     public static Movie fromCreateDtoToEntity(MovieCreateDto movieDto) {
@@ -86,6 +88,7 @@ public class MovieConverter {
         return new CrewRolePublicDto(
                 movieCrewRole.getMovieRole().name(),
                 movieCrewRole.getCharacterName(),
+                movieCrewRole.getMovie().getId(),
                 movieCrewRole.getMovie().getTitle(),
                 movieCrewRole.getMovie().getReleaseDate()
         );

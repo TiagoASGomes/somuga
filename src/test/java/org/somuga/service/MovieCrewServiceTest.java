@@ -6,6 +6,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
@@ -74,18 +75,21 @@ class MovieCrewServiceTest {
         List<MovieCrew> movieCrewList = List.of(movieCrew);
         Page<MovieCrew> page = new PageImpl<>(movieCrewList);
         List<MovieCrewPublicDto> movieCrewPublicDtoList = List.of(movieCrewPublicDto);
+        MovieCrewListDto movieCrewListDto = new MovieCrewListDto(movieCrewPublicDtoList, 1L);
         Pageable pageable = PageRequest.of(0, 10);
 
-        movieCrewConverter.when(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList))
-                .thenReturn(movieCrewPublicDtoList);
+        movieCrewConverter.when(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList, 1L))
+                .thenReturn(movieCrewListDto);
         Mockito.when(movieCrewRepository.findAll(pageable)).thenReturn(page);
+        Mockito.when(movieCrewRepository.count()).thenReturn(1L);
 
-        List<MovieCrewPublicDto> result = movieCrewService.getAll(pageable, null);
+        MovieCrewListDto result = movieCrewService.getAll(pageable, null);
 
-        assertEquals(movieCrewPublicDtoList, result);
+        assertEquals(movieCrewPublicDtoList, result.movieCrews());
 
-        movieCrewConverter.verify(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList));
+        movieCrewConverter.verify(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList, 1L));
         Mockito.verify(movieCrewRepository).findAll(pageable);
+        Mockito.verify(movieCrewRepository).count();
         Mockito.verifyNoMoreInteractions(movieCrewRepository);
         movieCrewConverter.verifyNoMoreInteractions();
     }
@@ -96,18 +100,21 @@ class MovieCrewServiceTest {
         List<MovieCrew> movieCrewList = List.of(movieCrew);
         Page<MovieCrew> page = new PageImpl<>(movieCrewList);
         List<MovieCrewPublicDto> movieCrewPublicDtoList = List.of(movieCrewPublicDto);
+        MovieCrewListDto movieCrewListDto = new MovieCrewListDto(movieCrewPublicDtoList, 1L);
         Pageable pageable = PageRequest.of(0, 10);
 
-        movieCrewConverter.when(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList))
-                .thenReturn(movieCrewPublicDtoList);
+        movieCrewConverter.when(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList, 1L))
+                .thenReturn(movieCrewListDto);
         Mockito.when(movieCrewRepository.findByFullNameContainingIgnoreCase("John", pageable)).thenReturn(page);
+        Mockito.when(movieCrewRepository.countByFullNameContainingIgnoreCase("John")).thenReturn(1L);
 
-        List<MovieCrewPublicDto> result = movieCrewService.getAll(pageable, "John");
+        MovieCrewListDto result = movieCrewService.getAll(pageable, "John");
 
-        assertEquals(movieCrewPublicDtoList, result);
+        assertEquals(movieCrewPublicDtoList, result.movieCrews());
 
-        movieCrewConverter.verify(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList));
+        movieCrewConverter.verify(() -> MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList, 1L));
         Mockito.verify(movieCrewRepository).findByFullNameContainingIgnoreCase("John", pageable);
+        Mockito.verify(movieCrewRepository).countByFullNameContainingIgnoreCase("John");
         Mockito.verifyNoMoreInteractions(movieCrewRepository);
         movieCrewConverter.verifyNoMoreInteractions();
     }

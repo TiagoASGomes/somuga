@@ -1,15 +1,14 @@
 package org.somuga.service.interfaces;
 
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface IMovieCrewService {
-    List<MovieCrewPublicDto> getAll(Pageable page, String name);
+    MovieCrewListDto getAll(Pageable page, String name);
 
     MovieCrewPublicDto getById(Long id) throws MovieCrewNotFoundException;
 

@@ -3,6 +3,7 @@ package org.somuga.service;
 import org.somuga.converter.GameConverter;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.entity.Game;
@@ -20,6 +21,7 @@ import org.somuga.repository.GameRepository;
 import org.somuga.service.interfaces.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -47,14 +49,16 @@ public class GameService implements IGameService {
 
 
     @Override
-    public List<GamePublicDto> getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer) {
+    public GameListDto getAll(Pageable page, String title, List<String> platform, List<String> genre, String developer) {
         List<SearchCriteria> params = createSearchCriteria(title, platform, genre, developer);
         GameSpecificationBuilder builder = new GameSpecificationBuilder();
         params.forEach(builder::with);
+        Specification<Game> spec = builder.build();
 
-        List<Game> games = gameRepo.findAll(builder.build(), page).toList();
+        List<Game> games = gameRepo.findAll(spec, page).toList();
+        Long gameCount = gameRepo.count(spec);
 
-        return GameConverter.fromEntityListToPublicDtoList(games);
+        return GameConverter.fromEntityListToPublicDtoList(games, gameCount);
     }
 
     private List<SearchCriteria> createSearchCriteria(String name, List<String> platform, List<String> genre, String developer) {

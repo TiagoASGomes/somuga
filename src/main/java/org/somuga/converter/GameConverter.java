@@ -2,6 +2,7 @@ package org.somuga.converter;
 
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.Game;
 
@@ -32,11 +33,12 @@ public class GameConverter {
         );
     }
 
-    public static List<GamePublicDto> fromEntityListToPublicDtoList(List<Game> games) {
-        if (games == null) return new ArrayList<>();
-        return games.stream()
+    public static GameListDto fromEntityListToPublicDtoList(List<Game> games, Long gameCount) {
+        if (games == null) return new GameListDto(new ArrayList<>(), 0L);
+        List<GamePublicDto> gameDtos = games.stream()
                 .map(GameConverter::fromEntityToPublicDto)
                 .toList();
+        return new GameListDto(gameDtos, gameCount);
     }
 
     public static Game fromCreateDtoToEntity(GameCreateDto gameDto) {

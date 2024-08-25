@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,16 +10,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/game/developer")
@@ -39,11 +38,11 @@ public class DeveloperController {
     @ApiResponse(responseCode = "200",
             description = "List of developers",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = DeveloperPublicDto.class)))})
+                    schema = @Schema(implementation = DeveloperListDto.class))})
     @Parameter(name = "name", description = "The developer name to search for", example = "Mojang")
     @GetMapping("/public")
-    public ResponseEntity<List<DeveloperPublicDto>> getAll(@RequestParam(required = false) String name) {
-        return new ResponseEntity<>(developerService.getAll(name), HttpStatus.OK);
+    public ResponseEntity<DeveloperListDto> getAll(@RequestParam(required = false) String name, Pageable page) {
+        return new ResponseEntity<>(developerService.getAll(name, page), HttpStatus.OK);
     }
 
     @Operation(summary = "Get a developer by id",

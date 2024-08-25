@@ -4,6 +4,7 @@ import org.somuga.converter.MovieConverter;
 import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrew;
@@ -20,6 +21,7 @@ import org.somuga.repository.MovieRepository;
 import org.somuga.service.interfaces.IMovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,14 +44,16 @@ public class MovieService implements IMovieService {
     }
 
     @Override
-    public List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewIds) {
+    public MovieListDto getAll(Pageable page, String title, List<Long> crewIds) {
         List<SearchCriteria> params = createSearchCriteria(title, crewIds);
         MovieSpecificationBuilder builder = new MovieSpecificationBuilder();
         params.forEach(builder::with);
+        Specification<Movie> spec = builder.build();
 
-        List<Movie> movies = movieRepo.findAll(builder.build(), page).toList();
+        List<Movie> movies = movieRepo.findAll(spec, page).toList();
+        Long count = movieRepo.count(spec);
 
-        return MovieConverter.fromEntityListToPublicDtoList(movies);
+        return MovieConverter.fromEntityListToPublicDtoList(movies, count);
     }
 
     private List<SearchCriteria> createSearchCriteria(String title, List<Long> crewIds) {

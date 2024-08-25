@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.converter.UserConverter;
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 import org.somuga.exception.user.DuplicateFieldException;
@@ -15,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import static org.somuga.util.message.Messages.*;
@@ -32,11 +32,13 @@ public class UserService implements IUserService {
 
 
     @Override
-    public List<UserPublicDto> getAll(Pageable page, String name) {
+    public UserListDto getAll(Pageable page, String name) {
         if (name != null) {
-            return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByUserNameContainingIgnoreCaseAndActiveTrue(name, page).toList());
+            Long count = userRepo.countByUserNameContainingIgnoreCaseAndActiveTrue(name);
+            return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByUserNameContainingIgnoreCaseAndActiveTrue(name, page).toList(), count);
         }
-        return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByActiveTrue(page).toList());
+        Long count = userRepo.countByActiveTrue();
+        return UserConverter.fromEntityListToPublicDtoList(userRepo.findAllByActiveTrue(page).toList(), count);
     }
 
     @Override

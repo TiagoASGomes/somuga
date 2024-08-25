@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +11,7 @@ import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -29,7 +29,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/game")
-@Tag(name = "Game", description = "The game API")
+@Tag(name = "Game", description = "Game API")
 public class GameController {
 
     private final IGameService gameService;
@@ -45,7 +45,7 @@ public class GameController {
     @ApiResponse(responseCode = "200",
             description = "List of games",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = GamePublicDto.class)))})
+                    schema = @Schema(implementation = GameListDto.class))})
     @Parameter(name = "title", description = "The game title to search for", example = "Minecraft")
     @Parameter(name = "platform", description = "The platform to search for", example = "PC")
     @Parameter(name = "genre", description = "The genre to search for", example = "Sandbox")
@@ -53,11 +53,11 @@ public class GameController {
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
     @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @GetMapping("/public")
-    public ResponseEntity<List<GamePublicDto>> getAll(Pageable page,
-                                                      @RequestParam(required = false) String title,
-                                                      @RequestParam(required = false) List<String> platform,
-                                                      @RequestParam(required = false) List<String> genre,
-                                                      @RequestParam(required = false) String developer) {
+    public ResponseEntity<GameListDto> getAll(Pageable page,
+                                              @RequestParam(required = false) String title,
+                                              @RequestParam(required = false) List<String> platform,
+                                              @RequestParam(required = false) List<String> genre,
+                                              @RequestParam(required = false) String developer) {
         return new ResponseEntity<>(gameService.getAll(page, title, platform, genre, developer), HttpStatus.OK);
     }
 

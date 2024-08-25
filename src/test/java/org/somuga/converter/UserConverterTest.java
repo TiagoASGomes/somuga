@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,34 +61,34 @@ class UserConverterTest {
                         .build()
         );
 
-        List<UserPublicDto> userDtos = UserConverter.fromEntityListToPublicDtoList(users);
+        UserListDto userDtos = UserConverter.fromEntityListToPublicDtoList(users, 2L);
 
-        assertEquals(users.size(), userDtos.size());
+        assertEquals(users.size(), userDtos.users().size());
         for (int i = 0; i < users.size(); i++) {
-            assertEquals(users.get(i).getId(), userDtos.get(i).id());
-            assertEquals(users.get(i).getUserName(), userDtos.get(i).userName());
-            assertEquals(users.get(i).getJoinDate(), userDtos.get(i).joinedDate());
+            assertEquals(users.get(i).getId(), userDtos.users().get(i).id());
+            assertEquals(users.get(i).getUserName(), userDtos.users().get(i).userName());
+            assertEquals(users.get(i).getJoinDate(), userDtos.users().get(i).joinedDate());
         }
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is empty")
     void fromEntityListToPublicDtoListEmpty() {
-        List<UserPublicDto> userDtos = UserConverter.fromEntityListToPublicDtoList(List.of());
-        assertEquals(0, userDtos.size());
+        UserListDto userDtos = UserConverter.fromEntityListToPublicDtoList(List.of(), 0L);
+        assertEquals(0, userDtos.users().size());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is null")
     void fromEntityListToPublicDtoListNull() {
-        List<UserPublicDto> userDtos = UserConverter.fromEntityListToPublicDtoList(null);
-        assertEquals(0, userDtos.size());
+        UserListDto userDtos = UserConverter.fromEntityListToPublicDtoList(null, 0L);
+        assertEquals(0, userDtos.users().size());
     }
 
     @Test
     @DisplayName("Test fromCreateDtoToEntity should convert create dto to entity")
     void fromCreateDtoToEntity() {
-        UserCreateDto userCreateDto = new UserCreateDto("user");
+        UserCreateDto userCreateDto = new UserCreateDto("user", "email@example.com");
 
         User user = UserConverter.fromCreateDtoToEntity(userCreateDto, "1");
 

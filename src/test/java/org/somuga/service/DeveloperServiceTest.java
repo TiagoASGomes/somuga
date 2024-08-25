@@ -6,6 +6,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.converter.DeveloperConverter;
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -14,6 +15,10 @@ import org.somuga.repository.DeveloperRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -61,19 +66,24 @@ class DeveloperServiceTest {
     @DisplayName("Test getAll method without name parameter and expect to return a list of DeveloperPublicDto")
     void getAll() {
         List<Developer> developers = List.of(developer);
+        Page<Developer> developerPage = new PageImpl<>(developers);
+        DeveloperListDto developerListDto = new DeveloperListDto(List.of(responseDto), 1L);
+        Pageable page = PageRequest.of(0, 10);
 
-        Mockito.when(developerRepository.findAll()).thenReturn(developers);
-        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers)).thenReturn(List.of(responseDto));
+        Mockito.when(developerRepository.findAll(Mockito.any(Pageable.class))).thenReturn(developerPage);
+        Mockito.when(developerRepository.count()).thenReturn(1L);
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers, 1L)).thenReturn(developerListDto);
 
-        List<DeveloperPublicDto> developerPublicDtos = developerService.getAll(null);
+        DeveloperListDto developerPublicDtos = developerService.getAll(null, page);
 
         assertNotNull(developerPublicDtos);
-        assertEquals(developer.getId(), developerPublicDtos.get(0).id());
-        assertEquals(developer.getDeveloperName(), developerPublicDtos.get(0).developerName());
-        assertEquals(developer.getSocials(), developerPublicDtos.get(0).socials());
+        assertEquals(developer.getId(), developerPublicDtos.developers().get(0).id());
+        assertEquals(developer.getDeveloperName(), developerPublicDtos.developers().get(0).developerName());
+        assertEquals(developer.getSocials(), developerPublicDtos.developers().get(0).socials());
 
-        Mockito.verify(developerRepository).findAll();
-        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers));
+        Mockito.verify(developerRepository).findAll(Mockito.any(Pageable.class));
+        Mockito.verify(developerRepository).count();
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers, 1L));
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
     }
@@ -82,19 +92,24 @@ class DeveloperServiceTest {
     @DisplayName("Test getAll method with name parameter and expect to return a list of DeveloperPublicDto")
     void getAllWithName() {
         List<Developer> developers = List.of(developer);
+        Page<Developer> developerPage = new PageImpl<>(developers);
+        DeveloperListDto developerListDto = new DeveloperListDto(List.of(responseDto), 1L);
+        Pageable page = PageRequest.of(0, 10);
 
-        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(developers);
-        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers)).thenReturn(List.of(responseDto));
+        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer", page)).thenReturn(developerPage);
+        Mockito.when(developerRepository.countByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(1L);
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers, 1L)).thenReturn(developerListDto);
 
-        List<DeveloperPublicDto> developerPublicDtos = developerService.getAll("Test Developer");
+        DeveloperListDto developerPublicDtos = developerService.getAll("Test Developer", page);
 
         assertNotNull(developerPublicDtos);
-        assertEquals(developer.getId(), developerPublicDtos.get(0).id());
-        assertEquals(developer.getDeveloperName(), developerPublicDtos.get(0).developerName());
-        assertEquals(developer.getSocials(), developerPublicDtos.get(0).socials());
+        assertEquals(developer.getId(), developerPublicDtos.developers().get(0).id());
+        assertEquals(developer.getDeveloperName(), developerPublicDtos.developers().get(0).developerName());
+        assertEquals(developer.getSocials(), developerPublicDtos.developers().get(0).socials());
 
-        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer");
-        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers));
+        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer", page);
+        Mockito.verify(developerRepository).countByDeveloperNameContainingIgnoreCase("Test Developer");
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(developers, 1L));
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
     }
@@ -102,16 +117,21 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test getAll method with name parameter, no matching developer found and expect to return an empty list")
     void getAllWithNameNoMatch() {
-        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(List.of());
-        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of())).thenReturn(List.of());
+        DeveloperListDto developerListDto = new DeveloperListDto(List.of(), 0L);
+        Pageable page = PageRequest.of(0, 10);
 
-        List<DeveloperPublicDto> developerPublicDtos = developerService.getAll("Test Developer");
+        Mockito.when(developerRepository.findAllByDeveloperNameContainingIgnoreCase("Test Developer", page)).thenReturn(new PageImpl<>(List.of()));
+        Mockito.when(developerRepository.countByDeveloperNameContainingIgnoreCase("Test Developer")).thenReturn(0L);
+        developerConverterMockedStatic.when(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of(), 0L)).thenReturn(developerListDto);
+
+        DeveloperListDto developerPublicDtos = developerService.getAll("Test Developer", page);
 
         assertNotNull(developerPublicDtos);
-        assertEquals(0, developerPublicDtos.size());
+        assertEquals(0, developerPublicDtos.developers().size());
 
-        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer");
-        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of()));
+        Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer", page);
+        Mockito.verify(developerRepository).countByDeveloperNameContainingIgnoreCase("Test Developer");
+        developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityListToPublicDtoList(List.of(), 0L));
         Mockito.verifyNoMoreInteractions(developerRepository);
         developerConverterMockedStatic.verifyNoMoreInteractions();
     }

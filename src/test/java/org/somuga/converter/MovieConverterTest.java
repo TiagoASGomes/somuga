@@ -7,6 +7,7 @@ import org.somuga.dto.crew_role.CrewRolePublicDto;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.entity.MovieCrew;
@@ -81,23 +82,23 @@ class MovieConverterTest {
     void fromEntityListToPublicDtoList() {
         List<Movie> movies = List.of(getMovie(), getMovie());
 
-        List<MoviePublicDto> moviePublicDtos = MovieConverter.fromEntityListToPublicDtoList(movies);
+        MovieListDto moviePublicDtos = MovieConverter.fromEntityListToPublicDtoList(movies, 2L);
 
-        assertEquals(movies.size(), moviePublicDtos.size());
-        assertEquals(movies.get(0).getId(), moviePublicDtos.get(0).id());
-        assertEquals(movies.get(1).getId(), moviePublicDtos.get(1).id());
+        assertEquals(movies.size(), moviePublicDtos.movies().size());
+        assertEquals(movies.get(0).getId(), moviePublicDtos.movies().get(0).id());
+        assertEquals(movies.get(1).getId(), moviePublicDtos.movies().get(1).id());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is null")
     void fromEntityListToPublicDtoListNull() {
-        assertEquals(0, MovieConverter.fromEntityListToPublicDtoList(null).size());
+        assertEquals(0, MovieConverter.fromEntityListToPublicDtoList(null, 0L).movies().size());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is empty")
     void fromEntityListToPublicDtoListEmpty() {
-        assertEquals(0, MovieConverter.fromEntityListToPublicDtoList(List.of()).size());
+        assertEquals(0, MovieConverter.fromEntityListToPublicDtoList(List.of(), 0L).movies().size());
     }
 
     @Test

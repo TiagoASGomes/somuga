@@ -1,6 +1,7 @@
 package org.somuga.converter;
 
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 
@@ -22,11 +23,12 @@ public class MovieCrewConverter {
         );
     }
 
-    public static List<MovieCrewPublicDto> fromEntityListToPublicDtoList(List<MovieCrew> movieCrew) {
-        if (movieCrew == null) return new ArrayList<>();
-        return movieCrew.stream()
+    public static MovieCrewListDto fromEntityListToPublicDtoList(List<MovieCrew> movieCrew, Long count) {
+        if (movieCrew == null) return new MovieCrewListDto(new ArrayList<>(), 0L);
+        List<MovieCrewPublicDto> movieCrewPublicDtos = movieCrew.stream()
                 .map(MovieCrewConverter::fromEntityToPublicDto)
                 .toList();
+        return new MovieCrewListDto(movieCrewPublicDtos, count);
     }
 
     public static MovieCrew fromCreateDtoToEntity(MovieCrewCreateDto movieCrewCreateDto) {

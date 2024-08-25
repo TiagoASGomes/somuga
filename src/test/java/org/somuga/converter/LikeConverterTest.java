@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.dto.game.GamePublicDto;
+import org.somuga.dto.like.LikeListDto;
 import org.somuga.dto.like.LikePublicDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.Game;
@@ -34,7 +35,7 @@ class LikeConverterTest {
             .userName("user")
             .build();
 
-    private final UserPublicDto userPublicDto = new UserPublicDto("1", "user", new Date());
+    private final UserPublicDto userPublicDto = new UserPublicDto("1", "user", new Date(), "email@example.com");
 
     private final Game media = Game.builder()
             .id(1L)
@@ -115,13 +116,13 @@ class LikeConverterTest {
         userConverterMockedStatic.when(() -> UserConverter.fromEntityToPublicDto(user)).thenReturn(userPublicDto);
         mediaConverterMockedStatic.when(() -> MediaConverter.fromMediaEntityToPublicDto(media)).thenReturn(mediaPublicDto);
 
-        List<LikePublicDto> likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(likes);
+        LikeListDto likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(likes, 2L);
 
-        assertEquals(likes.size(), likePublicDtos.size());
+        assertEquals(likes.size(), likePublicDtos.likes().size());
         for (int i = 0; i < likes.size(); i++) {
-            assertEquals(likes.get(i).getId(), likePublicDtos.get(i).id());
-            assertEquals(likes.get(i).getUser().getId(), likePublicDtos.get(i).user().id());
-            assertEquals(likes.get(i).getMedia().getId(), likePublicDtos.get(i).media().id());
+            assertEquals(likes.get(i).getId(), likePublicDtos.likes().get(i).id());
+            assertEquals(likes.get(i).getUser().getId(), likePublicDtos.likes().get(i).user().id());
+            assertEquals(likes.get(i).getMedia().getId(), likePublicDtos.likes().get(i).media().id());
         }
         userConverterMockedStatic.verify(() -> UserConverter.fromEntityToPublicDto(user), Mockito.times(likes.size()));
         mediaConverterMockedStatic.verify(() -> MediaConverter.fromMediaEntityToPublicDto(media), Mockito.times(likes.size()));
@@ -133,9 +134,9 @@ class LikeConverterTest {
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when input list is empty")
     void fromEntityListToPublidDtoListShouldReturnEmptyList() {
-        List<LikePublicDto> likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(List.of());
+        LikeListDto likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(List.of(), 0L);
 
-        assertEquals(0, likePublicDtos.size());
+        assertEquals(0, likePublicDtos.likes().size());
         userConverterMockedStatic.verifyNoInteractions();
         mediaConverterMockedStatic.verifyNoInteractions();
     }
@@ -143,9 +144,9 @@ class LikeConverterTest {
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when input list is null")
     void fromEntityListToPublidDtoListShouldReturnEmptyListWhenInputListIsNull() {
-        List<LikePublicDto> likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(null);
+        LikeListDto likePublicDtos = LikeConverter.fromEntityListToPublicDtoList(null, 0L);
 
-        assertEquals(0, likePublicDtos.size());
+        assertEquals(0, likePublicDtos.likes().size());
         userConverterMockedStatic.verifyNoInteractions();
         mediaConverterMockedStatic.verifyNoInteractions();
     }

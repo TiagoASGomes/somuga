@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewListDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
 import org.somuga.exception.InvalidPermissionException;
@@ -24,8 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/review")
@@ -61,15 +59,15 @@ public class ReviewController {
     @ApiResponse(responseCode = "200",
             description = "List of reviews",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = ReviewPublicDto.class)))})
+                    schema = @Schema(implementation = ReviewListDto.class))})
     @Parameter(name = "userId", description = "User ID", example = "auth0|1234567890")
     @Parameter(name = "mediaId", description = "Media ID", example = "1")
     @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Number of elements per page", example = "10")
     @GetMapping("/public")
-    public ResponseEntity<List<ReviewPublicDto>> getAll(Pageable page,
-                                                        @RequestParam(required = false) String userId,
-                                                        @RequestParam(required = false) Long mediaId) {
+    public ResponseEntity<ReviewListDto> getAll(Pageable page,
+                                                @RequestParam(required = false) String userId,
+                                                @RequestParam(required = false) Long mediaId) {
         return new ResponseEntity<>(reviewService.getAll(userId, mediaId, page), HttpStatus.OK);
     }
 

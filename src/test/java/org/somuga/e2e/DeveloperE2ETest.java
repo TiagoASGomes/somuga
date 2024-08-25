@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.DeveloperConverter;
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.repository.DeveloperRepository;
@@ -218,9 +219,10 @@ class DeveloperE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
+        DeveloperListDto developers = mapper.readValue(response, DeveloperListDto.class);
 
-        assertEquals(2, developers.size());
+        assertEquals(2, developers.developers().size());
+        assertEquals(2, developers.count());
     }
 
     @Test
@@ -232,9 +234,10 @@ class DeveloperE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?name=Developer", status().isOk(), mockMvc);
 
-        List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
+        DeveloperListDto developers = mapper.readValue(response, DeveloperListDto.class);
 
-        assertEquals(2, developers.size());
+        assertEquals(2, developers.count());
+        assertEquals(2, developers.developers().size());
     }
 
     @Test
@@ -247,9 +250,10 @@ class DeveloperE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?name=developer", status().isOk(), mockMvc);
 
-        List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
+        DeveloperListDto developers = mapper.readValue(response, DeveloperListDto.class);
 
-        assertEquals(2, developers.size());
+        assertEquals(2, developers.count());
+        assertEquals(2, developers.developers().size());
     }
 
     @Test
@@ -260,9 +264,10 @@ class DeveloperE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?name=NonExistent", status().isOk(), mockMvc);
 
-        List<DeveloperPublicDto> developers = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, DeveloperPublicDto.class));
+        DeveloperListDto developers = mapper.readValue(response, DeveloperListDto.class);
 
-        assertEquals(0, developers.size());
+        assertEquals(0, developers.count());
+        assertEquals(0, developers.developers().size());
     }
 
     @Test

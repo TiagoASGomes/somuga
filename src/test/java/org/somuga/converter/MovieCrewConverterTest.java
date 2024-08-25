@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,30 +60,30 @@ class MovieCrewConverterTest {
                         .build()
         );
 
-        List<MovieCrewPublicDto> movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList);
+        MovieCrewListDto movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewList, 2L);
 
-        assertEquals(movieCrewList.size(), movieCrewPublicDtoList.size());
+        assertEquals(movieCrewList.size(), movieCrewPublicDtoList.movieCrews().size());
         for (int i = 0; i < movieCrewList.size(); i++) {
-            assertEquals(movieCrewList.get(i).getId(), movieCrewPublicDtoList.get(i).id());
-            assertEquals(movieCrewList.get(i).getFullName(), movieCrewPublicDtoList.get(i).name());
-            assertEquals(movieCrewList.get(i).getBirthDate(), movieCrewPublicDtoList.get(i).birthDate());
+            assertEquals(movieCrewList.get(i).getId(), movieCrewPublicDtoList.movieCrews().get(i).id());
+            assertEquals(movieCrewList.get(i).getFullName(), movieCrewPublicDtoList.movieCrews().get(i).name());
+            assertEquals(movieCrewList.get(i).getBirthDate(), movieCrewPublicDtoList.movieCrews().get(i).birthDate());
         }
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is empty")
     void fromEntityListToPublicDtoListEmpty() {
-        List<MovieCrewPublicDto> movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(List.of());
+        MovieCrewListDto movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(List.of(), 0L);
 
-        assertEquals(0, movieCrewPublicDtoList.size());
+        assertEquals(0, movieCrewPublicDtoList.movieCrews().size());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when entity list is null")
     void fromEntityListToPublicDtoListNull() {
-        List<MovieCrewPublicDto> movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(null);
+        MovieCrewListDto movieCrewPublicDtoList = MovieCrewConverter.fromEntityListToPublicDtoList(null, 0L);
 
-        assertEquals(0, movieCrewPublicDtoList.size());
+        assertEquals(0, movieCrewPublicDtoList.movieCrews().size());
     }
 
     @Test

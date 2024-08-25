@@ -28,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +83,7 @@ public class LikeE2ETest {
                 .webAppContextSetup(controller)
                 .apply(springSecurity())
                 .build();
-        user = createUser(USER_ID, "UserName");
+        user = createUser(USER_ID, "UserName", "email@example.com");
         game = createGame();
     }
 
@@ -101,11 +102,12 @@ public class LikeE2ETest {
         return gameRepository.save(game);
     }
 
-    public User createUser(String id, String userName) {
+    public User createUser(String id, String userName, String email) {
         User user = User.builder()
                 .id(id)
                 .userName(userName)
                 .joinDate(new Date())
+                .email(email)
                 .active(true)
                 .build();
         return userTestRepository.save(user);
@@ -176,43 +178,47 @@ public class LikeE2ETest {
     @Test
     @DisplayName("Test get all likes from user and expect status 200 and list with likes")
     void testGetAllLikesFromUser() throws Exception {
-        User user = createUser(USER_ID + 1, "UserName2");
+        User user = createUser(USER_ID + 1, "UserName2", "email2@example.com");
         for (int i = 0; i < 3; i++) {
             createLike(user, createGame());
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + user.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$.likes", hasSize(3)))
+                .andExpect(jsonPath("$.count", equalTo(3)));
     }
 
     @Test
     @DisplayName("Test get all likes from user paged and expect status 200 and list with likes and pages")
     void testGetAllLikesFromUserPaged() throws Exception {
-        User user = createUser(USER_ID + 1, "UserName2");
+        User user = createUser(USER_ID + 1, "UserName2", "email2@example.com");
         for (int i = 0; i < 5; i++) {
             createLike(user, createGame());
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&userId=" + user.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(4)));
+                .andExpect(jsonPath("$.likes", hasSize(4)))
+                .andExpect(jsonPath("$.count", equalTo(5)));
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&userId=" + user.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$.likes", hasSize(1)))
+                .andExpect(jsonPath("$.count", equalTo(5)));
     }
 
     @Test
     @DisplayName("Test get all likes from user with no likes and expect status 200 and empty list")
     void testGetAllLikesFromUserWithNoUserLikes() throws Exception {
-        User user = createUser(USER_ID + 1, "UserName2");
+        User user = createUser(USER_ID + 1, "UserName2", "email2@example.com");
         for (int i = 0; i < 3; i++) {
             createLike(user, createGame());
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?userId=" + 999999))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.likes", hasSize(0)))
+                .andExpect(jsonPath("$.count", equalTo(0)));
 
     }
 
@@ -222,12 +228,13 @@ public class LikeE2ETest {
     void testGetAllLikesFromMedia() throws Exception {
         Media media = createGame();
         for (int i = 0; i < 6; i++) {
-            createLike(createUser(USER_ID + i, "Name" + i), media);
+            createLike(createUser(USER_ID + i, "Name" + i, "email" + i + "@example.com"), media);
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + media.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(6)));
+                .andExpect(jsonPath("$.likes", hasSize(6)))
+                .andExpect(jsonPath("$.count", equalTo(6)));
     }
 
     @Test
@@ -235,15 +242,17 @@ public class LikeE2ETest {
     void testGetAllLikesFromMediaPaged() throws Exception {
         Media media = createGame();
         for (int i = 0; i < 6; i++) {
-            createLike(createUser(USER_ID + i, "Name" + i), media);
+            createLike(createUser(USER_ID + i, "Name" + i, "email" + i + "@example.com"), media);
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=0&size=4&mediaId=" + media.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(4)));
+                .andExpect(jsonPath("$.likes", hasSize(4)))
+                .andExpect(jsonPath("$.count", equalTo(6)));
         mockMvc.perform(get(PUBLIC_API_PATH + "?page=1&size=4&mediaId=" + media.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$.likes", hasSize(2)))
+                .andExpect(jsonPath("$.count", equalTo(6)));
 
     }
 
@@ -252,12 +261,13 @@ public class LikeE2ETest {
     void testGetAllLikesFromMediaWithNoMediaLikes() throws Exception {
         Media media = createGame();
         for (int i = 0; i < 6; i++) {
-            createLike(createUser(USER_ID + i, "Name" + i), media);
+            createLike(createUser(USER_ID + i, "Name" + i, "email" + i + "@example.com"), media);
         }
 
         mockMvc.perform(get(PUBLIC_API_PATH + "?mediaId=" + 999999))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(jsonPath("$.likes", hasSize(0)))
+                .andExpect(jsonPath("$.count", equalTo(0)));
     }
 
     @Test

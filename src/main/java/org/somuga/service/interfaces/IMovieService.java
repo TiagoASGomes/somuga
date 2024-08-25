@@ -2,6 +2,7 @@ package org.somuga.service.interfaces;
 
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.Movie;
 import org.somuga.exception.InvalidPermissionException;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public interface IMovieService {
 
-    List<MoviePublicDto> getAll(Pageable page, String title, List<Long> crewIds);
+    MovieListDto getAll(Pageable page, String title, List<Long> crewIds);
 
     MovieLikePublicDto getById(Long id) throws MovieNotFoundException;
 

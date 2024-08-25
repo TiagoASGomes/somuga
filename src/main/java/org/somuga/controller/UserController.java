@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
@@ -20,8 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @RestController
@@ -41,12 +39,12 @@ public class UserController {
     @ApiResponse(responseCode = "200",
             description = "Users found",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = UserPublicDto.class)))})
+                    schema = @Schema(implementation = UserListDto.class))})
     @Parameter(name = "name", description = "User name", example = "John")
     @Parameter(name = "page", description = "Page number", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "size", description = "Page size", example = "10")
     @GetMapping("/public")
-    public ResponseEntity<List<UserPublicDto>> getAll(Pageable page, @RequestParam(required = false) String name) {
+    public ResponseEntity<UserListDto> getAll(Pageable page, @RequestParam(required = false) String name) {
         return new ResponseEntity<>(userService.getAll(page, name), HttpStatus.OK);
     }
 
