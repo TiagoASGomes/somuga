@@ -1,9 +1,11 @@
 package org.somuga.converter;
 
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DeveloperConverter {
@@ -22,11 +24,12 @@ public class DeveloperConverter {
         );
     }
 
-    public static List<DeveloperPublicDto> fromEntityListToPublicDtoList(List<Developer> developers) {
-        if (developers == null) return null;
-        return developers.stream()
+    public static DeveloperListDto fromEntityListToPublicDtoList(List<Developer> developers, Long count) {
+        if (developers == null) return new DeveloperListDto(new ArrayList<>(0), 0L);
+        List<DeveloperPublicDto> developerDtos = developers.stream()
                 .map(DeveloperConverter::fromEntityToPublicDto)
                 .toList();
+        return new DeveloperListDto(developerDtos, count);
     }
 
     public static Developer fromCreateDtoToEntity(DeveloperCreateDto developerDto) {

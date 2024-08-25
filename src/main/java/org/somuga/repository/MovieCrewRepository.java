@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface MovieCrewRepository extends JpaRepository<MovieCrew, Long> {
 
     Page<MovieCrew> findByFullNameContainingIgnoreCase(String fullName, Pageable page);
+
+    Long countByFullNameContainingIgnoreCase(String fullName);
 }

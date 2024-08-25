@@ -47,6 +47,7 @@ public class Messages {
     public static final String INVALID_GENRES = "Genres cannot be empty";
     public static final String INVALID_DEVELOPER = "Developer cannot be empty";
     public static final String CHARACTER_NAME_REQUIRED = "Character name is required for actors";
+    public static final String INVALID_EMAIL = "Invalid email";
 
 
     private Messages() {

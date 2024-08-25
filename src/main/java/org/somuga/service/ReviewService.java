@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.converter.ReviewConverter;
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewListDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
 import org.somuga.entity.Media;
@@ -20,6 +21,7 @@ import org.somuga.service.interfaces.IReviewService;
 import org.somuga.service.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -51,12 +53,14 @@ public class ReviewService implements IReviewService {
     }
 
     @Override
-    public List<ReviewPublicDto> getAll(String userId, Long mediaId, Pageable page) {
+    public ReviewListDto getAll(String userId, Long mediaId, Pageable page) {
         List<SearchCriteria> params = createSearchCriteria(userId, mediaId);
         ReviewSpecificationBuilder builder = new ReviewSpecificationBuilder();
         params.forEach(builder::with);
-        List<Review> reviews = reviewRepo.findAll(builder.build(), page).toList();
-        return ReviewConverter.fromEntityListToPublicDtoList(reviews);
+        Specification<Review> spec = builder.build();
+        List<Review> reviews = reviewRepo.findAll(spec, page).toList();
+        Long count = reviewRepo.count(spec);
+        return ReviewConverter.fromEntityListToPublicDtoList(reviews, count);
     }
 
     private List<SearchCriteria> createSearchCriteria(String userId, Long mediaId) {

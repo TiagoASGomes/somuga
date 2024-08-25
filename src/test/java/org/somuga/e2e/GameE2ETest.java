@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.dto.game_genre.GameGenrePublicDto;
 import org.somuga.dto.platform.PlatformPublicDto;
@@ -137,6 +138,7 @@ class GameE2ETest {
         User user = User.builder()
                 .id(userId)
                 .userName("TestUser")
+                .email("email@example.com")
                 .build();
 
         userRepository.save(user);
@@ -448,9 +450,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(2, games.size());
+        assertEquals(2, games.games().size());
+        assertEquals(2, games.count());
     }
 
     @Test
@@ -462,9 +465,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(1, games.size());
+        assertEquals(2, games.count());
+        assertEquals(1, games.games().size());
     }
 
     @Test
@@ -477,9 +481,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?title=The Witcher", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(2, games.size());
+        assertEquals(2, games.count());
+        assertEquals(2, games.games().size());
     }
 
     @Test
@@ -492,9 +497,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?platform=PS4", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(2, games.size());
+        assertEquals(2, games.games().size());
+        assertEquals(2, games.count());
     }
 
     @Test
@@ -508,9 +514,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?platform=PC&platform=XBOX", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(1, games.size());
+        assertEquals(1, games.games().size());
+        assertEquals(1, games.count());
     }
 
 
@@ -524,9 +531,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?genre=RPG", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(2, games.size());
+        assertEquals(2, games.count());
+        assertEquals(2, games.games().size());
     }
 
     @Test
@@ -540,9 +548,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?genre=Adventure&genre=Action", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(1, games.size());
+        assertEquals(1, games.count());
+        assertEquals(1, games.games().size());
     }
 
     @Test
@@ -556,9 +565,10 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?developer=CD Projekt Red", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(2, games.size());
+        assertEquals(2, games.count());
+        assertEquals(2, games.games().size());
     }
 
     @Test
@@ -576,10 +586,11 @@ class GameE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?title=Game&developer=CD Projekt Red&platform=PC&genre=Action", status().isOk(), mockMvc);
 
-        List<GamePublicDto> games = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, GamePublicDto.class));
+        GameListDto games = mapper.readValue(response, GameListDto.class);
 
-        assertEquals(1, games.size());
-        assertEquals(game.id(), games.get(0).id());
+        assertEquals(1, games.count());
+        assertEquals(1, games.games().size());
+        assertEquals(game.id(), games.games().get(0).id());
     }
 
     @Test

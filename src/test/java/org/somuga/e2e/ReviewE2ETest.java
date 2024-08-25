@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.ReviewConverter;
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewListDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.review.ReviewUpdateDto;
 import org.somuga.entity.Game;
@@ -27,7 +28,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
@@ -78,7 +78,7 @@ public class ReviewE2ETest {
                 .webAppContextSetup(controller)
                 .apply(springSecurity())
                 .build();
-        user = createUser(USER_ID, "UserName");
+        user = createUser(USER_ID, "UserName", "email@example.com");
         game = createGame();
     }
 
@@ -97,10 +97,11 @@ public class ReviewE2ETest {
         return gameRepository.save(game);
     }
 
-    public User createUser(String id, String userName) {
+    public User createUser(String id, String userName, String email) {
         User user = User.builder()
                 .id(id)
                 .userName(userName)
+                .email(email)
                 .joinDate(new Date())
                 .active(true)
                 .build();
@@ -315,8 +316,8 @@ public class ReviewE2ETest {
         ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
         ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
 
-        createUser("user2", "user2");
-        createUser("user3", "user3");
+        createUser("user2", "user2", "email2@example.com");
+        createUser("user3", "user3", "email3@example.com");
 
         postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
         postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));
@@ -343,35 +344,37 @@ public class ReviewE2ETest {
     @Test
     @DisplayName("Test get all reviews and expect status 200")
     void testGetAllReviews() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         createReview(user, game, 5, "My Review");
         createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(reviewRepository.count(), reviews.size());
+        assertEquals(reviewRepository.count(), reviews.reviews().size());
+        assertEquals(reviewRepository.count(), reviews.count());
     }
 
     @Test
     @DisplayName("Test get all reviews paged and expect status 200")
     void testGetAllReviewsPaged() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         createReview(user, game, 5, "My Review");
         createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(1, reviews.size());
+        assertEquals(1, reviews.reviews().size());
+        assertEquals(reviewRepository.count(), reviews.count());
     }
 
     @Test
     @DisplayName("Test get all reviews with userId and expect status 200")
     void testGetAllReviewsWithUserId() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         long game2Id = createGame().getId();
         createReview(user, game, 5, "My Review");
         createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
@@ -379,16 +382,17 @@ public class ReviewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID, status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(2, reviews.size());
-        assertTrue(reviews.stream().allMatch(review -> review.user().id().equals(USER_ID)));
+        assertEquals(2, reviews.reviews().size());
+        assertEquals(2, reviews.count());
+        assertTrue(reviews.reviews().stream().allMatch(review -> review.user().id().equals(USER_ID)));
     }
 
     @Test
     @DisplayName("Test get all reviews with userId paged and expect status 200")
     void testGetAllReviewsWithUserIdPaged() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         long game2Id = createGame().getId();
         createReview(user, game, 5, "My Review");
         createReview(user, gameRepository.findById(game2Id).get(), 5, "My Review");
@@ -396,16 +400,17 @@ public class ReviewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID + "&page=0&size=1", status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(1, reviews.size());
-        assertTrue(reviews.stream().allMatch(review -> review.user().id().equals(USER_ID)));
+        assertEquals(1, reviews.reviews().size());
+        assertEquals(2, reviews.count());
+        assertTrue(reviews.reviews().stream().allMatch(review -> review.user().id().equals(USER_ID)));
     }
 
     @Test
     @DisplayName("Test get all reviews with mediaId and expect status 200")
     void testGetAllReviewsWithMediaId() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         long game2Id = createGame().getId();
         createReview(user, game, 5, "My Review");
         createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
@@ -413,16 +418,17 @@ public class ReviewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?mediaId=" + game.getId(), status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(2, reviews.size());
-        assertTrue(reviews.stream().allMatch(review -> review.mediaId().equals(game.getId())));
+        assertEquals(2, reviews.reviews().size());
+        assertEquals(2, reviews.count());
+        assertTrue(reviews.reviews().stream().allMatch(review -> review.mediaId().equals(game.getId())));
     }
 
     @Test
     @DisplayName("Test get all reviews with mediaId paged and expect status 200")
     void testGetAllReviewsWithMediaIdPaged() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         long game2Id = createGame().getId();
         createReview(user, game, 5, "My Review");
         createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
@@ -430,16 +436,17 @@ public class ReviewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?mediaId=" + game.getId() + "&page=0&size=1", status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(1, reviews.size());
-        assertTrue(reviews.stream().allMatch(review -> review.mediaId().equals(game.getId())));
+        assertEquals(1, reviews.reviews().size());
+        assertEquals(2, reviews.count());
+        assertTrue(reviews.reviews().stream().allMatch(review -> review.mediaId().equals(game.getId())));
     }
 
     @Test
     @DisplayName("Test get all reviews with userId and mediaId and expect status 200")
     void testGetAllReviewsWithUserIdAndMediaId() throws Exception {
-        String user2Id = createUser("user2", "user2").getId();
+        String user2Id = createUser("user2", "user2", "email2@example.com").getId();
         long game2Id = createGame().getId();
         createReview(user, game, 5, "My Review");
         createReview(userRepository.findById(user2Id).get(), game, 7, "My Review");
@@ -447,11 +454,12 @@ public class ReviewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?userId=" + USER_ID + "&mediaId=" + game.getId(), status().isOk(), mockMvc);
 
-        List<ReviewPublicDto> reviews = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, ReviewPublicDto.class));
+        ReviewListDto reviews = mapper.readValue(response, ReviewListDto.class);
 
-        assertEquals(1, reviews.size());
-        assertEquals(USER_ID, reviews.get(0).user().id());
-        assertEquals(game.getId(), reviews.get(0).mediaId());
+        assertEquals(1, reviews.reviews().size());
+        assertEquals(USER_ID, reviews.reviews().get(0).user().id());
+        assertEquals(game.getId(), reviews.reviews().get(0).mediaId());
+        assertEquals(1, reviews.count());
     }
 
     @Test
@@ -601,7 +609,7 @@ public class ReviewE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update review with user not matching and expect status 403")
     void testUpdateReviewUserNotMatching() throws Exception {
-        User user2 = createUser("user2", "user2");
+        User user2 = createUser("user2", "user2", "email2@example.com");
         long reviewId = createReview(user2, game, 5, "My Review").id();
         ReviewUpdateDto reviewDto = new ReviewUpdateDto(7, "My Updated Review");
 
@@ -636,8 +644,8 @@ public class ReviewE2ETest {
         ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
         ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
 
-        createUser("user2", "user2");
-        createUser("user3", "user3");
+        createUser("user2", "user2", "email2@example.com");
+        createUser("user3", "user3", "email3@example.com");
 
         String response = postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
         postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));
@@ -687,7 +695,7 @@ public class ReviewE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete review with user not matching and expect status 403")
     void testDeleteReviewUserNotMatching() throws Exception {
-        User user2 = createUser("user2", "user2");
+        User user2 = createUser("user2", "user2", "email2@example.com");
         long reviewId = createReview(user2, game, 5, "My Review").id();
 
         String response = deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isForbidden(), mockMvc);
@@ -702,7 +710,7 @@ public class ReviewE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test delete review from another user with admin and expect status 204")
     void testDeleteReviewAdmin() throws Exception {
-        User user2 = createUser("user2", "user2");
+        User user2 = createUser("user2", "user2", "email2@example.com");
         long reviewId = createReview(user2, game, 5, "My Review").id();
 
         deleteRequest(PRIVATE_API_PATH + "/" + reviewId, status().isNoContent(), mockMvc);
@@ -727,8 +735,8 @@ public class ReviewE2ETest {
         ReviewCreateDto reviewDto2 = new ReviewCreateDto(game.getId(), 1, "My Review");
         ReviewCreateDto reviewDto3 = new ReviewCreateDto(game.getId(), 2, "My Review");
 
-        createUser("user2", "user2");
-        createUser("user3", "user3");
+        createUser("user2", "user2", "email2@example.com");
+        createUser("user3", "user3", "email3@example.com");
 
         String response = postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto1), mockMvc, user(USER_ID));
         postRequestWithUser(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(reviewDto2), mockMvc, user("user2"));

@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,8 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
-import org.somuga.dto.game_genre.GameGenrePublicDto;
 import org.somuga.dto.like.LikeCreateDto;
+import org.somuga.dto.like.LikeListDto;
 import org.somuga.dto.like.LikePublicDto;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.like.AlreadyLikedException;
@@ -24,8 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/like")
@@ -44,15 +41,15 @@ public class LikeController {
     @ApiResponse(responseCode = "200",
             description = "List of likes",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = GameGenrePublicDto.class)))})
+                    schema = @Schema(implementation = LikeListDto.class))})
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
     @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @Parameter(name = "userId", description = "The user id", example = "auth0|1234567890")
     @Parameter(name = "mediaId", description = "The media id", example = "1")
     @GetMapping("/public")
-    public ResponseEntity<List<LikePublicDto>> getAll(Pageable page,
-                                                      @RequestParam(required = false) String userId,
-                                                      @RequestParam(required = false) Long mediaId) {
+    public ResponseEntity<LikeListDto> getAll(Pageable page,
+                                              @RequestParam(required = false) String userId,
+                                              @RequestParam(required = false) Long mediaId) {
         return new ResponseEntity<>(likeService.getAll(userId, mediaId, page), HttpStatus.OK);
     }
 

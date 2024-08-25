@@ -7,6 +7,7 @@ import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.entity.*;
 import org.somuga.repository.LikeRepository;
@@ -145,6 +146,7 @@ class MovieE2ETest {
         User user = User.builder()
                 .id(userId)
                 .userName("TestUser")
+                .email("email@example.com")
                 .build();
 
         userRepository.save(user);
@@ -387,9 +389,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(2, moviePublicDtos.size());
+        assertEquals(2, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -401,9 +404,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(1, moviePublicDtos.size());
+        assertEquals(1, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -416,9 +420,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE, status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(2, moviePublicDtos.size());
+        assertEquals(2, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -431,9 +436,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE.toLowerCase(), status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(2, moviePublicDtos.size());
+        assertEquals(2, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -446,9 +452,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?title=" + TITLE + "&page=0&size=1", status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(1, moviePublicDtos.size());
+        assertEquals(1, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -461,9 +468,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId(), status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(2, moviePublicDtos.size());
+        assertEquals(2, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -474,11 +482,12 @@ class MovieE2ETest {
         createMovie(TITLE + 2, RELEASE_DATE, DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
         createMovie("Different", RELEASE_DATE, DESCRIPTION, DURATION, List.of(new MovieRoleCreateDto(crew.get(1).getId(), "ACTOR", "Name")), MEDIA_URL, IMAGE_URL);
 
-        String response = getRequest(PUBLIC_API_PATH + "?crewId=" + crew.get(0).getId() + "&page=0&size=1", status().isOk(), mockMvc);
+        String response = getRequest(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&page=0&size=1", status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(1, moviePublicDtos.size());
+        assertEquals(1, moviePublicDtos.movies().size());
+        assertEquals(2, moviePublicDtos.count());
     }
 
     @Test
@@ -492,9 +501,10 @@ class MovieE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?crewIds=" + crew.get(0).getId() + "&title=" + TITLE, status().isOk(), mockMvc);
 
-        List<MoviePublicDto> moviePublicDtos = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MoviePublicDto.class));
+        MovieListDto moviePublicDtos = mapper.readValue(response, MovieListDto.class);
 
-        assertEquals(1, moviePublicDtos.size());
+        assertEquals(1, moviePublicDtos.movies().size());
+        assertEquals(1, moviePublicDtos.count());
     }
 
 

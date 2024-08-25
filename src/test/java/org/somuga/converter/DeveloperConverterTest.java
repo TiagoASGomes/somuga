@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,30 +60,30 @@ class DeveloperConverterTest {
                 .build();
 
         List<Developer> developers = List.of(developer1, developer2);
-        List<DeveloperPublicDto> developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(developers);
+        DeveloperListDto developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(developers, 2L);
 
-        assertEquals(developers.size(), developerPublicDtos.size());
-        assertEquals(developers.get(0).getId(), developerPublicDtos.get(0).id());
-        assertEquals(developers.get(0).getDeveloperName(), developerPublicDtos.get(0).developerName());
-        assertEquals(developers.get(0).getSocials(), developerPublicDtos.get(0).socials());
-        assertEquals(developers.get(1).getId(), developerPublicDtos.get(1).id());
-        assertEquals(developers.get(1).getDeveloperName(), developerPublicDtos.get(1).developerName());
-        assertEquals(developers.get(1).getSocials(), developerPublicDtos.get(1).socials());
+        assertEquals(developers.size(), developerPublicDtos.developers().size());
+        assertEquals(developers.get(0).getId(), developerPublicDtos.developers().get(0).id());
+        assertEquals(developers.get(0).getDeveloperName(), developerPublicDtos.developers().get(0).developerName());
+        assertEquals(developers.get(0).getSocials(), developerPublicDtos.developers().get(0).socials());
+        assertEquals(developers.get(1).getId(), developerPublicDtos.developers().get(1).id());
+        assertEquals(developers.get(1).getDeveloperName(), developerPublicDtos.developers().get(1).developerName());
+        assertEquals(developers.get(1).getSocials(), developerPublicDtos.developers().get(1).socials());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList method with empty list should return empty list")
     void fromEntityListToPublicDtoListWithEmptyList() {
         List<Developer> developers = List.of();
-        List<DeveloperPublicDto> developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(developers);
-        assertEquals(developers.size(), developerPublicDtos.size());
+        DeveloperListDto developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(developers, 0L);
+        assertEquals(developers.size(), developerPublicDtos.developers().size());
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList method with null list should return empty list")
     void fromEntityListToPublicDtoListWithNullList() {
-        List<DeveloperPublicDto> developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(null);
-        assertNull(developerPublicDtos);
+        DeveloperListDto developerPublicDtos = DeveloperConverter.fromEntityListToPublicDtoList(null, 0L);
+        assertEquals(0, developerPublicDtos.developers().size());
     }
 
     @Test

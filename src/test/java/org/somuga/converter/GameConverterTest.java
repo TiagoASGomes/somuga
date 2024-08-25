@@ -7,6 +7,7 @@ import org.mockito.Mockito;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.dto.game_genre.GameGenrePublicDto;
 import org.somuga.dto.platform.PlatformPublicDto;
@@ -198,9 +199,9 @@ class GameConverterTest {
         platformConverterMockedStatic.when(() -> PlatformConverter.fromEntityListToPublicDtoList(platforms))
                 .thenReturn(platformPublicDtos);
 
-        List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
+        GameListDto gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games, 2L);
 
-        assertEquals(games.size(), gamePublicDtos.size());
+        assertEquals(games.size(), gamePublicDtos.games().size());
 
         developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer), Mockito.times(games.size()));
         gameGenreConverterMockedStatic.verify(() -> GameGenreConverter.fromEntityListToPublicDtoList(genres), Mockito.times(games.size()));
@@ -215,9 +216,9 @@ class GameConverterTest {
     void fromEntityListToPublicDtoListReturnEmpty() {
         List<Game> games = List.of();
 
-        List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games);
+        GameListDto gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(games, 0L);
 
-        assertEquals(0, gamePublicDtos.size());
+        assertEquals(0, gamePublicDtos.games().size());
         developerConverterMockedStatic.verifyNoInteractions();
         gameGenreConverterMockedStatic.verifyNoInteractions();
         platformConverterMockedStatic.verifyNoInteractions();
@@ -226,9 +227,9 @@ class GameConverterTest {
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when list of entities is null")
     void fromEntityListToPublicDtoListReturnNull() {
-        List<GamePublicDto> gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(null);
+        GameListDto gamePublicDtos = GameConverter.fromEntityListToPublicDtoList(null, 0L);
 
-        assertEquals(0, gamePublicDtos.size());
+        assertEquals(0, gamePublicDtos.games().size());
         developerConverterMockedStatic.verifyNoInteractions();
         gameGenreConverterMockedStatic.verifyNoInteractions();
         platformConverterMockedStatic.verifyNoInteractions();

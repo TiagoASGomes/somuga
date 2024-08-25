@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 import org.somuga.repository.MovieCrewRepository;
@@ -21,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
@@ -169,9 +169,10 @@ class MovieCrewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<MovieCrewPublicDto> movieCrewResponse = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MovieCrewPublicDto.class));
+        MovieCrewListDto movieCrewResponse = mapper.readValue(response, MovieCrewListDto.class);
 
-        assertEquals(2, movieCrewResponse.size());
+        assertEquals(2, movieCrewResponse.movieCrews().size());
+        assertEquals(2, movieCrewResponse.count());
     }
 
     @Test
@@ -183,9 +184,10 @@ class MovieCrewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=2", status().isOk(), mockMvc);
 
-        List<MovieCrewPublicDto> movieCrewResponse = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MovieCrewPublicDto.class));
+        MovieCrewListDto movieCrewResponse = mapper.readValue(response, MovieCrewListDto.class);
 
-        assertEquals(2, movieCrewResponse.size());
+        assertEquals(3, movieCrewResponse.count());
+        assertEquals(2, movieCrewResponse.movieCrews().size());
     }
 
     @Test
@@ -197,9 +199,10 @@ class MovieCrewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?name=" + NAME, status().isOk(), mockMvc);
 
-        List<MovieCrewPublicDto> movieCrewResponse = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MovieCrewPublicDto.class));
+        MovieCrewListDto movieCrewResponse = mapper.readValue(response, MovieCrewListDto.class);
 
-        assertEquals(2, movieCrewResponse.size());
+        assertEquals(2, movieCrewResponse.movieCrews().size());
+        assertEquals(2, movieCrewResponse.count());
     }
 
     @Test
@@ -210,9 +213,10 @@ class MovieCrewE2ETest {
 
         String response = getRequest(PUBLIC_API_PATH + "?name=" + NAME + "&page=0&size=1", status().isOk(), mockMvc);
 
-        List<MovieCrewPublicDto> movieCrewResponse = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, MovieCrewPublicDto.class));
+        MovieCrewListDto movieCrewResponse = mapper.readValue(response, MovieCrewListDto.class);
 
-        assertEquals(1, movieCrewResponse.size());
+        assertEquals(1, movieCrewResponse.movieCrews().size());
+        assertEquals(2, movieCrewResponse.count());
     }
 
     @Test

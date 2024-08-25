@@ -1,9 +1,11 @@
 package org.somuga.converter;
 
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserConverter {
@@ -15,14 +17,16 @@ public class UserConverter {
         if (user == null) return null;
         return new UserPublicDto(user.getId(),
                 user.getUserName(),
-                user.getJoinDate());
+                user.getJoinDate(),
+                user.getEmail());
     }
 
-    public static List<UserPublicDto> fromEntityListToPublicDtoList(List<User> users) {
-        if (users == null) return List.of();
-        return users.stream()
+    public static UserListDto fromEntityListToPublicDtoList(List<User> users, Long count) {
+        if (users == null) return new UserListDto(new ArrayList<>(0), 0L);
+        List<UserPublicDto> userPublicDtos = users.stream()
                 .map(UserConverter::fromEntityToPublicDto)
                 .toList();
+        return new UserListDto(userPublicDtos, count);
     }
 
     public static User fromCreateDtoToEntity(UserCreateDto user, String id) {
@@ -30,6 +34,7 @@ public class UserConverter {
         return User.builder()
                 .id(id)
                 .userName(user.userName())
+                .email(user.email())
                 .build();
     }
 }

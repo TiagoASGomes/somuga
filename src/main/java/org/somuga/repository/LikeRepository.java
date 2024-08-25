@@ -4,12 +4,13 @@ import org.somuga.entity.Like;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface LikeRepository extends JpaRepository<Like, Long> {
+public interface LikeRepository extends JpaRepository<Like, Long>, JpaSpecificationExecutor<Like> {
     Page<Like> findByUserId(String userId, Pageable page);
 
     Page<Like> findByMediaId(Long mediaId, Pageable page);

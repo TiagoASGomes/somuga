@@ -2,7 +2,6 @@ package org.somuga.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +11,7 @@ import jakarta.validation.Valid;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.movie.MovieCreateDto;
 import org.somuga.dto.movie.MovieLikePublicDto;
+import org.somuga.dto.movie.MovieListDto;
 import org.somuga.dto.movie.MoviePublicDto;
 import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.movie.InvalidCrewRoleException;
@@ -43,15 +43,15 @@ public class MovieController {
     @ApiResponse(responseCode = "200",
             description = "List of movies",
             content = {@Content(mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = MoviePublicDto.class)))})
+                    schema = @Schema(implementation = MovieListDto.class))})
     @Parameter(name = "title", description = "The movie title to search for", example = "The Godfather")
     @Parameter(name = "crewIds", description = "A list of crew members ids to search for", example = "1,2,3")
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
     @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @GetMapping("/public")
-    public ResponseEntity<List<MoviePublicDto>> getAll(Pageable page,
-                                                       @RequestParam(required = false) String title,
-                                                       @RequestParam(required = false) List<Long> crewIds) {
+    public ResponseEntity<MovieListDto> getAll(Pageable page,
+                                               @RequestParam(required = false) String title,
+                                               @RequestParam(required = false) List<Long> crewIds) {
         return new ResponseEntity<>(movieService.getAll(page, title, crewIds), HttpStatus.OK);
     }
 

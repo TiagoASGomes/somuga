@@ -10,6 +10,8 @@ public record CrewRolePublicDto(
         String movieRole,
         @Schema(description = "The character name, empty if role is not actor", example = "Neo")
         String characterName,
+        @Schema(description = "The movie ID", example = "1")
+        Long movieId,
         @Schema(description = "The movie title", example = "The Matrix")
         String movieTitle,
         @Schema(description = "The movie release date", example = "1999-03-31")

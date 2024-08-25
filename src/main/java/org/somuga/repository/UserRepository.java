@@ -17,4 +17,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     Page<User> findAllByUserNameContainingIgnoreCaseAndActiveTrue(String userName, Pageable page);
 
     Page<User> findAllByActiveTrue(Pageable page);
+
+    Long countByUserNameContainingIgnoreCaseAndActiveTrue(String userName);
+
+    Long countByActiveTrue();
 }

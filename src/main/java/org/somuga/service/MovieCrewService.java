@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
+import org.somuga.dto.movie_crew.MovieCrewListDto;
 import org.somuga.dto.movie_crew.MovieCrewPublicDto;
 import org.somuga.entity.MovieCrew;
 import org.somuga.exception.movie_crew.MovieCrewNotFoundException;
@@ -10,8 +11,6 @@ import org.somuga.service.interfaces.IMovieCrewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static org.somuga.util.message.Messages.MOVIE_CREW_NOT_FOUND;
 
@@ -26,11 +25,13 @@ public class MovieCrewService implements IMovieCrewService {
     }
 
     @Override
-    public List<MovieCrewPublicDto> getAll(Pageable page, String name) {
+    public MovieCrewListDto getAll(Pageable page, String name) {
         if (name != null) {
-            return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByFullNameContainingIgnoreCase(name, page).toList());
+            Long count = movieCrewRepository.countByFullNameContainingIgnoreCase(name);
+            return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findByFullNameContainingIgnoreCase(name, page).toList(), count);
         }
-        return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findAll(page).toList());
+        Long count = movieCrewRepository.count();
+        return MovieCrewConverter.fromEntityListToPublicDtoList(movieCrewRepository.findAll(page).toList(), count);
     }
 
     @Override

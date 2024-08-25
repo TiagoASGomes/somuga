@@ -10,6 +10,7 @@ import org.somuga.converter.GameGenreConverter;
 import org.somuga.converter.PlatformConverter;
 import org.somuga.dto.game.GameCreateDto;
 import org.somuga.dto.game.GameLikePublicDto;
+import org.somuga.dto.game.GameListDto;
 import org.somuga.dto.game.GamePublicDto;
 import org.somuga.entity.*;
 import org.somuga.enums.MediaType;
@@ -112,17 +113,20 @@ class GameServiceTest {
         List<Game> games = List.of(game);
         Page<Game> gamesPage = new PageImpl<>(games);
         List<GamePublicDto> gamePublicDtos = List.of(gamePublicDto);
+        GameListDto gameListDto = new GameListDto(gamePublicDtos, 1L);
         Pageable pageable = PageRequest.of(0, 10);
 
-        gameConverter.when(() -> GameConverter.fromEntityListToPublicDtoList(games)).thenReturn(gamePublicDtos);
+        gameConverter.when(() -> GameConverter.fromEntityListToPublicDtoList(games, 1L)).thenReturn(gameListDto);
         Mockito.when(gameRepo.findAll(Mockito.<Specification<Game>>any(), Mockito.any(Pageable.class))).thenReturn(gamesPage);
+        Mockito.when(gameRepo.count(Mockito.<Specification<Game>>any())).thenReturn(1L);
 
-        List<GamePublicDto> result = gameService.getAll(pageable, null, null, null, null);
+        GameListDto result = gameService.getAll(pageable, null, null, null, null);
 
-        assertEquals(gamePublicDtos, result);
-        gameConverter.verify(() -> GameConverter.fromEntityListToPublicDtoList(games));
+        assertEquals(gameListDto, result);
+        gameConverter.verify(() -> GameConverter.fromEntityListToPublicDtoList(games, 1L));
         gameConverter.verifyNoMoreInteractions();
         Mockito.verify(gameRepo).findAll(Mockito.<Specification<Game>>any(), Mockito.any(Pageable.class));
+        Mockito.verify(gameRepo).count(Mockito.<Specification<Game>>any());
         Mockito.verifyNoMoreInteractions(gameRepo);
     }
 
@@ -132,17 +136,20 @@ class GameServiceTest {
         List<Game> games = List.of(game);
         Page<Game> gamesPage = new PageImpl<>(games);
         List<GamePublicDto> gamePublicDtos = List.of(gamePublicDto);
+        GameListDto gameListDto = new GameListDto(gamePublicDtos, 1L);
         Pageable pageable = PageRequest.of(0, 10);
 
-        gameConverter.when(() -> GameConverter.fromEntityListToPublicDtoList(games)).thenReturn(gamePublicDtos);
+        gameConverter.when(() -> GameConverter.fromEntityListToPublicDtoList(games, 1L)).thenReturn(gameListDto);
         Mockito.when(gameRepo.findAll(Mockito.<Specification<Game>>any(), Mockito.any(Pageable.class))).thenReturn(gamesPage);
+        Mockito.when(gameRepo.count(Mockito.<Specification<Game>>any())).thenReturn(1L);
 
-        List<GamePublicDto> result = gameService.getAll(pageable, "game", List.of("platform"), List.of("genre"), "developer");
+        GameListDto result = gameService.getAll(pageable, "game", List.of("platform"), List.of("genre"), "developer");
 
-        assertEquals(gamePublicDtos, result);
-        gameConverter.verify(() -> GameConverter.fromEntityListToPublicDtoList(games));
+        assertEquals(gameListDto, result);
+        gameConverter.verify(() -> GameConverter.fromEntityListToPublicDtoList(games, 1L));
         gameConverter.verifyNoMoreInteractions();
         Mockito.verify(gameRepo).findAll(Mockito.<Specification<Game>>any(), Mockito.any(Pageable.class));
+        Mockito.verify(gameRepo).count(Mockito.<Specification<Game>>any());
         Mockito.verifyNoMoreInteractions(gameRepo);
     }
 

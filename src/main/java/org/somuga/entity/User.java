@@ -19,6 +19,8 @@ public class User {
     private String id;
     @Column(name = "user_name", nullable = false)
     private String userName;
+    @Column(nullable = false, unique = true)
+    private String email;
     @OneToMany(mappedBy = "user")
     private List<Like> likes;
     @OneToMany(mappedBy = "user")

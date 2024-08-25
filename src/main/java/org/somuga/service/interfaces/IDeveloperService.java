@@ -1,16 +1,16 @@
 package org.somuga.service.interfaces;
 
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.exception.developer.DeveloperNotFoundException;
 import org.somuga.exception.user.DuplicateFieldException;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface IDeveloperService {
 
-    List<DeveloperPublicDto> getAll(String name);
+    DeveloperListDto getAll(String name, Pageable page);
 
     DeveloperPublicDto getById(Long id) throws DeveloperNotFoundException;
 

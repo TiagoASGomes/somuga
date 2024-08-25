@@ -2,6 +2,7 @@ package org.somuga.service;
 
 import org.somuga.converter.DeveloperConverter;
 import org.somuga.dto.developer.DeveloperCreateDto;
+import org.somuga.dto.developer.DeveloperListDto;
 import org.somuga.dto.developer.DeveloperPublicDto;
 import org.somuga.entity.Developer;
 import org.somuga.exception.developer.DeveloperNotFoundException;
@@ -9,9 +10,9 @@ import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.repository.DeveloperRepository;
 import org.somuga.service.interfaces.IDeveloperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.somuga.util.message.Messages.DEVELOPER_ALREADY_EXISTS;
@@ -28,11 +29,13 @@ public class DeveloperService implements IDeveloperService {
     }
 
     @Override
-    public List<DeveloperPublicDto> getAll(String name) {
+    public DeveloperListDto getAll(String name, Pageable page) {
         if (name != null) {
-            return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAllByDeveloperNameContainingIgnoreCase(name));
+            Long count = developerRepo.countByDeveloperNameContainingIgnoreCase(name);
+            return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAllByDeveloperNameContainingIgnoreCase(name, page).toList(), count);
         }
-        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll());
+        Long count = developerRepo.count();
+        return DeveloperConverter.fromEntityListToPublicDtoList(developerRepo.findAll(page).toList(), count);
     }
 
     @Override

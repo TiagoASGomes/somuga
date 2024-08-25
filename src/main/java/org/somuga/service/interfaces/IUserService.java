@@ -1,16 +1,15 @@
 package org.somuga.service.interfaces;
 
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 import org.somuga.exception.user.DuplicateFieldException;
 import org.somuga.exception.user.UserNotFoundException;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface IUserService {
-    List<UserPublicDto> getAll(Pageable page, String name);
+    UserListDto getAll(Pageable page, String name);
 
     UserPublicDto getById(String id) throws UserNotFoundException;
 

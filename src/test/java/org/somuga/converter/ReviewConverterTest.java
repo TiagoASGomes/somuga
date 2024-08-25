@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.somuga.dto.review.ReviewCreateDto;
+import org.somuga.dto.review.ReviewListDto;
 import org.somuga.dto.review.ReviewPublicDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.Game;
@@ -34,7 +35,7 @@ class ReviewConverterTest {
             .userName("user")
             .build();
 
-    private final UserPublicDto userPublicDto = new UserPublicDto("1", "user", new Date());
+    private final UserPublicDto userPublicDto = new UserPublicDto("1", "user", new Date(), "email@example.com");
 
     private final Game game = Game.builder()
             .id(1L)
@@ -124,15 +125,15 @@ class ReviewConverterTest {
 
         userConverterMockedStatic.when(() -> UserConverter.fromEntityToPublicDto(user)).thenReturn(userPublicDto);
 
-        List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(reviews);
+        ReviewListDto reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(reviews, 2L);
 
-        assertEquals(reviews.size(), reviewPublicDtos.size());
+        assertEquals(reviews.size(), reviewPublicDtos.reviews().size());
         for (int i = 0; i < reviews.size(); i++) {
-            assertEquals(reviews.get(i).getId(), reviewPublicDtos.get(i).id());
-            assertEquals(reviews.get(i).getUser().getId(), reviewPublicDtos.get(i).user().id());
-            assertEquals(reviews.get(i).getMedia().getId(), reviewPublicDtos.get(i).mediaId());
-            assertEquals(reviews.get(i).getReviewScore(), reviewPublicDtos.get(i).reviewScore());
-            assertEquals(reviews.get(i).getWrittenReview(), reviewPublicDtos.get(i).writtenReview());
+            assertEquals(reviews.get(i).getId(), reviewPublicDtos.reviews().get(i).id());
+            assertEquals(reviews.get(i).getUser().getId(), reviewPublicDtos.reviews().get(i).user().id());
+            assertEquals(reviews.get(i).getMedia().getId(), reviewPublicDtos.reviews().get(i).mediaId());
+            assertEquals(reviews.get(i).getReviewScore(), reviewPublicDtos.reviews().get(i).reviewScore());
+            assertEquals(reviews.get(i).getWrittenReview(), reviewPublicDtos.reviews().get(i).writtenReview());
         }
         userConverterMockedStatic.verify(() -> UserConverter.fromEntityToPublicDto(user), Mockito.times(reviews.size()));
         userConverterMockedStatic.verifyNoMoreInteractions();
@@ -141,16 +142,16 @@ class ReviewConverterTest {
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when input list is empty")
     void fromEntityListToPublicDtoListEmpty() {
-        List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(List.of());
-        assertEquals(0, reviewPublicDtos.size());
+        ReviewListDto reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(List.of(), 0L);
+        assertEquals(0, reviewPublicDtos.reviews().size());
         userConverterMockedStatic.verifyNoInteractions();
     }
 
     @Test
     @DisplayName("Test fromEntityListToPublicDtoList should return empty list when input list is null")
     void fromEntityListToPublicDtoListNull() {
-        List<ReviewPublicDto> reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(null);
-        assertEquals(0, reviewPublicDtos.size());
+        ReviewListDto reviewPublicDtos = ReviewConverter.fromEntityListToPublicDtoList(null, 0L);
+        assertEquals(0, reviewPublicDtos.reviews().size());
         userConverterMockedStatic.verifyNoInteractions();
     }
 

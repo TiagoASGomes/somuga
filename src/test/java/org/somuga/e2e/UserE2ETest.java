@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.UserConverter;
 import org.somuga.dto.user.UserCreateDto;
+import org.somuga.dto.user.UserListDto;
 import org.somuga.dto.user.UserPublicDto;
 import org.somuga.entity.User;
 import org.somuga.repository.UserRepository;
@@ -21,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
@@ -67,10 +67,11 @@ public class UserE2ETest {
                 .build();
     }
 
-    public UserPublicDto createUser(String id, String name, boolean active) {
+    public UserPublicDto createUser(String id, String name, boolean active, String email) {
         User user = User.builder()
                 .id(id)
                 .userName(name)
+                .email(email)
                 .joinDate(new Date())
                 .active(active)
                 .build();
@@ -81,7 +82,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user and expect status 201")
     void testCreate() throws Exception {
-        UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
+        UserCreateDto userCreateDto = new UserCreateDto(USERNAME, "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -99,7 +100,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test create user without authentication and expect status 401")
     void testCreateWithoutAuthentication() throws Exception {
-        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(new UserCreateDto(USERNAME)), mockMvc);
+        postRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(new UserCreateDto(USERNAME, "email@example.com")), mockMvc);
 
         assertEquals(0, userRepository.count());
     }
@@ -108,8 +109,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with duplicate username and expect status 400")
     void testCreateWithDuplicateUsername() throws Exception {
-        createUser("different", USERNAME, true);
-        UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
+        createUser("different", USERNAME, true, "email2@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto(USERNAME, "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -123,8 +124,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with duplicate id and expect status 400")
     void testCreateWithDuplicateId() throws Exception {
-        createUser(USER_ID, USERNAME, true);
-        UserCreateDto userCreateDto = new UserCreateDto("different");
+        createUser(USER_ID, USERNAME, true, "email2@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("different", "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -138,7 +139,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with username exceeding 20 characters and expect status 400")
     void testCreateWithInvalidUsername() throws Exception {
-        UserCreateDto userCreateDto = new UserCreateDto("ABCDEF".repeat(5));
+        UserCreateDto userCreateDto = new UserCreateDto("ABCDEF".repeat(5), "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -152,7 +153,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with empty username and expect status 400")
     void testCreateWithEmptyUsername() throws Exception {
-        UserCreateDto userCreateDto = new UserCreateDto("");
+        UserCreateDto userCreateDto = new UserCreateDto("", "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -166,7 +167,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with null username and expect status 400")
     void testCreateWithNullUsername() throws Exception {
-        UserCreateDto userCreateDto = new UserCreateDto(null);
+        UserCreateDto userCreateDto = new UserCreateDto(null, "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -180,8 +181,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with inactive user with same id and expect status 400")
     void testCreateWithInactiveUser() throws Exception {
-        createUser(USER_ID, USERNAME, false);
-        UserCreateDto userCreateDto = new UserCreateDto(USERNAME);
+        createUser(USER_ID, USERNAME, false, "email@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto(USERNAME, "email@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -195,8 +196,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create user with duplicate name case insensitive and expect status 400")
     void testCreateWithDuplicateNameCaseInsensitive() throws Exception {
-        createUser("different", USERNAME, true);
-        UserCreateDto userCreateDto = new UserCreateDto(USERNAME.toLowerCase());
+        createUser("different", USERNAME, true, "email2@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto(USERNAME.toLowerCase(), "email3@example.com");
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -209,79 +210,84 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test get all users and expect status 200")
     void testGetAll() throws Exception {
-        UserPublicDto userPublicDto = createUser("1", "User1", true);
+        UserPublicDto userPublicDto = createUser("1", "User1", true, "email@example.com");
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
+        UserListDto users = mapper.readValue(response, UserListDto.class);
 
-        assertEquals(1, users.size());
-        assertEquals(userPublicDto.id(), users.get(0).id());
-        assertEquals(userPublicDto.userName(), users.get(0).userName());
+        assertEquals(1, users.users().size());
+        assertEquals(1, users.count());
+        assertEquals(userPublicDto.id(), users.users().get(0).id());
+        assertEquals(userPublicDto.userName(), users.users().get(0).userName());
     }
 
     @Test
     @DisplayName("Test get all users with inactive user and expect status 200 with only active user")
     void testGetAllWithInactiveUser() throws Exception {
-        createUser("1", "User1", false);
-        createUser("2", "User2", true);
+        createUser("1", "User1", false, "email@example.com");
+        createUser("2", "User2", true, "email2@example.com");
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
-        List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
+        UserListDto users = mapper.readValue(response, UserListDto.class);
 
-        assertEquals(1, users.size());
-        assertEquals("2", users.get(0).id());
-        assertEquals("User2", users.get(0).userName());
+        assertEquals(1, users.users().size());
+        assertEquals(1, users.count());
+        assertEquals("2", users.users().get(0).id());
+        assertEquals("User2", users.users().get(0).userName());
     }
 
     @Test
     @DisplayName("Test get all users with name and expect status 200")
     void testGetAllWithName() throws Exception {
-        createUser("1", "User1", true);
-        createUser("2", "User2", true);
-        createUser("3", "Different", true);
+        createUser("1", "User1", true, "email@example.com");
+        createUser("2", "User2", true, "email2@example.com");
+        createUser("3", "Different", true, "email3@example.com");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=User", status().isOk(), mockMvc);
 
-        List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
+        UserListDto users = mapper.readValue(response, UserListDto.class);
 
-        assertEquals(2, users.size());
+        assertEquals(2, users.users().size());
+        assertEquals(2, users.count());
     }
 
     @Test
     @DisplayName("Test get all users case insensitive and expect status 200")
     void testGetAllCaseInsensitive() throws Exception {
-        createUser("1", "User1", true);
-        createUser("2", "User2", true);
-        createUser("3", "Different", true);
+        createUser("1", "User1", true, "email@example.com");
+        createUser("2", "User2", true, "email2@example.com");
+        createUser("3", "Different", true, "email3@example.com");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=user", status().isOk(), mockMvc);
 
-        List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
+        UserListDto users = mapper.readValue(response, UserListDto.class);
 
-        assertEquals(2, users.size());
+        assertEquals(2, users.users().size());
+        assertEquals(2, users.count());
     }
 
     @Test
     @DisplayName("Test get all users with name and inactive users and expect status 200 with only active user")
     void testGetAllWithNameAndInactiveUser() throws Exception {
-        createUser("1", "User1", false);
-        createUser("2", "User2", true);
+        createUser("1", "User1", false, "email@example.com");
+        createUser("2", "User2", true, "email2@example.com");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=User", status().isOk(), mockMvc);
 
-        List<UserPublicDto> users = mapper.readValue(response, mapper.getTypeFactory().constructCollectionType(List.class, UserPublicDto.class));
+        UserListDto users = mapper.readValue(response, UserListDto.class);
 
-        assertEquals(1, users.size());
-        assertEquals("2", users.get(0).id());
-        assertEquals("User2", users.get(0).userName());
+        assertEquals(1, users.users().size());
+        assertEquals(1, users.count());
+        assertEquals("2", users.users().get(0).id());
+        assertEquals("User2", users.users().get(0).userName());
     }
 
     @Test
     @DisplayName("Test get by id and expect status 200")
     void testGetById() throws Exception {
-        UserPublicDto userPublicDto = createUser("1", "User1", true);
+        UserPublicDto userPublicDto = createUser("1", "User1", true, "email@example.com");
 
         String response = getRequest(PUBLIC_API_PATH + "/1", status().isOk(), mockMvc);
 
@@ -294,7 +300,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test get by id with inactive user and expect status 404")
     void testGetByIdWithInactiveUser() throws Exception {
-        createUser("1", "User1", false);
+        createUser("1", "User1", false, "email@example.com");
 
         String response = getRequest(PUBLIC_API_PATH + "/1", status().isNotFound(), mockMvc);
 
@@ -317,8 +323,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username and expect status 200")
     void testUpdateUsername() throws Exception {
-        createUser(USER_ID, "User1", true);
-        UserCreateDto userCreateDto = new UserCreateDto("User2");
+        createUser(USER_ID, "User1", true, "email@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("User2", "email@example.com");
 
         String response = putRequest(PRIVATE_API_PATH, status().isOk(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -336,8 +342,8 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test update username without authentication and expect status 401")
     void testUpdateUsernameWithoutAuthentication() throws Exception {
-        createUser(USER_ID, "User1", true);
-        UserCreateDto userCreateDto = new UserCreateDto("User2");
+        createUser(USER_ID, "User1", true, "email@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("User2", "email@example.com");
 
         putRequest(PRIVATE_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -350,9 +356,9 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username with duplicate username and expect status 400")
     void testUpdateUsernameWithDuplicateUsername() throws Exception {
-        createUser(USER_ID, "User1", true);
-        createUser("different", "User2", true);
-        UserCreateDto userCreateDto = new UserCreateDto("User2");
+        createUser(USER_ID, "User1", true, "email@example.com");
+        createUser("different", "User2", true, "email2@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("User2", "email@example.com");
 
         String response = putRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -370,9 +376,9 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username with duplicate name case insensitive and expect status 400")
     void testUpdateUsernameWithDuplicateNameCaseInsensitive() throws Exception {
-        createUser(USER_ID, "User1", true);
-        createUser("different", "User2", true);
-        UserCreateDto userCreateDto = new UserCreateDto("user2");
+        createUser(USER_ID, "User1", true, "email@example.com");
+        createUser("different", "User2", true, "email2@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("user2", "email@example.com");
 
         String response = putRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -390,8 +396,8 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username with inactive user and expect status 404")
     void testUpdateUsernameWithInactiveUser() throws Exception {
-        createUser(USER_ID, "User1", false);
-        UserCreateDto userCreateDto = new UserCreateDto("User2");
+        createUser(USER_ID, "User1", false, "email@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto("User2", "email@example.com");
 
         String response = putRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -409,7 +415,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update username without user creation and expect status 404")
     void testUpdateUsernameWithoutUserCreation() throws Exception {
-        UserCreateDto userCreateDto = new UserCreateDto("User2");
+        UserCreateDto userCreateDto = new UserCreateDto("User2", "email@example.com");
 
         String response = putRequest(PRIVATE_API_PATH, status().isNotFound(), mapper.writeValueAsString(userCreateDto), mockMvc);
 
@@ -423,7 +429,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete user and expect status 204")
     void testDelete() throws Exception {
-        createUser(USER_ID, "User1", true);
+        createUser(USER_ID, "User1", true, "email@example.com");
 
         deleteRequest(PRIVATE_API_PATH, status().isNoContent(), mockMvc);
 
@@ -436,7 +442,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test delete user without authentication and expect status 401")
     void testDeleteWithoutAuthentication() throws Exception {
-        createUser(USER_ID, "User1", true);
+        createUser(USER_ID, "User1", true, "email@example.com");
 
         deleteRequest(PRIVATE_API_PATH, status().isUnauthorized(), mockMvc);
 
@@ -450,7 +456,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete user with inactive user and expect status 404")
     void testDeleteWithInactiveUser() throws Exception {
-        createUser(USER_ID, "User1", false);
+        createUser(USER_ID, "User1", false, "email@example.com");
 
         String response = deleteRequest(PRIVATE_API_PATH, status().isNotFound(), mockMvc);
 
@@ -476,7 +482,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test admin delete user and expect status 204")
     void testAdminDelete() throws Exception {
-        createUser("1", "User1", true);
+        createUser("1", "User1", true, "email@example.com");
 
         deleteRequest(ADMIN_API_PATH + "/1", status().isNoContent(), mockMvc);
 
@@ -487,7 +493,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID, authorities = "ADMIN")
     @DisplayName("Test admin delete user with inactive user and expect status 204")
     void testAdminDeleteWithInactiveUser() throws Exception {
-        createUser("1", "User1", false);
+        createUser("1", "User1", false, "email@example.com");
 
         deleteRequest(ADMIN_API_PATH + "/1", status().isNoContent(), mockMvc);
 
@@ -509,7 +515,7 @@ public class UserE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test admin delete without authorization and expect status 403")
     void testAdminDeleteWithoutAuthorization() throws Exception {
-        createUser("1", "User1", true);
+        createUser("1", "User1", true, "email@example.com");
 
         deleteRequest(ADMIN_API_PATH + "/1", status().isForbidden(), mockMvc);
 
@@ -519,7 +525,7 @@ public class UserE2ETest {
     @Test
     @DisplayName("Test admin delete without authentication and expect status 401")
     void testAdminDeleteWithoutAuthentication() throws Exception {
-        createUser("1", "User1", true);
+        createUser("1", "User1", true, "email@example.com");
 
         deleteRequest(ADMIN_API_PATH + "/1", status().isUnauthorized(), mockMvc);
 
