@@ -18,7 +18,6 @@ public class MovieCrewConverter {
         return new MovieCrewPublicDto(
                 movieCrew.getId(),
                 movieCrew.getFullName(),
-                movieCrew.getBirthDate(),
                 MovieConverter.fromEntityListToCrewRolePublicDtoList(movieCrew.getRoles())
         );
     }
@@ -35,7 +34,6 @@ public class MovieCrewConverter {
         if (movieCrewCreateDto == null) return null;
         return MovieCrew.builder()
                 .fullName(movieCrewCreateDto.fullName())
-                .birthDate(movieCrewCreateDto.birthDate())
                 .build();
     }
 

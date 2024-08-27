@@ -63,7 +63,6 @@ public class MovieConverter {
         return new MovieRolePublicDto(
                 role.getMovieCrew().getId(),
                 role.getMovieCrew().getFullName(),
-                role.getMovieCrew().getBirthDate(),
                 role.getMovieRole().name(),
                 role.getCharacterName()
         );

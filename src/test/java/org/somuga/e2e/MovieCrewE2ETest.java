@@ -1,8 +1,10 @@
 package org.somuga.e2e;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.somuga.aspect.ErrorDto;
 import org.somuga.converter.MovieCrewConverter;
 import org.somuga.dto.movie_crew.MovieCrewCreateDto;
@@ -21,8 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
@@ -39,7 +39,6 @@ class MovieCrewE2ETest {
     private final String PUBLIC_API_PATH = "/api/v1/movie/crew/public";
     private final String ADMIN_API_PATH = "/api/v1/movie/crew/admin";
     private final String NAME = "Test Name";
-    private final Date BIRTH_DATE = new Date();
     MockMvc mockMvc;
     @Autowired
     private MovieCrewRepository movieCrewRepository;
@@ -48,11 +47,6 @@ class MovieCrewE2ETest {
     @MockBean
     @SuppressWarnings("unused")
     private JwtDecoder jwtDecoder;
-
-    @BeforeAll
-    public static void setUpMapper() {
-        mapper.registerModule(new JavaTimeModule());
-    }
 
     @AfterEach
     public void cleanUp() {
@@ -67,10 +61,9 @@ class MovieCrewE2ETest {
                 .build();
     }
 
-    public MovieCrewPublicDto createMovieCrew(String name, Date birthDate) {
+    public MovieCrewPublicDto createMovieCrew(String name) {
         MovieCrew movieCrew = MovieCrew.builder()
                 .fullName(name)
-                .birthDate(birthDate)
                 .build();
         return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(movieCrew));
     }
@@ -80,7 +73,7 @@ class MovieCrewE2ETest {
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create movie crew and expect status 201")
     void testCreateMovieCrew() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME);
 
         String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -91,14 +84,13 @@ class MovieCrewE2ETest {
         MovieCrew movieCrew1 = movieCrewRepository.findById(movieCrewResponse.id()).orElse(null);
         assertNotNull(movieCrew1);
         assertEquals(movieCrewCreateDto.fullName(), movieCrew1.getFullName());
-        assertEquals(movieCrewCreateDto.birthDate(), movieCrew1.getBirthDate());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create movie crew without authorization and expect status 403")
     void testCreateMovieCrewWithoutAuthorization() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME);
 
         postRequest(ADMIN_API_PATH, status().isForbidden(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -108,7 +100,7 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test create movie crew without authentication and expect status 401")
     void testCreateMovieCrewWithoutAuthentication() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME);
 
         postRequest(ADMIN_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -119,38 +111,23 @@ class MovieCrewE2ETest {
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create movie crew with null data and expect status 400")
     void testCreateMovieCrewWithInvalidData() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(null, null);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(null);
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertTrue(errorDto.message().contains(INVALID_NAME));
-        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
 
         assertEquals(0, movieCrewRepository.count());
     }
 
-    @Test
-    @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
-    @DisplayName("Test create movie crew with invalid birth date in the future and expect status 400")
-    void testCreateMovieCrewWithInvalidBirthDate() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, new Date(System.currentTimeMillis() + 1000000));
-
-        String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
-
-        ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
-
-        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
-
-        assertEquals(0, movieCrewRepository.count());
-    }
 
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test create movie crew with name exceeding 100 characters and expect status 400")
     void testCreateMovieCrewWithInvalidNameSize() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("a".repeat(101), BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("a".repeat(101));
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -164,8 +141,8 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test get all movie crew and expect status 200")
     void testGetAllMovieCrew() throws Exception {
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew("Different", BIRTH_DATE);
+        createMovieCrew(NAME);
+        createMovieCrew("Different");
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
@@ -178,9 +155,9 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test get all movie movieCrewCreateDto page and expect status 200")
     void testGetAllMovieCrewPage() throws Exception {
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew("Different", BIRTH_DATE);
+        createMovieCrew(NAME);
+        createMovieCrew(NAME);
+        createMovieCrew("Different");
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=2", status().isOk(), mockMvc);
 
@@ -193,9 +170,9 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test get all movie crew with name and expect status 200")
     void testGetAllMovieCrewWithName() throws Exception {
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew("Different", BIRTH_DATE);
+        createMovieCrew(NAME);
+        createMovieCrew(NAME);
+        createMovieCrew("Different");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=" + NAME, status().isOk(), mockMvc);
 
@@ -208,8 +185,8 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test get all movie crew with name paged and expect status 200")
     void testGetAllMovieCrewWithNamePaged() throws Exception {
-        createMovieCrew(NAME, BIRTH_DATE);
-        createMovieCrew(NAME, BIRTH_DATE);
+        createMovieCrew(NAME);
+        createMovieCrew(NAME);
 
         String response = getRequest(PUBLIC_API_PATH + "?name=" + NAME + "&page=0&size=1", status().isOk(), mockMvc);
 
@@ -222,7 +199,7 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test get movie crew by id and expect status 200")
     void testGetMovieCrewById() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
 
         String response = getRequest(PUBLIC_API_PATH + "/" + movieCrewPublicDto.id(), status().isOk(), mockMvc);
 
@@ -245,8 +222,8 @@ class MovieCrewE2ETest {
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test update movie crew and expect status 200")
     void testUpdateMovieCrew() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name", new Date());
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name");
 
         String response = putRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isOk(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -257,15 +234,14 @@ class MovieCrewE2ETest {
         assertEquals(1, movieCrewRepository.count());
         assertEquals(movieCrewPublicDto.id(), movieCrewResponse.id());
         assertEquals(movieCrewCreateDto.fullName(), movieCrewResponse.name(), movieCrew.getFullName());
-        assertEquals(movieCrewCreateDto.birthDate(), movieCrewResponse.birthDate(), movieCrew.getBirthDate().toString());
     }
 
     @Test
     @WithMockUser(username = USER_ID)
     @DisplayName("Test update movie crew without authorization and expect status 403")
     void testUpdateMovieCrewWithoutAuthorization() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name", new Date());
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name");
 
         putRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isForbidden(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -273,14 +249,13 @@ class MovieCrewE2ETest {
         assertNotNull(movieCrew);
 
         assertEquals(NAME, movieCrew.getFullName());
-        assertEquals(BIRTH_DATE, movieCrew.getBirthDate());
     }
 
     @Test
     @DisplayName("Test update movie crew without authentication and expect status 401")
     void testUpdateMovieCrewWithoutAuthentication() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name", new Date());
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("Updated Name");
 
         putRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isUnauthorized(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -288,35 +263,32 @@ class MovieCrewE2ETest {
         assertNotNull(movieCrew);
 
         assertEquals(NAME, movieCrew.getFullName());
-        assertEquals(BIRTH_DATE, movieCrew.getBirthDate());
     }
 
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test update movie crew with null data and expect status 400")
     void testUpdateMovieCrewWithInvalidData() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(null, null);
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(null);
 
         String response = putRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
         ErrorDto errorDto = mapper.readValue(response, ErrorDto.class);
 
         assertTrue(errorDto.message().contains(INVALID_NAME));
-        assertTrue(errorDto.message().contains(INVALID_BIRTH_DATE));
 
         MovieCrew movieCrew = movieCrewRepository.findById(movieCrewPublicDto.id()).orElse(null);
         assertNotNull(movieCrew);
 
         assertEquals(NAME, movieCrew.getFullName());
-        assertEquals(BIRTH_DATE, movieCrew.getBirthDate());
     }
 
     @Test
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test update movie crew not found and expect status 404")
     void testUpdateMovieCrewNotFound() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME, BIRTH_DATE);
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(NAME);
 
         String response = putRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mapper.writeValueAsString(movieCrewCreateDto), mockMvc);
 
@@ -329,7 +301,7 @@ class MovieCrewE2ETest {
     @WithMockUser(username = USER_ID, authorities = {"ADMIN"})
     @DisplayName("Test delete movie crew and expect status 204")
     void testDeleteMovieCrew() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
 
         deleteRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isNoContent(), mockMvc);
 
@@ -340,7 +312,7 @@ class MovieCrewE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test delete movie crew without authorization and expect status 403")
     void testDeleteMovieCrewWithoutAuthorization() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
 
         deleteRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isForbidden(), mockMvc);
 
@@ -350,7 +322,7 @@ class MovieCrewE2ETest {
     @Test
     @DisplayName("Test delete movie crew without authentication and expect status 401")
     void testDeleteMovieCrewWithoutAuthentication() throws Exception {
-        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME, BIRTH_DATE);
+        MovieCrewPublicDto movieCrewPublicDto = createMovieCrew(NAME);
 
         deleteRequest(ADMIN_API_PATH + "/" + movieCrewPublicDto.id(), status().isUnauthorized(), mockMvc);
 

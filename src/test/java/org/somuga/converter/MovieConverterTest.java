@@ -43,7 +43,6 @@ class MovieConverterTest {
         MovieCrew movieCrew = MovieCrew.builder()
                 .id(1L)
                 .fullName("John Doe")
-                .birthDate(new Date())
                 .build();
 
         movie.addMovieCrew(movieCrew, MovieRole.DIRECTOR, "Character Name");
@@ -140,7 +139,6 @@ class MovieConverterTest {
 
         assertEquals(role.getMovieCrew().getId(), movieRolePublicDto.id());
         assertEquals(role.getMovieCrew().getFullName(), movieRolePublicDto.fullName());
-        assertEquals(role.getMovieCrew().getBirthDate(), movieRolePublicDto.birthDate());
         assertEquals(role.getMovieRole().name(), movieRolePublicDto.movieRole());
         assertEquals(role.getCharacterName(), movieRolePublicDto.characterName());
     }

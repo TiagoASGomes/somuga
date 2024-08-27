@@ -23,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,12 +40,10 @@ class MovieCrewServiceTest {
     private final MovieCrew movieCrew = MovieCrew.builder()
             .id(1L)
             .fullName("John Doe")
-            .birthDate(new Date())
             .build();
     private final MovieCrewPublicDto movieCrewPublicDto = new MovieCrewPublicDto(
             1L,
             "John Doe",
-            new Date(),
             new ArrayList<>()
     );
     @MockBean
@@ -153,7 +150,7 @@ class MovieCrewServiceTest {
     @DisplayName("Create movie crew member")
     @WithMockUser(username = "admin")
     void create() {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("John Doe", new Date());
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("John Doe");
 
         movieCrewConverter.when(() -> MovieCrewConverter.fromCreateDtoToEntity(movieCrewCreateDto))
                 .thenReturn(movieCrew);
@@ -175,7 +172,7 @@ class MovieCrewServiceTest {
     @DisplayName("Update movie crew member")
     @WithMockUser(username = "admin")
     void update() throws Exception {
-        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("John Doe2", new Date());
+        MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto("John Doe2");
 
         movieCrewConverter.when(() -> MovieCrewConverter.fromEntityToPublicDto(movieCrew)).thenReturn(movieCrewPublicDto);
         Mockito.when(movieCrewRepository.findById(1L)).thenReturn(Optional.of(movieCrew));

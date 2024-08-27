@@ -49,7 +49,6 @@ public class MovieCrewService implements IMovieCrewService {
     public MovieCrewPublicDto update(Long id, MovieCrewCreateDto movieCrew) throws MovieCrewNotFoundException {
         MovieCrew crew = findById(id);
         crew.setFullName(movieCrew.fullName());
-        crew.setBirthDate(movieCrew.birthDate());
         return MovieCrewConverter.fromEntityToPublicDto(movieCrewRepository.save(crew));
     }
 

@@ -92,10 +92,10 @@ class MovieE2ETest {
     }
 
     public void createCrew() {
-        MovieCrew director = MovieCrew.builder().fullName("Director").birthDate(new Date()).build();
-        MovieCrew producer = MovieCrew.builder().fullName("Producer").birthDate(new Date()).build();
-        MovieCrew writer = MovieCrew.builder().fullName("Writer").birthDate(new Date()).build();
-        MovieCrew actor = MovieCrew.builder().fullName("Actor").birthDate(new Date()).build();
+        MovieCrew director = MovieCrew.builder().fullName("Director").build();
+        MovieCrew producer = MovieCrew.builder().fullName("Producer").build();
+        MovieCrew writer = MovieCrew.builder().fullName("Writer").build();
+        MovieCrew actor = MovieCrew.builder().fullName("Actor").build();
         crew.add(director);
         crew.add(producer);
         crew.add(writer);
