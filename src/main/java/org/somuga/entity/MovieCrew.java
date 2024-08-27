@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity(name = "MovieCrew")
@@ -21,7 +20,6 @@ public class MovieCrew {
     private Long id;
     @Column(name = "full_name", nullable = false)
     private String fullName;
-    private Date birthDate;
     @OneToMany(mappedBy = "movieCrew",
             cascade = CascadeType.ALL,
             orphanRemoval = true)

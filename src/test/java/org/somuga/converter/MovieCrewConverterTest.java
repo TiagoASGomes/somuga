@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,14 +27,12 @@ class MovieCrewConverterTest {
         MovieCrew movieCrew = MovieCrew.builder()
                 .id(1L)
                 .fullName("John Doe")
-                .birthDate(new Date())
                 .build();
 
         MovieCrewPublicDto movieCrewPublicDto = MovieCrewConverter.fromEntityToPublicDto(movieCrew);
 
         assertEquals(movieCrew.getId(), movieCrewPublicDto.id());
         assertEquals(movieCrew.getFullName(), movieCrewPublicDto.name());
-        assertEquals(movieCrew.getBirthDate(), movieCrewPublicDto.birthDate());
     }
 
     @Test
@@ -51,12 +48,10 @@ class MovieCrewConverterTest {
                 MovieCrew.builder()
                         .id(1L)
                         .fullName("John Doe")
-                        .birthDate(new Date())
                         .build(),
                 MovieCrew.builder()
                         .id(2L)
                         .fullName("Jane Doe")
-                        .birthDate(new Date())
                         .build()
         );
 
@@ -66,7 +61,6 @@ class MovieCrewConverterTest {
         for (int i = 0; i < movieCrewList.size(); i++) {
             assertEquals(movieCrewList.get(i).getId(), movieCrewPublicDtoList.movieCrews().get(i).id());
             assertEquals(movieCrewList.get(i).getFullName(), movieCrewPublicDtoList.movieCrews().get(i).name());
-            assertEquals(movieCrewList.get(i).getBirthDate(), movieCrewPublicDtoList.movieCrews().get(i).birthDate());
         }
     }
 
@@ -90,15 +84,13 @@ class MovieCrewConverterTest {
     @DisplayName("Test fromCreateDtoToEntity should convert create dto to entity")
     void fromCreateDtoToEntity() {
         MovieCrewCreateDto movieCrewCreateDto = new MovieCrewCreateDto(
-                "John Doe",
-                new Date()
+                "John Doe"
         );
 
         MovieCrew movieCrew = MovieCrewConverter.fromCreateDtoToEntity(movieCrewCreateDto);
 
         assertNull(movieCrew.getId());
         assertEquals(movieCrewCreateDto.fullName(), movieCrew.getFullName());
-        assertEquals(movieCrewCreateDto.birthDate(), movieCrew.getBirthDate());
     }
 
     @Test
