@@ -113,7 +113,6 @@ class GameE2ETest {
     private Long createDeveloper(String developerName, List<String> socials) {
         Developer dev = Developer.builder()
                 .developerName(developerName)
-                .socials(socials)
                 .build();
         return developerRepository.save(dev).getId();
     }

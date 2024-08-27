@@ -23,8 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
 import static org.somuga.util.message.Messages.*;
@@ -63,10 +61,9 @@ class DeveloperE2ETest {
         developerRepository.deleteAll();
     }
 
-    public DeveloperPublicDto createDeveloper(String name, List<String> socials) {
+    public DeveloperPublicDto createDeveloper(String name) {
         Developer developer = Developer.builder()
                 .developerName(name)
-                .socials(socials)
                 .build();
 
         return DeveloperConverter.fromEntityToPublicDto(developerRepository.save(developer));
@@ -76,7 +73,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer and expect 201")
     void testCreateDeveloperAuthorized() throws Exception {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer");
 
         String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -89,14 +86,13 @@ class DeveloperE2ETest {
 
         assertNotNull(developer);
         assertEquals(developerCreateDto.developerName(), developerPublicDto.developerName(), developer.getDeveloperName());
-        assertEquals(2, developerPublicDto.socials().size(), developer.getSocials().size());
     }
 
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test create developer without authorization and expect 403")
     void testCreateDeveloperUnauthorized() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer");
 
         postRequest(ADMIN_API_PATH, status().isForbidden(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -106,7 +102,7 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test create developer without authentication and expect 401")
     void testCreateDeveloperUnauthenticated() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer");
 
         postRequest(ADMIN_API_PATH, status().isUnauthorized(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -117,7 +113,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer with invalid developer name and expect 400")
     void testCreateDeveloperInvalidDeveloperName() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer!");
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -131,7 +127,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer with empty developer name and expect 400")
     void testCreateDeveloperEmptyDeveloperName() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("");
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -145,7 +141,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer with name exceeding 255 characters and expect 400")
     void testCreateDeveloperExceedingDeveloperName() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("ABCDEF".repeat(50), List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("ABCDEF".repeat(50));
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -157,51 +153,11 @@ class DeveloperE2ETest {
 
     @Test
     @WithMockUser(username = USER, authorities = {"ADMIN"})
-    @DisplayName("Test create developer with no socials and expect 201")
-    void testCreateDeveloperNoSocials() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of());
-
-        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developer), mockMvc);
-
-        DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
-
-        assertEquals(1, developerRepository.count());
-        assertNotNull(developerPublicDto.id());
-
-        Developer developerEntity = developerRepository.findById(developerPublicDto.id()).orElse(null);
-
-        assertNotNull(developerEntity);
-        assertEquals(developer.developerName(), developerPublicDto.developerName(), developerEntity.getDeveloperName());
-        assertEquals(0, developerPublicDto.socials().size(), developerEntity.getSocials().size());
-    }
-
-    @Test
-    @WithMockUser(username = USER, authorities = {"ADMIN"})
-    @DisplayName("Test create developer with null socials and expect 201")
-    void testCreateDeveloperNullSocials() throws Exception {
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", null);
-
-        String response = postRequest(ADMIN_API_PATH, status().isCreated(), mapper.writeValueAsString(developer), mockMvc);
-
-        DeveloperPublicDto developerPublicDto = mapper.readValue(response, DeveloperPublicDto.class);
-
-        assertEquals(1, developerRepository.count());
-        assertNotNull(developerPublicDto.id());
-
-        Developer developerEntity = developerRepository.findById(developerPublicDto.id()).orElse(null);
-
-        assertNotNull(developerEntity);
-        assertEquals(developer.developerName(), developerPublicDto.developerName(), developerEntity.getDeveloperName());
-        assertEquals(0, developerPublicDto.socials().size());
-    }
-
-    @Test
-    @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test create developer with duplicate developer name and expect 400")
     void testCreateDeveloperDuplicateDeveloperName() throws Exception {
-        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer");
 
-        DeveloperCreateDto developer = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developer = new DeveloperCreateDto("Developer");
 
         String response = postRequest(ADMIN_API_PATH, status().isBadRequest(), mapper.writeValueAsString(developer), mockMvc);
 
@@ -214,8 +170,8 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get all developers and expect 200")
     void testGetAllDevelopers() throws Exception {
-        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer");
+        createDeveloper("Teste");
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
@@ -228,9 +184,9 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get all developers with name and expect 200")
     void testGetAllDevelopersWithName() throws Exception {
-        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Developerr", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer");
+        createDeveloper("Developerr");
+        createDeveloper("Teste");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=Developer", status().isOk(), mockMvc);
 
@@ -243,10 +199,10 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get all developers with name case insensitive and expect 200")
     void testGetAllDevelopersWithNameCaseInsensitive() throws Exception {
-        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Developerr", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer");
+        createDeveloper("Developerr");
 
-        createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Teste");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=developer", status().isOk(), mockMvc);
 
@@ -259,8 +215,8 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get all developers with a search query that does not exist and expect 200")
     void testGetAllDevelopersWithNonExistentName() throws Exception {
-        createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Teste", List.of("twitter.com/developer", "github.com/developer"));
+        createDeveloper("Developer");
+        createDeveloper("Teste");
 
         String response = getRequest(PUBLIC_API_PATH + "?name=NonExistent", status().isOk(), mockMvc);
 
@@ -273,7 +229,7 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test get developer by id and expect 200")
     void testGetDeveloperById() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
 
         String response = getRequest(PUBLIC_API_PATH + "/" + developerPublicDto.id(), status().isOk(), mockMvc);
 
@@ -296,8 +252,8 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test update developer and expect 200")
     void testUpdateDeveloper() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated");
 
         String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isOk(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -308,15 +264,14 @@ class DeveloperE2ETest {
 
         assertEquals(developerPublicDto.id(), developerDto.id());
         assertEquals(developerCreateDto.developerName(), developerDto.developerName(), developer.getDeveloperName());
-        assertEquals(developerCreateDto.socials().size(), developerDto.socials().size(), developer.getSocials().size());
     }
 
     @Test
     @WithMockUser(username = USER)
     @DisplayName("Test update developer without authorization and expect 403")
     void testUpdateDeveloperUnauthorized() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated");
 
         putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isForbidden(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -328,8 +283,8 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test update developer without authentication and expect 401")
     void testUpdateDeveloperUnauthenticated() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer Updated");
 
         putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isUnauthorized(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -342,8 +297,8 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test update developer with invalid developer name and expect 400")
     void testUpdateDeveloperInvalidDeveloperName() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer!", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer!");
 
         String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -361,9 +316,9 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test update developer with duplicate developer name and expect 400")
     void testUpdateDeveloperDuplicateDeveloperName() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
-        createDeveloper("Developer2", List.of("twitter.com/developer", "github.com/developer"));
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer2", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
+        createDeveloper("Developer2");
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer2");
 
         String response = putRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isBadRequest(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -380,7 +335,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test update developer not found and expect 404")
     void testUpdateDeveloperNotFound() throws Exception {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Developer");
 
         String response = putRequest(ADMIN_API_PATH + "/1", status().isNotFound(), mapper.writeValueAsString(developerCreateDto), mockMvc);
 
@@ -394,7 +349,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER, authorities = {"ADMIN"})
     @DisplayName("Test delete developer and expect 204")
     void testDeleteDeveloper() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
 
         deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isNoContent(), mockMvc);
 
@@ -405,7 +360,7 @@ class DeveloperE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test delete developer without authorization and expect 403")
     void testDeleteDeveloperUnauthorized() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
 
         deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isForbidden(), mockMvc);
 
@@ -415,7 +370,7 @@ class DeveloperE2ETest {
     @Test
     @DisplayName("Test delete developer without authentication and expect 401")
     void testDeleteDeveloperUnauthenticated() throws Exception {
-        DeveloperPublicDto developerPublicDto = createDeveloper("Developer", List.of("twitter.com/developer", "github.com/developer"));
+        DeveloperPublicDto developerPublicDto = createDeveloper("Developer");
 
         deleteRequest(ADMIN_API_PATH + "/" + developerPublicDto.id(), status().isUnauthorized(), mockMvc);
 

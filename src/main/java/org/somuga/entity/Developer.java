@@ -18,7 +18,6 @@ public class Developer {
     private Long id;
     @Column(unique = true, name = "developer_name", nullable = false)
     private String developerName;
-    private List<String> socials;
     @OneToMany(mappedBy = "developer",
             fetch = FetchType.LAZY)
     private List<Game> games;

@@ -38,10 +38,9 @@ class DeveloperServiceTest {
     private final Developer developer = Developer.builder()
             .id(1L)
             .developerName("Test Developer")
-            .socials(List.of("Test Socials"))
             .build();
 
-    private final DeveloperPublicDto responseDto = new DeveloperPublicDto(1L, "Test Developer", List.of("Test Socials"));
+    private final DeveloperPublicDto responseDto = new DeveloperPublicDto(1L, "Test Developer");
     @Autowired
     private DeveloperService developerService;
     @MockBean
@@ -79,7 +78,6 @@ class DeveloperServiceTest {
         assertNotNull(developerPublicDtos);
         assertEquals(developer.getId(), developerPublicDtos.developers().get(0).id());
         assertEquals(developer.getDeveloperName(), developerPublicDtos.developers().get(0).developerName());
-        assertEquals(developer.getSocials(), developerPublicDtos.developers().get(0).socials());
 
         Mockito.verify(developerRepository).findAll(Mockito.any(Pageable.class));
         Mockito.verify(developerRepository).count();
@@ -105,7 +103,6 @@ class DeveloperServiceTest {
         assertNotNull(developerPublicDtos);
         assertEquals(developer.getId(), developerPublicDtos.developers().get(0).id());
         assertEquals(developer.getDeveloperName(), developerPublicDtos.developers().get(0).developerName());
-        assertEquals(developer.getSocials(), developerPublicDtos.developers().get(0).socials());
 
         Mockito.verify(developerRepository).findAllByDeveloperNameContainingIgnoreCase("Test Developer", page);
         Mockito.verify(developerRepository).countByDeveloperNameContainingIgnoreCase("Test Developer");
@@ -146,7 +143,6 @@ class DeveloperServiceTest {
 
         assertEquals(developer.getId(), developerPublicDto.id());
         assertEquals(developer.getDeveloperName(), developerPublicDto.developerName());
-        assertEquals(developer.getSocials(), developerPublicDto.socials());
 
         Mockito.verify(developerRepository).findById(1L);
         developerConverterMockedStatic.verify(() -> DeveloperConverter.fromEntityToPublicDto(developer));
@@ -171,7 +167,7 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test create method and expect to return a DeveloperPublicDto")
     void create() throws Exception {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer", List.of("Test Socials"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer");
 
         Mockito.when(developerRepository.save(developer)).thenReturn(developer);
         Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.empty());
@@ -182,7 +178,6 @@ class DeveloperServiceTest {
 
         assertEquals(developer.getId(), developerPublicDto.id());
         assertEquals(developer.getDeveloperName(), developerPublicDto.developerName());
-        assertEquals(developer.getSocials(), developerPublicDto.socials());
 
         Mockito.verify(developerRepository).save(developer);
         Mockito.verify(developerRepository).findByDeveloperNameIgnoreCase("Test Developer");
@@ -195,7 +190,7 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test create method with existing developer name and expect to throw DuplicateFieldException")
     void createExistingDeveloperName() {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer", List.of("Test Socials"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer");
 
         Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.of(developer));
 
@@ -211,8 +206,8 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test update method and expect to return a DeveloperPublicDto")
     void update() throws Exception {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2", List.of("Test Socials2"));
-        DeveloperPublicDto updatedResponseDto = new DeveloperPublicDto(1L, "Test Developer2", List.of("Test Socials2"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2");
+        DeveloperPublicDto updatedResponseDto = new DeveloperPublicDto(1L, "Test Developer2");
 
         Mockito.when(developerRepository.findById(1L)).thenReturn(Optional.of(developer));
         Mockito.when(developerRepository.save(developer)).thenReturn(developer);
@@ -223,7 +218,6 @@ class DeveloperServiceTest {
 
         assertEquals(developer.getId(), developerPublicDto.id());
         assertEquals(developerCreateDto.developerName(), developerPublicDto.developerName());
-        assertEquals(developerCreateDto.socials(), developerPublicDto.socials());
 
         Mockito.verify(developerRepository).findById(1L);
         Mockito.verify(developerRepository).save(developer);
@@ -236,7 +230,7 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test update method with non-existing developer id and expect to throw DeveloperNotFoundException")
     void updateNonExisting() {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2", List.of("Test Socials2"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer2");
 
         Mockito.when(developerRepository.findById(1L)).thenReturn(Optional.empty());
         Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer2")).thenReturn(Optional.empty());
@@ -254,12 +248,11 @@ class DeveloperServiceTest {
     @Test
     @DisplayName("Test update method with existing developer name and expect to throw DuplicateFieldException")
     void updateExistingDeveloperName() {
-        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer", List.of("Test Socials"));
+        DeveloperCreateDto developerCreateDto = new DeveloperCreateDto("Test Developer");
 
         Developer duplicateDeveloper = Developer.builder()
                 .id(2L)
                 .developerName("Test Developer")
-                .socials(List.of("Test Socials"))
                 .build();
         Mockito.when(developerRepository.findByDeveloperNameIgnoreCase("Test Developer")).thenReturn(Optional.of(duplicateDeveloper));
 
@@ -308,7 +301,6 @@ class DeveloperServiceTest {
 
         assertEquals(developer.getId(), foundDeveloper.getId());
         assertEquals(developer.getDeveloperName(), foundDeveloper.getDeveloperName());
-        assertEquals(developer.getSocials(), foundDeveloper.getSocials());
 
         Mockito.verify(developerRepository).findById(1L);
         Mockito.verifyNoMoreInteractions(developerRepository);

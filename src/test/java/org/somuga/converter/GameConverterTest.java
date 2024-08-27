@@ -41,8 +41,7 @@ class GameConverterTest {
 
     private final DeveloperPublicDto developerPublicDto = new DeveloperPublicDto(
             1L,
-            "Developer Name",
-            new ArrayList<>(0)
+            "Developer Name"
     );
 
     private final List<GameGenre> genres = List.of(

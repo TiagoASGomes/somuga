@@ -61,7 +61,6 @@ public class DeveloperService implements IDeveloperService {
         }
         Developer developer = findById(id);
         developer.setDeveloperName(developerDto.developerName());
-        developer.setSocials(developerDto.socials());
         return DeveloperConverter.fromEntityToPublicDto(developerRepo.save(developer));
     }
 

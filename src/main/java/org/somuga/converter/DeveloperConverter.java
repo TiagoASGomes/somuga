@@ -15,12 +15,10 @@ public class DeveloperConverter {
 
     public static DeveloperPublicDto fromEntityToPublicDto(Developer developer) {
         if (developer == null) return null;
-        if (developer.getSocials() == null) developer.setSocials(List.of());
 
         return new DeveloperPublicDto(
                 developer.getId(),
-                developer.getDeveloperName(),
-                developer.getSocials()
+                developer.getDeveloperName()
         );
     }
 
@@ -36,7 +34,6 @@ public class DeveloperConverter {
         if (developerDto == null) return null;
         return Developer.builder()
                 .developerName(developerDto.developerName())
-                .socials(developerDto.socials())
                 .build();
     }
 }
