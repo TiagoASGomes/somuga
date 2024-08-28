@@ -52,7 +52,7 @@ class MediaConverterTest {
                 .mediaType(MediaType.GAME)
                 .build();
 
-        GamePublicDto responseDto = new GamePublicDto(1L, "Game Title", null, null, null, null, null, "Game Description", 0.0, 0, null, null);
+        GamePublicDto responseDto = new GamePublicDto(1L, "Game Title", null, null, null, null, "Game Description", 0.0, 0, null, null);
 
         gameConverterMockedStatic.when(() -> GameConverter.fromEntityToPublicDto(game)).thenReturn(responseDto);
 

@@ -43,7 +43,7 @@ class LikeConverterTest {
             .mediaType(MediaType.GAME)
             .build();
 
-    private final GamePublicDto mediaPublicDto = new GamePublicDto(1L, "game", null, null, null, null, null, null, 0.0, 0, null, null);
+    private final GamePublicDto mediaPublicDto = new GamePublicDto(1L, "game", null, null, null, null, null, 0.0, 0, null, null);
 
     @BeforeAll
     static void setUp() {

@@ -1,7 +1,9 @@
 package org.somuga.dto.game;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
@@ -30,11 +32,6 @@ public record GameCreateDto(
         @NotNull(message = INVALID_PLATFORMS)
         @Size(min = 1, message = INVALID_PLATFORMS)
         List<Long> platformsIds,
-        @Schema(description = "The game price", example = "20.00")
-        @Min(value = 0, message = INVALID_PRICE)
-        @Max(value = 1000, message = INVALID_PRICE)
-        @NotNull(message = INVALID_PRICE)
-        Double price,
         @Schema(description = "A description of the game", example = "Minecraft is a sandbox video game developed by Mojang Studios.")
         @NotBlank(message = INVALID_DESCRIPTION)
         @Size(max = 1000, message = MAX_DESCRIPTION_CHARACTERS)

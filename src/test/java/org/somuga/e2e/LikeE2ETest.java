@@ -96,7 +96,6 @@ public class LikeE2ETest {
                 .mediaType(org.somuga.enums.MediaType.GAME)
                 .mediaCreatorId(USER_ID)
                 .imageUrl("https://example.com")
-                .price(0.0)
                 .averageRating(0.0)
                 .build();
         return gameRepository.save(game);

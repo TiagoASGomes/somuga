@@ -23,8 +23,6 @@ public record GamePublicDto(
         List<GameGenrePublicDto> genres,
         @Schema(description = "Game platforms")
         List<PlatformPublicDto> platforms,
-        @Schema(description = "Game price", example = "20.00")
-        Double price,
         @Schema(description = "Game description", example = "Minecraft is a sandbox video game developed by Mojang Studios.")
         String description,
         @Schema(description = "Game average rating", example = "8.5")
