@@ -19,8 +19,6 @@ import java.util.List;
 @AllArgsConstructor
 public class Game extends Media {
 
-    @Column(name = "price", nullable = false, columnDefinition = "DECIMAL(10,2)")
-    private Double price;
     @ManyToOne
     private Developer developer;
     @ManyToMany(cascade = CascadeType.REMOVE, mappedBy = "games", fetch = FetchType.EAGER)

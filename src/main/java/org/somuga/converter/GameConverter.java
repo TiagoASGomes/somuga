@@ -24,7 +24,6 @@ public class GameConverter {
                 DeveloperConverter.fromEntityToPublicDto(game.getDeveloper()),
                 GameGenreConverter.fromEntityListToPublicDtoList(game.getGenres()),
                 PlatformConverter.fromEntityListToPublicDtoList(game.getPlatforms()),
-                game.getPrice(),
                 game.getDescription(),
                 game.getAverageRating(),
                 game.getLikes().size(),
@@ -46,7 +45,6 @@ public class GameConverter {
         return Game.builder()
                 .title(gameDto.title())
                 .releaseDate(gameDto.releaseDate())
-                .price(gameDto.price())
                 .description(gameDto.description())
                 .mediaUrl(gameDto.mediaUrl())
                 .imageUrl(gameDto.imageUrl())

@@ -94,7 +94,6 @@ class GameConverterTest {
                 .id(1L)
                 .title("Game Title")
                 .releaseDate(new Date())
-                .price(10.0)
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")
@@ -115,7 +114,6 @@ class GameConverterTest {
         assertEquals(game.getId(), gamePublicDto.id());
         assertEquals(game.getTitle(), gamePublicDto.title());
         assertEquals(game.getReleaseDate(), gamePublicDto.releaseDate());
-        assertEquals(game.getPrice(), gamePublicDto.price());
         assertEquals(game.getDescription(), gamePublicDto.description());
         assertEquals(game.getMediaUrl(), gamePublicDto.mediaUrl());
         assertEquals(game.getImageUrl(), gamePublicDto.imageUrl());
@@ -158,7 +156,6 @@ class GameConverterTest {
         assertNull(gamePublicDto.id());
         assertNull(gamePublicDto.title());
         assertNull(gamePublicDto.releaseDate());
-        assertNull(gamePublicDto.price());
         assertNull(gamePublicDto.description());
         assertNull(gamePublicDto.mediaUrl());
         assertNull(gamePublicDto.imageUrl());
@@ -180,7 +177,6 @@ class GameConverterTest {
                 .id(1L)
                 .title("Game Title")
                 .releaseDate(new Date())
-                .price(10.0)
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")
@@ -243,7 +239,6 @@ class GameConverterTest {
                 1L,
                 List.of(1L, 2L),
                 List.of(1L, 2L),
-                10.0,
                 "Game Description",
                 "http://media.com",
                 "http://image.com"
@@ -253,7 +248,6 @@ class GameConverterTest {
 
         assertEquals(gameDto.title(), game.getTitle());
         assertEquals(gameDto.releaseDate(), game.getReleaseDate());
-        assertEquals(gameDto.price(), game.getPrice());
         assertEquals(gameDto.description(), game.getDescription());
         assertEquals(gameDto.mediaUrl(), game.getMediaUrl());
         assertEquals(gameDto.imageUrl(), game.getImageUrl());
@@ -283,7 +277,6 @@ class GameConverterTest {
                 .id(1L)
                 .title("Game Title")
                 .releaseDate(new Date())
-                .price(10.0)
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")
@@ -304,7 +297,6 @@ class GameConverterTest {
         assertEquals(game.getId(), gameLikePublicDto.game().id());
         assertEquals(game.getTitle(), gameLikePublicDto.game().title());
         assertEquals(game.getReleaseDate(), gameLikePublicDto.game().releaseDate());
-        assertEquals(game.getPrice(), gameLikePublicDto.game().price());
         assertEquals(game.getDescription(), gameLikePublicDto.game().description());
         assertEquals(game.getMediaUrl(), gameLikePublicDto.game().mediaUrl());
         assertEquals(game.getImageUrl(), gameLikePublicDto.game().imageUrl());

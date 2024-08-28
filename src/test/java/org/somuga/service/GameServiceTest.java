@@ -59,7 +59,6 @@ class GameServiceTest {
             .releaseDate(date)
             .imageUrl("image")
             .mediaUrl("media")
-            .price(10.1)
             .developer(developer)
             .genres(new ArrayList<>(List.of(genre)))
             .platforms(new ArrayList<>(List.of(platform)))
@@ -73,7 +72,6 @@ class GameServiceTest {
             DeveloperConverter.fromEntityToPublicDto(developer),
             GameGenreConverter.fromEntityListToPublicDtoList(List.of(genre)),
             PlatformConverter.fromEntityListToPublicDtoList(List.of(platform)),
-            10.1,
             "description",
             0.0,
             0,
@@ -223,7 +221,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
@@ -231,7 +228,6 @@ class GameServiceTest {
         Game convertedGame = Game.builder()
                 .title("game")
                 .releaseDate(date)
-                .price(10.1)
                 .description("description")
                 .imageUrl("image")
                 .mediaUrl("media")
@@ -270,7 +266,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
@@ -299,7 +294,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
@@ -332,7 +326,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
@@ -363,7 +356,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
@@ -371,7 +363,6 @@ class GameServiceTest {
         Game convertedGame = Game.builder()
                 .title("game2")
                 .releaseDate(date)
-                .price(10.1)
                 .description("description")
                 .imageUrl("image")
                 .mediaUrl("media")
@@ -384,7 +375,6 @@ class GameServiceTest {
                 DeveloperConverter.fromEntityToPublicDto(developer),
                 GameGenreConverter.fromEntityListToPublicDtoList(List.of(genre)),
                 PlatformConverter.fromEntityListToPublicDtoList(List.of(platform)),
-                10.1,
                 "description",
                 0.0,
                 0,
@@ -427,7 +417,6 @@ class GameServiceTest {
                 1L,
                 List.of(1L),
                 List.of(1L),
-                10.1,
                 "description",
                 "image",
                 "media"
