@@ -47,8 +47,8 @@ public class GameController {
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = GameListDto.class))})
     @Parameter(name = "title", description = "The game title to search for", example = "Minecraft")
-    @Parameter(name = "platform", description = "The platform to search for", example = "PC")
-    @Parameter(name = "genre", description = "The genre to search for", example = "Sandbox")
+    @Parameter(name = "platform", description = "The platform to search for")
+    @Parameter(name = "genre", description = "The genre to search for")
     @Parameter(name = "developer", description = "The developer to search for", example = "Mojang")
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
     @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))

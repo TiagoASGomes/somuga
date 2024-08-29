@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.somuga.enums.MediaType;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -34,7 +34,7 @@ public abstract class Media {
     private MediaType mediaType;
     @Column(nullable = false, name = "title")
     private String title;
-    private Date releaseDate;
+    private LocalDate releaseDate;
     @Column(length = 1000, nullable = false, name = "description")
     private String description;
     @Column(name = "image_url")

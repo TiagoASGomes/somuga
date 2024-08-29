@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -91,7 +91,7 @@ public class LikeE2ETest {
         Game game = Game.builder()
                 .title("Game")
                 .description("Description")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .mediaUrl("https://example.com")
                 .mediaType(org.somuga.enums.MediaType.GAME)
                 .mediaCreatorId(USER_ID)
@@ -105,7 +105,7 @@ public class LikeE2ETest {
         User user = User.builder()
                 .id(id)
                 .userName(userName)
-                .joinDate(new Date())
+                .joinDate(LocalDate.now())
                 .email(email)
                 .active(true)
                 .build();

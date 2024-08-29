@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +44,7 @@ class GameE2ETest {
     private final String PRIVATE_API_PATH = "/api/v1/game/private";
     private final String title = "Cyberpunk 2077";
     private final String description = "A futuristic game";
-    private final Date releaseDate = new Date();
+    private final LocalDate releaseDate = LocalDate.now().minusYears(1);
     private final String mediaUrl = "https://media.com";
     private final String imageUrl = "https://image.com";
     MockMvc mockMvc;
@@ -142,7 +142,7 @@ class GameE2ETest {
         userRepository.save(user);
     }
 
-    private void assertGame(GamePublicDto game, Game gameEntity, String title, String description, Date releaseDate, String mediaUrl, String imageUrl, Long developer, List<Long> platforms, List<Long> genres, String mediaCreatorId, MediaType mediaType) {
+    private void assertGame(GamePublicDto game, Game gameEntity, String title, String description, LocalDate releaseDate, String mediaUrl, String imageUrl, Long developer, List<Long> platforms, List<Long> genres, String mediaCreatorId, MediaType mediaType) {
         assertEquals(title, game.title());
         assertEquals(title, gameEntity.getTitle());
         assertEquals(description, game.description());
@@ -382,8 +382,8 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get all games and expect 200")
     void testGetAllGames() throws Exception {
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH, status().isOk(), mockMvc);
 
@@ -397,8 +397,8 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get all games paged and expect 200")
     void testGetAllGamesPaged() throws Exception {
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?page=0&size=1", status().isOk(), mockMvc);
 
@@ -412,9 +412,9 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get all games with title search criteria and expect 200")
     void testGetAllGamesWithTitle() throws Exception {
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?title=The Witcher", status().isOk(), mockMvc);
 
@@ -428,9 +428,9 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get all games with platform search criteria and expect 200")
     void testGetAllGamesWithPlatform() throws Exception {
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, platforms.subList(0, 1), "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer, genres, platforms.subList(0, 1), "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?platform=PS4", status().isOk(), mockMvc);
 
@@ -445,9 +445,9 @@ class GameE2ETest {
     @DisplayName("Test get all games with multiple platform search criteria and expect 200")
     void testGetAllGamesWithMultiplePlatforms() throws Exception {
         Long platform3 = createPlatform("XBOX");
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres, List.of(platforms.get(0), platform3), "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer, genres, List.of(platforms.get(0), platform3), "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?platform=PC&platform=XBOX", status().isOk(), mockMvc);
 
@@ -462,9 +462,9 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get all games with genre search criteria and expect 200")
     void testGetAllGamesWithGenre() throws Exception {
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer, genres.subList(0, 1), platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer, genres.subList(0, 1), platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?genre=RPG", status().isOk(), mockMvc);
 
@@ -479,9 +479,9 @@ class GameE2ETest {
     @DisplayName("Test get all games with multiple genre search criteria and expect 200")
     void testGetAllGamesWithMultipleGenres() throws Exception {
         Long genre3 = createGenre("Adventure");
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer, List.of(genres.get(0), genre3), platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer, List.of(genres.get(0), genre3), platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?genre=Adventure&genre=Action", status().isOk(), mockMvc);
 
@@ -496,9 +496,9 @@ class GameE2ETest {
     @DisplayName("Test get all games with developer search criteria and expect 200")
     void testGetAllGamesWithDeveloper() throws Exception {
         Long developer2 = createDeveloper("Teste", List.of("https://twitter.com/teste"));
-        createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 3", new Date(), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("The Witcher 2", new Date(), developer2, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 3", LocalDate.now().minusYears(1), developer, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("The Witcher 2", LocalDate.now().minusYears(1), developer2, genres, platforms, "A fantasy game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?developer=CD Projekt Red", status().isOk(), mockMvc);
 
@@ -515,11 +515,11 @@ class GameE2ETest {
         Long developer2 = createDeveloper("Teste", List.of("https://twitter.com/teste"));
         Long platform3 = createPlatform("XBOX");
         Long genre3 = createGenre("Adventure");
-        createGame(new GameCreateDto("Game 1", new Date(), developer, genres, List.of(platform3), "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("Game 2", new Date(), developer, List.of(genre3), platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("Game 3", new Date(), developer2, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        createGame(new GameCreateDto("Different", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
-        GamePublicDto game = createGame(new GameCreateDto("Game 4", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Game 1", LocalDate.now().minusYears(1), developer, genres, List.of(platform3), "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Game 2", LocalDate.now().minusYears(1), developer, List.of(genre3), platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Game 3", LocalDate.now().minusYears(1), developer2, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        createGame(new GameCreateDto("Different", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Game 4", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "?title=Game&developer=CD Projekt Red&platform=PC&genre=Action", status().isOk(), mockMvc);
 
@@ -534,7 +534,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get game by id and expect 200")
     void testGetGameById() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
 
         String response = getRequest(PUBLIC_API_PATH + "/" + game.id(), status().isOk(), mockMvc);
 
@@ -567,7 +567,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get game by id with liked and expect 200 with liked true")
     void testGetGameByIdWithLiked() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
         createUser(USER);
         createLike(game.id(), USER);
 
@@ -591,7 +591,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test get by id  with liked from another user and expect 200 with liked false")
     void testGetGameByIdWithLikedFromAnotherUser() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
         createUser("anotherUser");
         createLike(game.id(), "anotherUser");
 
@@ -618,11 +618,11 @@ class GameE2ETest {
         Long newDeveloperId = createDeveloper("Teste", List.of("https://twitter.com/teste"));
         Long newPlatformId = createPlatform("XBOX");
         Long newGenreId = createGenre("Adventure");
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
 
         GameCreateDto gameUpdate = new GameCreateDto(
                 "Updated",
-                new Date(),
+                LocalDate.now().minusYears(1),
                 newDeveloperId,
                 List.of(newGenreId),
                 List.of(newPlatformId),
@@ -666,7 +666,7 @@ class GameE2ETest {
                 .mediaCreatorId("anotherUser")
                 .mediaType(MediaType.GAME)
                 .description(description)
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now().minusYears(1))
                 .mediaUrl(mediaUrl)
                 .averageRating(0.0)
                 .build();
@@ -674,7 +674,7 @@ class GameE2ETest {
 
         GameCreateDto gameUpdate = new GameCreateDto(
                 "Updated",
-                new Date(),
+                LocalDate.now().minusYears(1),
                 developer,
                 genres,
                 platforms,
@@ -703,7 +703,7 @@ class GameE2ETest {
     void testUpdateGameNotFound() throws Exception {
         GameCreateDto gameUpdate = new GameCreateDto(
                 "Updated",
-                new Date(),
+                LocalDate.now().minusYears(1),
                 developer,
                 genres,
                 platforms,
@@ -724,7 +724,7 @@ class GameE2ETest {
     @WithMockUser(username = USER)
     @DisplayName("Test delete game and expect 204")
     void testDeleteGame() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
 
         deleteRequest(PRIVATE_API_PATH + "/" + game.id(), status().isNoContent(), mockMvc);
 
@@ -740,7 +740,7 @@ class GameE2ETest {
                 .mediaCreatorId("anotherUser")
                 .mediaType(MediaType.GAME)
                 .description(description)
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now().minusYears(1))
                 .mediaUrl(mediaUrl)
                 .averageRating(0.0)
                 .build();
@@ -768,7 +768,7 @@ class GameE2ETest {
     @WithMockUser(username = USER, authorities = "ADMIN")
     @DisplayName("Test delete game as admin and expect 204")
     void testDeleteGameAsAdmin() throws Exception {
-        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", new Date(), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
+        GamePublicDto game = createGame(new GameCreateDto("Cyberpunk 2077", LocalDate.now().minusYears(1), developer, genres, platforms, "A futuristic game", "https://media.com", "https://image.com"));
 
         deleteRequest(PRIVATE_API_PATH + "/" + game.id(), status().isNoContent(), mockMvc);
 
@@ -797,7 +797,7 @@ class GameE2ETest {
                 .mediaCreatorId("anotherUser")
                 .mediaType(MediaType.GAME)
                 .description(description)
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now().minusYears(1))
                 .mediaUrl(mediaUrl)
                 .averageRating(0.0)
                 .build();

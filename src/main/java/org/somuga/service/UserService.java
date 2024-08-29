@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.somuga.util.message.Messages.*;
@@ -61,7 +61,7 @@ public class UserService implements IUserService {
         User user = UserConverter.fromCreateDtoToEntity(userDto, id);
         checkDuplicateFields(user.getUserName());
         user.setActive(true);
-        user.setJoinDate(new Date());
+        user.setJoinDate(LocalDate.now());
         return UserConverter.fromEntityToPublicDto(userRepo.save(user));
     }
 

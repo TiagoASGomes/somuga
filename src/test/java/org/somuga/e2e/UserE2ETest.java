@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
@@ -72,7 +72,7 @@ public class UserE2ETest {
                 .id(id)
                 .userName(name)
                 .email(email)
-                .joinDate(new Date())
+                .joinDate(LocalDate.now())
                 .active(active)
                 .build();
         return UserConverter.fromEntityToPublicDto(userRepository.save(user));

@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.somuga.util.message.Messages.*;
@@ -20,7 +20,7 @@ public record GameCreateDto(
         @Schema(description = "The game release date", example = "2011-11-18")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         @NotNull(message = INVALID_RELEASE_DATE)
-        Date releaseDate,
+        LocalDate releaseDate,
         @Schema(description = "The game developer id", example = "1")
         @NotNull(message = INVALID_DEVELOPER)
         Long developerId,

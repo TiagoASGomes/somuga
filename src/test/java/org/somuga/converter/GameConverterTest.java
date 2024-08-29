@@ -19,8 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -93,7 +93,7 @@ class GameConverterTest {
         Game game = Game.builder()
                 .id(1L)
                 .title("Game Title")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")
@@ -176,7 +176,7 @@ class GameConverterTest {
         Game game = Game.builder()
                 .id(1L)
                 .title("Game Title")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")
@@ -235,7 +235,7 @@ class GameConverterTest {
     void fromCreateDtoToEntity() {
         GameCreateDto gameDto = new GameCreateDto(
                 "Game Title",
-                new Date(),
+                LocalDate.now(),
                 1L,
                 List.of(1L, 2L),
                 List.of(1L, 2L),
@@ -276,7 +276,7 @@ class GameConverterTest {
         Game game = Game.builder()
                 .id(1L)
                 .title("Game Title")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .description("Game Description")
                 .mediaUrl("http://media.com")
                 .imageUrl("http://image.com")

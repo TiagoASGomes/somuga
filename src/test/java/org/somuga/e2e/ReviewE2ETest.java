@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.somuga.testUtils.Utils.*;
@@ -86,7 +86,7 @@ public class ReviewE2ETest {
         Game game = Game.builder()
                 .title("Game")
                 .description("Description")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .mediaUrl("https://example.com")
                 .mediaType(org.somuga.enums.MediaType.GAME)
                 .mediaCreatorId(USER_ID)
@@ -101,7 +101,7 @@ public class ReviewE2ETest {
                 .id(id)
                 .userName(userName)
                 .email(email)
-                .joinDate(new Date())
+                .joinDate(LocalDate.now())
                 .active(true)
                 .build();
         return userRepository.save(user);

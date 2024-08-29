@@ -6,7 +6,7 @@ import org.somuga.dto.game_genre.GameGenrePublicDto;
 import org.somuga.dto.media.MediaPublicDto;
 import org.somuga.dto.platform.PlatformPublicDto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Schema(description = "Game public DTO")
@@ -16,7 +16,7 @@ public record GamePublicDto(
         @Schema(description = "Game title", example = "Minecraft")
         String title,
         @Schema(description = "Game release date", example = "2011-11-18")
-        Date releaseDate,
+        LocalDate releaseDate,
         @Schema(description = "Game developer")
         DeveloperPublicDto developer,
         @Schema(description = "Game genres")

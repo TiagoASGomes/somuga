@@ -2,7 +2,7 @@ package org.somuga.dto.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Schema(description = "DTO for a user")
 public record UserPublicDto(
@@ -11,7 +11,7 @@ public record UserPublicDto(
         @Schema(description = "Username of the user", example = "user123")
         String userName,
         @Schema(description = "Date when the user joined", example = "2021-08-02T21:14:59.981Z")
-        Date joinedDate,
+        LocalDate joinedDate,
         @Schema(description = "The user's email", example = "john@example.com")
         String email
 ) {

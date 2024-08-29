@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +32,7 @@ class MovieConverterTest {
         Movie movie = Movie.builder()
                 .id(1L)
                 .title("Movie Title")
-                .releaseDate(new Date())
+                .releaseDate(LocalDate.now())
                 .description("Movie Description")
                 .duration(120)
                 .mediaUrl("http://media.com")
@@ -105,7 +105,7 @@ class MovieConverterTest {
     void fromCreateDtoToEntity() {
         MovieCreateDto movieCreateDto = new MovieCreateDto(
                 "Movie Title",
-                new Date(),
+                LocalDate.now(),
                 "Movie Description",
                 120,
                 List.of(),

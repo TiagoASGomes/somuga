@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,7 +28,7 @@ class UserConverterTest {
         User user = User.builder()
                 .id("1")
                 .userName("user")
-                .joinDate(new Date())
+                .joinDate(LocalDate.now())
                 .build();
 
         UserPublicDto userDto = UserConverter.fromEntityToPublicDto(user);
@@ -52,12 +52,12 @@ class UserConverterTest {
                 User.builder()
                         .id("1")
                         .userName("user1")
-                        .joinDate(new Date())
+                        .joinDate(LocalDate.now())
                         .build(),
                 User.builder()
                         .id("2")
                         .userName("user2")
-                        .joinDate(new Date())
+                        .joinDate(LocalDate.now())
                         .build()
         );
 

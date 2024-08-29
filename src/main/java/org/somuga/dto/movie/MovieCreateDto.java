@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import org.somuga.dto.crew_role.MovieRoleCreateDto;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.somuga.util.message.Messages.*;
@@ -20,7 +20,7 @@ public record MovieCreateDto(
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         @Past(message = INVALID_RELEASE_DATE)
         @NotNull(message = INVALID_RELEASE_DATE)
-        Date releaseDate,
+        LocalDate releaseDate,
         @Schema(description = "Description of the movie", example = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.")
         @NotBlank(message = INVALID_DESCRIPTION)
         @Size(max = 1000, message = MAX_DESCRIPTION_CHARACTERS)

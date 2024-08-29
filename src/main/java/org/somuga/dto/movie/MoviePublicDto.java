@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.somuga.dto.crew_role.MovieRolePublicDto;
 import org.somuga.dto.media.MediaPublicDto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Schema(description = "Movie public DTO")
@@ -14,7 +14,7 @@ public record MoviePublicDto(
         @Schema(description = "Movie title", example = "The Matrix")
         String title,
         @Schema(description = "Movie release date", example = "1999-03-31")
-        Date releaseDate,
+        LocalDate releaseDate,
         @Schema(description = "Movie description", example = "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.")
         String description,
         @Schema(description = "Movie duration in minutes", example = "136")

@@ -3,7 +3,7 @@ package org.somuga.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -25,7 +25,7 @@ public class User {
     private List<Like> likes;
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
-    private Date joinDate;
+    private LocalDate joinDate;
     private boolean active;
 
 }

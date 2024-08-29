@@ -45,7 +45,7 @@ public class MovieController {
             content = {@Content(mediaType = "application/json",
                     schema = @Schema(implementation = MovieListDto.class))})
     @Parameter(name = "title", description = "The movie title to search for", example = "The Godfather")
-    @Parameter(name = "crewIds", description = "A list of crew members ids to search for", example = "1,2,3")
+    @Parameter(name = "crewIds", description = "A list of crew members ids to search for")
     @Parameter(name = "size", description = "The number of elements to return", example = "10")
     @Parameter(name = "page", description = "The page number to return", example = "0", schema = @Schema(type = "integer"))
     @GetMapping("/public")

@@ -25,8 +25,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +49,7 @@ class MovieE2ETest {
     private final String PUBLIC_API_PATH = "/api/v1/movie/public";
     private final List<MovieCrew> crew = new ArrayList<>();
     private final String TITLE = "Title";
-    private final Date RELEASE_DATE = new Date();
+    private final LocalDate RELEASE_DATE = LocalDate.now().minusYears(1);
     private final String DESCRIPTION = "Description";
     private final Integer DURATION = 120;
     private final String MEDIA_URL = "https://media.com";
@@ -103,7 +103,7 @@ class MovieE2ETest {
         movieCrewRepository.saveAll(crew);
     }
 
-    public MoviePublicDto createMovie(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
+    public MoviePublicDto createMovie(String title, LocalDate releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
         String response = postRequest(PRIVATE_API_PATH, status().isCreated(), mapper.writeValueAsString(movieCreateDto), mockMvc);
@@ -111,7 +111,7 @@ class MovieE2ETest {
         return mapper.readValue(response, MoviePublicDto.class);
     }
 
-    public ErrorDto createMovieBadRequest(String title, Date releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
+    public ErrorDto createMovieBadRequest(String title, LocalDate releaseDate, String description, Integer duration, List<MovieRoleCreateDto> crew, String mediaUrl, String imageUrl) throws Exception {
         MovieCreateDto movieCreateDto = new MovieCreateDto(title, releaseDate, description, duration, crew, mediaUrl, imageUrl);
 
         String response = postRequest(PRIVATE_API_PATH, status().isBadRequest(), mapper.writeValueAsString(movieCreateDto), mockMvc);
@@ -230,7 +230,7 @@ class MovieE2ETest {
     @WithMockUser(username = USER_ID)
     @DisplayName("Test create a movie future date and expect status 400")
     void testCreateMovieWithFutureDate() throws Exception {
-        ErrorDto errorDto = createMovieBadRequest(TITLE, new Date(System.currentTimeMillis() + 1000000), DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
+        ErrorDto errorDto = createMovieBadRequest(TITLE, LocalDate.now().plusDays(1), DESCRIPTION, DURATION, createAllRoles(), MEDIA_URL, IMAGE_URL);
 
         assertTrue(errorDto.message().contains(INVALID_RELEASE_DATE));
         assertEquals(0, movieRepository.count());
@@ -575,7 +575,7 @@ class MovieE2ETest {
         List<MovieRoleCreateDto> crew = createAllRoles();
         MoviePublicDto moviePublicDto = createMovie(TITLE, RELEASE_DATE, DESCRIPTION, DURATION, crew.subList(0, 2), MEDIA_URL, IMAGE_URL);
         String newTitle = "New Title";
-        Date newReleaseDate = new Date();
+        LocalDate newReleaseDate = LocalDate.now().minusYears(2);
         String newDescription = "New Description";
         Integer newDuration = 150;
         String newImageUrl = "https://newimage.com";

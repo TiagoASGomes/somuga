@@ -32,8 +32,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +51,7 @@ class GameServiceTest {
     private final Developer developer = Developer.builder().id(1L).developerName("developer").build();
     private final GameGenre genre = GameGenre.builder().id(1L).genre("genre").build();
     private final Platform platform = Platform.builder().id(1L).platformName("platform").build();
-    private final Date date = new Date();
+    private final LocalDate date = LocalDate.now();
     private final Game game = Game.builder().id(1L)
             .title("game")
             .mediaType(MediaType.GAME)
