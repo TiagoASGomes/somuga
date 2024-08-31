@@ -29,7 +29,7 @@ public record GamePublicDto(
         Double averageRating,
         @Schema(description = "Number of game likes", example = "1000")
         int likes,
-        @Schema(description = "A link the game official website", example = "https://www.minecraft.net")
+        @Schema(description = "A link to IGDB page of the game", example = "https://www.minecraft.net")
         String mediaUrl,
         @Schema(description = "A link to the game image", example = "https://www.minecraft.net/image.jpg")
         String imageUrl

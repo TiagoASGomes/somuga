@@ -92,6 +92,9 @@ public class GameService implements IGameService {
         boolean isLiked = game.getLikes()
                 .stream()
                 .anyMatch(like -> like.getUser().getId().equals(user));
+        boolean isReviewd = game.getReviews()
+                .stream()
+                .anyMatch(review -> review.getUser().getId().equals(user));
         return GameConverter.fromEntityToPublicLikeDto(game, isLiked);
     }
 

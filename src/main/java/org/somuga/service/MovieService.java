@@ -79,6 +79,9 @@ public class MovieService implements IMovieService {
         boolean isLiked = movie.getLikes()
                 .stream()
                 .anyMatch(like -> like.getUser().getId().equals(user));
+        boolean isReviewd = movie.getReviews()
+                .stream()
+                .anyMatch(review -> review.getUser().getId().equals(user));
         return MovieConverter.fromEntityToLikePublicDto(movie, isLiked);
     }
 
