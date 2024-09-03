@@ -24,14 +24,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http
-                .cors(withDefaults())
-                .authorizeHttpRequests((authorize) -> authorize
+                .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(regexMatcher("/api/.*/public.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/private.*")).authenticated()
                         .requestMatchers(regexMatcher("/swagger.*|/v3/api-docs.*")).permitAll()
                         .requestMatchers(regexMatcher("/api/.*/admin.*")).hasAuthority("ADMIN")
                 )
-                .cors(withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(withDefaults())
                 )
