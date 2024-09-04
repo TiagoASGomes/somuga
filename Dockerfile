@@ -5,7 +5,7 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn install -DskipTests
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jdk-alpine
 
@@ -13,6 +13,6 @@ WORKDIR /app
 
 EXPOSE 8080
 
-COPY --from=build /app/target/somuga-0.0.1-SNAPSHOT.jar .
+COPY --from=build /app/target/somuga-1.0.jar .
 
-ENTRYPOINT ["java", "-jar", "somuga-0.0.1-SNAPSHOT.jar", "--host", "0.0.0.0"]
+ENTRYPOINT ["java", "-jar", "somuga-1.0.jar", "--host", "0.0.0.0"]

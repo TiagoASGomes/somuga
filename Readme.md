@@ -41,7 +41,6 @@ rely on any external dependencies or services._
     ```
 3. Use Postman or the [swagger documentation](http://localhost:8080/swagger-ui/index.html) to test the endpoints, the
    app is running on port 8080
-4. Get the access token on the link above and use it to authenticate the requests
 
 [linkedin-url]: https://www.linkedin.com/in/tiago-gomes-4272952ba/
 
