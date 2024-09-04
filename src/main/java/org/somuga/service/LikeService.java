@@ -7,7 +7,6 @@ import org.somuga.dto.like.LikePublicDto;
 import org.somuga.entity.Like;
 import org.somuga.entity.Media;
 import org.somuga.entity.User;
-import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
@@ -29,7 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.somuga.util.message.Messages.*;
+import static org.somuga.util.message.Messages.ALREADY_LIKED;
+import static org.somuga.util.message.Messages.LIKE_NOT_FOUND;
 
 @Service
 public class LikeService implements ILikeService {
@@ -81,12 +81,10 @@ public class LikeService implements ILikeService {
     }
 
     @Override
-    public void delete(Long id) throws LikeNotFoundException, InvalidPermissionException {
-        Like like = likeRepo.findById(id).orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + id));
+    public void delete(Long mediaId) throws LikeNotFoundException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ADMIN")) && !like.getUser().getId().equals(auth.getName())) {
-            throw new InvalidPermissionException(UNAUTHORIZED_DELETE);
-        }
-        likeRepo.deleteById(id);
+        Like like = likeRepo.findByMediaIdAndUserId(mediaId, auth.getName())
+                .orElseThrow(() -> new LikeNotFoundException(LIKE_NOT_FOUND + mediaId));
+        likeRepo.delete(like);
     }
 }

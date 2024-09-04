@@ -12,7 +12,6 @@ import org.somuga.aspect.ErrorDto;
 import org.somuga.dto.like.LikeCreateDto;
 import org.somuga.dto.like.LikeListDto;
 import org.somuga.dto.like.LikePublicDto;
-import org.somuga.exception.InvalidPermissionException;
 import org.somuga.exception.like.AlreadyLikedException;
 import org.somuga.exception.like.LikeNotFoundException;
 import org.somuga.exception.media.MediaNotFoundException;
@@ -87,18 +86,15 @@ public class LikeController {
             @ApiResponse(responseCode = "401",
                     description = "Unauthenticated",
                     content = @Content),
-            @ApiResponse(responseCode = "403",
-                    description = "Invalid permission, like does not belong to user",
-                    content = @Content),
             @ApiResponse(responseCode = "404",
                     description = "Like not found",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorDto.class))
             )})
-    @Parameter(name = "id", description = "The like id", example = "1", required = true)
-    @DeleteMapping("/private/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws LikeNotFoundException, InvalidPermissionException {
-        likeService.delete(id);
+    @Parameter(name = "mediaId", description = "The id of the media to delete like", example = "1", required = true)
+    @DeleteMapping("/private")
+    public ResponseEntity<Void> delete(@RequestParam Long mediaId) throws LikeNotFoundException {
+        likeService.delete(mediaId);
         return ResponseEntity.noContent().build();
     }
 }

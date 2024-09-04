@@ -7,7 +7,7 @@ public class Messages {
     public static final String MOVIE_NOT_FOUND = "No movie found with id: ";
     public static final String GAME_NOT_FOUND = "No game found with id: ";
     public static final String MEDIA_NOT_FOUND = "No media found with id: ";
-    public static final String LIKE_NOT_FOUND = "No media found with id: ";
+    public static final String LIKE_NOT_FOUND = "No like found with current user for media with id: ";
     public static final String PLATFORM_NOT_FOUND = "No platform found with id: ";
     public static final String DEVELOPER_NOT_FOUND = "No developer found with id: ";
     public static final String GENRE_NOT_FOUND = "No genre found with id: ";
@@ -28,12 +28,10 @@ public class Messages {
     public static final String PLATFORM_ALREADY_EXISTS = "Platform already exists with this fullName: ";
     public static final String GENRE_ALREADY_EXISTS = "Genre already exists with this fullName: ";
     public static final String INVALID_RELEASE_DATE = "Release date cannot be empty";
-    public static final String INVALID_PRICE = "Price must be between 0 and 1000";
     public static final String INVALID_DESCRIPTION = "Description field cannot be empty";
     public static final String MAX_DESCRIPTION_CHARACTERS = "Description must be lower that 1000 characters";
     public static final String INVALID_NAME = "Name field cannot be empty";
     public static final String INVALID_NAME_SIZE = "Name must be between 3 and 100 characters";
-    public static final String INVALID_BIRTH_DATE = "Birth date must be in the past";
     public static final String INVALID_MOVIE_ROLE = "Invalid movie role";
     public static final String INVALID_CHARACTER_NAME = "Character name must be lower than 255 characters";
     public static final String INVALID_DURATION = "Duration must be between 1 and 1440 minutes";
