@@ -275,7 +275,7 @@ public class LikeE2ETest {
     void testDeleteLike() throws Exception {
         LikePublicDto like = createLike(user, game);
 
-        deleteRequest(PRIVATE_API_PATH + "/" + like.id(), status().isNoContent(), mockMvc);
+        deleteRequest(PRIVATE_API_PATH + "/" + game.getId(), status().isNoContent(), mockMvc);
 
         assertEquals(0, likeTestRepository.count());
     }
@@ -285,7 +285,7 @@ public class LikeE2ETest {
     void testDeleteLikeUnauthorized() throws Exception {
         LikePublicDto like = createLike(user, game);
 
-        deleteRequest(PRIVATE_API_PATH + "/" + like.id(), status().isUnauthorized(), mockMvc);
+        deleteRequest(PRIVATE_API_PATH + "/" + game.getId(), status().isUnauthorized(), mockMvc);
     }
 
 

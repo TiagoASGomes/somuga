@@ -2,7 +2,7 @@ package org.somuga.filters.movie;
 
 import jakarta.persistence.criteria.*;
 import org.somuga.entity.Movie;
-import org.somuga.entity.MovieCrewRole;
+import org.somuga.entity.MovieCrew;
 import org.somuga.filters.SearchCriteria;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -20,13 +20,13 @@ public class MovieSpecification implements Specification<Movie> {
         String strToSearch = criteria.getValue().toLowerCase();
         return switch (criteria.getKey()) {
             case "title" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + strToSearch + "%");
-            case "crewId" ->
-                    criteriaBuilder.equal(movieCrewRoleJoin(root).get("id").get("movieCrewId"), Long.parseLong(strToSearch));
+            case "crewId" -> criteriaBuilder.equal(movieCrewRoleJoin(root).get("id"), Long.parseLong(strToSearch));
             default -> null;
         };
     }
 
-    private Join<Movie, MovieCrewRole> movieCrewRoleJoin(Root<Movie> root) {
-        return root.join("movieCrew", JoinType.INNER);
+    private Join<MovieCrew, Movie> movieCrewRoleJoin(Root<Movie> root) {
+        return root.join("movieCrew", JoinType.INNER).join("movieCrew", JoinType.INNER);
     }
+
 }
