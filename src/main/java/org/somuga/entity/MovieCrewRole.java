@@ -3,7 +3,6 @@ package org.somuga.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.somuga.enums.MovieRole;
-import org.somuga.util.id_class.MovieCrewRoleId;
 
 @Entity(name = "MovieCrewRole")
 @Table(name = "movie_crew_role")
@@ -14,15 +13,14 @@ import org.somuga.util.id_class.MovieCrewRoleId;
 @AllArgsConstructor
 public class MovieCrewRole {
 
-    @EmbeddedId
-    private MovieCrewRoleId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("movieCrewId")
     private MovieCrew movieCrew;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("movieId")
     private Movie movie;
 
     @Enumerated(value = EnumType.STRING)

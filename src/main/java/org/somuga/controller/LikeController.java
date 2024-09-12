@@ -92,8 +92,8 @@ public class LikeController {
                             schema = @Schema(implementation = ErrorDto.class))
             )})
     @Parameter(name = "mediaId", description = "The id of the media to delete like", example = "1", required = true)
-    @DeleteMapping("/private")
-    public ResponseEntity<Void> delete(@RequestParam Long mediaId) throws LikeNotFoundException {
+    @DeleteMapping("/private/{mediaId}")
+    public ResponseEntity<Void> delete(@PathVariable Long mediaId) throws LikeNotFoundException {
         likeService.delete(mediaId);
         return ResponseEntity.noContent().build();
     }
