@@ -24,6 +24,12 @@ A frontend application is being developed to consume this API.
 
 If you want to run this project locally, follow the steps below.
 
+If you want to test the API without running locally, you can use
+the [swagger documentation](http://swagger.somuga.org/swagger-ui/index.html) to test
+
+To get an access token, you can visit the following
+link [here](https://somuga.org/token) and create a new account to get a token:
+
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
