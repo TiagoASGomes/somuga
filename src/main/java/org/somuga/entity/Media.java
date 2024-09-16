@@ -35,7 +35,7 @@ public abstract class Media {
     @Column(nullable = false, name = "title")
     private String title;
     private LocalDate releaseDate;
-    @Column(length = 1000, nullable = false, name = "description")
+    @Column(length = 2000, nullable = false, name = "description")
     private String description;
     @Column(name = "image_url")
     private String imageUrl;
